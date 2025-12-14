@@ -62,15 +62,25 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                     }
                 });
                 if (error) throw error;
-                alert(t('msg_signup_success'));
+                
+                // Supabase에서 이메일 인증이 필수인 경우 data.session은 null입니다.
+                if (data.session) {
+                    alert(t('msg_signup_success'));
+                    onClose();
+                } else {
+                    alert(t('msg_email_verification'));
+                    // 인증 대기 상태이므로 모달을 닫고 메일 확인을 유도하거나, 모달을 유지할 수 있습니다.
+                    // 여기서는 모달을 닫아줍니다.
+                    onClose();
+                }
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email,
                     password
                 });
                 if (error) throw error;
+                onClose();
             }
-            onClose();
         } catch (error: any) {
             console.error("Auth Error:", error);
             let msg = t('alert_error');
