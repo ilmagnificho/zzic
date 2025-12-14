@@ -1058,21 +1058,21 @@ const App: React.FC = () => {
                                 <input 
                                     type="range" 
                                     min="100" 
-                                    max={user.balance} 
+                                    max={Math.max(100, user.balance)}
                                     step="100"
                                     value={betAmount}
                                     onChange={(e) => setBetAmount(Number(e.target.value))}
-                                    className="absolute w-full h-4 bg-zinc-800 rounded-full appearance-none cursor-pointer z-20 opacity-0"
+                                    className="absolute w-full h-full opacity-0 cursor-pointer z-20"
                                 />
                                 <div className="w-full h-4 bg-black border border-zinc-800 rounded-full overflow-hidden relative z-10">
                                     <div 
                                         className="h-full bg-zzic" 
-                                        style={{ width: `${(betAmount / user.balance) * 100}%` }}
+                                        style={{ width: `${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}%` }}
                                     ></div>
                                 </div>
                                 <div 
                                     className="absolute h-7 w-7 bg-white rounded-full shadow-lg border-4 border-black z-10 pointer-events-none transition-all"
-                                    style={{ left: `calc(${(betAmount / user.balance) * 100}% - 14px)` }}
+                                    style={{ left: `calc(${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}% - 14px)` }}
                                 ></div>
                             </div>
                             <div className="flex justify-between text-[10px] text-zinc-600 mt-2 font-bold uppercase">
