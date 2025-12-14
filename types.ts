@@ -47,6 +47,7 @@ export interface Comment {
   text: string;
   timestamp: number;
   prediction?: 'YES' | 'NO'; // The stance of the commenter
+  parentId?: string; // For nested replies
 }
 
 export interface RankedUser {

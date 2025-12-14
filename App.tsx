@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
@@ -231,7 +231,6 @@ const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ o
             ]);
             if (error) {
                 console.error("Failed to save suggestion:", error);
-                // Continue to show success message even if DB fails in this MVP/Demo context
             }
         }
 
@@ -249,12 +248,13 @@ const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ o
                  <div className="space-y-4">
                      <div>
                          <label className="block text-[10px] font-black text-zzic mb-2 uppercase">{t('suggest_category')}</label>
-                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                         {/* Changed from overflow-x-auto to flex-wrap for full visibility as requested */}
+                         <div className="flex gap-2 flex-wrap pb-2">
                              {(Object.keys(CATEGORY_COLORS) as Category[]).map(cat => (
                                  <button
                                     key={cat}
                                     onClick={() => setCategory(cat)}
-                                    className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black border transition-colors whitespace-nowrap ${category === cat ? `bg-white text-black border-white` : 'bg-black text-zinc-500 border-zinc-800'}`}
+                                    className={`py-2 px-3 rounded-lg text-[10px] font-black border transition-colors whitespace-nowrap ${category === cat ? `bg-white text-black border-white` : 'bg-black text-zinc-500 border-zinc-800'}`}
                                  >
                                      {cat}
                                  </button>
@@ -434,6 +434,7 @@ const App: React.FC = () => {
   // Comments State
   const [comments, setComments] = useState<Comment[]>(MOCK_COMMENTS);
   const [newCommentText, setNewCommentText] = useState('');
+  const [replyToId, setReplyToId] = useState<string | null>(null); // State for replying
 
   // Betting State
   const [betAmount, setBetAmount] = useState<number>(100);
@@ -623,11 +624,13 @@ const App: React.FC = () => {
       userName: user.name,
       text: newCommentText,
       timestamp: Date.now(),
-      prediction: stance
+      prediction: stance,
+      parentId: replyToId || undefined
     };
 
     setComments(prev => [newComment, ...prev]);
     setNewCommentText('');
+    setReplyToId(null); // Reset reply state
   };
 
   const handleLogout = async () => {
@@ -647,6 +650,10 @@ const App: React.FC = () => {
   const marketComments = useMemo(() => 
     comments.filter(c => c.marketId === activeMarketId),
   [comments, activeMarketId]);
+  
+  const replyTargetComment = useMemo(() => 
+    comments.find(c => c.id === replyToId),
+  [comments, replyToId]);
 
 
   // --- Render Functions ---
@@ -922,12 +929,66 @@ const App: React.FC = () => {
     </div>
   );
 
+  // Recursive Comment Renderer
+  const CommentItem: React.FC<{ comment: Comment, depth?: number }> = ({ comment, depth = 0 }) => {
+      const replies = marketComments.filter(c => c.parentId === comment.id);
+      
+      return (
+          <div className={`animate-in fade-in slide-in-from-bottom-2 ${depth > 0 ? 'ml-6 md:ml-10 mt-2 relative' : 'mt-4'}`}>
+              {/* Vertical line for threaded look */}
+              {depth > 0 && (
+                  <div className="absolute -left-4 top-0 bottom-0 w-px bg-zinc-800 rounded-full"></div>
+              )}
+              {depth > 0 && (
+                  <div className="absolute -left-4 top-4 w-3 h-px bg-zinc-800 rounded-full"></div>
+              )}
+
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0 border border-zinc-800">
+                    <User size={14} className="text-zinc-500"/>
+                </div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-zinc-300">{comment.userName}</span>
+                        {comment.prediction && (
+                            <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-500'}`}>
+                                {comment.prediction}
+                            </span>
+                        )}
+                        <span className="text-[10px] text-zinc-600 ml-auto font-mono">{new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <div className={`text-sm text-zinc-400 leading-relaxed bg-black/40 p-3 rounded-2xl border border-zinc-900 ${depth === 0 ? 'rounded-tl-none' : ''} relative group`}>
+                        {comment.text}
+                        {user && (
+                            <button 
+                                onClick={() => setReplyToId(comment.id)}
+                                className="absolute bottom-2 right-2 p-1.5 rounded-full bg-zinc-800/50 text-zinc-500 hover:text-zzic hover:bg-zinc-800 transition-all opacity-0 group-hover:opacity-100"
+                                title={t('detail_reply')}
+                            >
+                                <MessageCircle size={12} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+              </div>
+
+              {/* Recursive Replies */}
+              {replies.map(reply => (
+                  <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
+              ))}
+          </div>
+      );
+  };
+
   const renderDetail = () => {
     if (!activeMarket) return null;
 
     const currentMultiplier = getMultiplier(activeMarket.yesPrice, selectedPrediction);
     const potentialReturn = Math.floor(betAmount * currentMultiplier);
     const marketTitle = language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title;
+
+    // Filter root comments for rendering
+    const rootComments = marketComments.filter(c => !c.parentId);
 
     return (
         <div className="pb-24 md:pb-0 min-h-screen animate-in slide-in-from-right duration-300">
@@ -1062,20 +1123,29 @@ const App: React.FC = () => {
                     </h3>
                     
                     {/* Comment Input */}
-                    <div className="flex gap-2 mb-8">
+                    <div className="flex gap-2 mb-8 items-end relative">
+                        {replyToId && (
+                            <div className="absolute -top-7 left-1 flex items-center gap-2 text-xs font-bold text-zzic animate-in fade-in slide-in-from-bottom-1">
+                                <CornerDownRight size={12} />
+                                {t('detail_reply_to')} @{replyTargetComment?.userName}
+                                <button onClick={() => setReplyToId(null)} className="ml-2 text-zinc-500 hover:text-white">
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        )}
                         <input 
                             type="text" 
-                            placeholder={user ? t('detail_comment_placeholder') : t('detail_comment_login_placeholder')}
+                            placeholder={user ? (replyToId ? t('detail_reply_placeholder') : t('detail_comment_placeholder')) : t('detail_comment_login_placeholder')}
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                             onClick={() => !user && confirm(t('msg_comment_login')) && setView('AUTH')}
                             readOnly={!user}
-                            className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-medium"
+                            className={`flex-1 bg-zinc-900 border ${replyToId ? 'border-zzic' : 'border-zinc-800'} rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-medium`}
                         />
                         <button 
                             onClick={handleAddComment}
-                            className="bg-zinc-800 text-white w-12 rounded-xl hover:bg-zzic hover:text-black transition-colors disabled:opacity-30 flex items-center justify-center"
+                            className="bg-zinc-800 text-white w-12 h-[46px] rounded-xl hover:bg-zzic hover:text-black transition-colors disabled:opacity-30 flex items-center justify-center"
                             disabled={!newCommentText.trim() && !!user}
                         >
                             <Send size={18} />
@@ -1083,32 +1153,14 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Comments List */}
-                    <div className="space-y-4">
-                        {marketComments.length === 0 ? (
+                    <div className="space-y-0">
+                        {rootComments.length === 0 ? (
                             <div className="text-center py-10">
                                 <p className="text-zinc-700 text-sm font-bold uppercase">{t('detail_no_comments')}</p>
                             </div>
                         ) : (
-                            marketComments.map(comment => (
-                                <div key={comment.id} className="flex gap-3 animate-in fade-in slide-in-from-bottom-2">
-                                    <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0 border border-zinc-800">
-                                        <User size={14} className="text-zinc-500"/>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-bold text-zinc-300">{comment.userName}</span>
-                                            {comment.prediction && (
-                                                <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-500'}`}>
-                                                    {comment.prediction}
-                                                </span>
-                                            )}
-                                            <span className="text-[10px] text-zinc-600 ml-auto font-mono">{new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                        </div>
-                                        <div className="text-sm text-zinc-400 leading-relaxed bg-black/40 p-3 rounded-2xl rounded-tl-none border border-zinc-900">
-                                            {comment.text}
-                                        </div>
-                                    </div>
-                                </div>
+                            rootComments.map(comment => (
+                                <CommentItem key={comment.id} comment={comment} />
                             ))
                         )}
                     </div>

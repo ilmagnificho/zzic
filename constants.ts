@@ -76,6 +76,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const MOCK_COMMENTS: Comment[] = [
   { id: 'c1', marketId: 'm1', userName: '민희진파이팅', text: '솔직히 올해는 힘들지 않을까요?', timestamp: Date.now() - 100000, prediction: 'NO' },
+  { id: 'c1-1', marketId: 'm1', userName: '버니즈1', text: '그래도 희망을 가져봅니다!', timestamp: Date.now() - 50000, parentId: 'c1' },
   { id: 'c2', marketId: 'm7', userName: '사토시', text: '무조건 갑니다. 지금이 저점 매수 기회.', timestamp: Date.now() - 50000, prediction: 'YES' },
   { id: 'c3', marketId: 'm6', userName: '워렌버핏', text: '산타는 없다. 현금 확보해라.', timestamp: Date.now() - 200000, prediction: 'NO' },
   { id: 'c4', marketId: 'm5', userName: '개발자K', text: 'Gemini 2.0 성능 미쳤던데?', timestamp: Date.now() - 30000, prediction: 'YES' },

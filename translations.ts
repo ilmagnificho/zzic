@@ -53,6 +53,10 @@ export const TRANSLATIONS = {
     detail_comment_placeholder: '의견을 남겨주세요...',
     detail_comment_login_placeholder: '로그인이 필요합니다.',
     detail_no_comments: '아직 작성된 의견이 없습니다.',
+    detail_reply: '답글',
+    detail_reply_to: '님에게 답글 작성 중...',
+    detail_reply_placeholder: '답글을 입력하세요...',
+    detail_cancel_reply: '취소',
 
     // Profile
     profile_title: '마이 페이지',
@@ -147,6 +151,10 @@ export const TRANSLATIONS = {
     detail_comment_placeholder: 'Leave a comment...',
     detail_comment_login_placeholder: 'Login required.',
     detail_no_comments: 'No comments yet.',
+    detail_reply: 'Reply',
+    detail_reply_to: 'Replying to',
+    detail_reply_placeholder: 'Write a reply...',
+    detail_cancel_reply: 'Cancel',
 
     // Profile
     profile_title: 'My Page',
