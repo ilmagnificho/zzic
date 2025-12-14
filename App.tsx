@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
@@ -8,6 +8,20 @@ import { supabase } from './lib/supabase';
 import { TRANSLATIONS, Language } from './translations';
 
 // --- Helper Components ---
+
+const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
+
+const DBWarningBanner = () => {
+    if (isSupabaseConnected) return null;
+    return (
+        <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2 text-center">
+            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide flex items-center justify-center gap-2">
+                <AlertCircle size={12} />
+                데이터베이스 연결 안됨 (데모 모드)
+            </p>
+        </div>
+    );
+};
 
 const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void; language: Language }> = ({ onLogin, onClose, language }) => {
     const [mode, setMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
@@ -21,6 +35,22 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        if (!isSupabaseConnected) {
+            alert("DB 연결이 설정되지 않았습니다. (Demo Mode)");
+            // 데모용 강제 로그인
+            onLogin({
+                id: 'demo_' + Date.now(),
+                name: name || 'DemoUser',
+                email: email,
+                balance: INITIAL_BALANCE,
+                portfolio: [],
+                isGuest: false
+            });
+            onClose();
+            setLoading(false);
+            return;
+        }
 
         try {
             if (mode === 'SIGNUP') {
@@ -64,16 +94,16 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
     };
 
     return (
-        <div className="min-h-screen bg-black flex flex-col justify-center px-6 relative overflow-hidden animate-in fade-in duration-500 z-[100] fixed inset-0">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
             {/* ZZIC Ambience */}
-            <div className="absolute top-[-10%] right-[-30%] w-[100%] h-[60%] bg-zzic blur-[150px] opacity-20 rounded-full"></div>
+            <div className="absolute top-[-10%] right-[-30%] w-[100%] h-[60%] bg-zzic blur-[150px] opacity-20 rounded-full pointer-events-none"></div>
             
             {/* Close Button */}
             <button onClick={onClose} className="absolute top-6 right-6 text-zinc-500 hover:text-white z-50">
                 <X size={28} />
             </button>
 
-            <div className="relative z-10 w-full max-w-sm mx-auto">
+            <div className="relative z-10 w-full max-w-sm mx-auto p-4">
                 <div className="mb-12 text-center">
                     <h1 className="text-7xl font-black italic tracking-tighter text-white mb-2" style={{ textShadow: '0 0 20px rgba(204,255,0,0.3)' }}>
                         ZZIC
@@ -81,7 +111,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                     <p className="text-zzic font-bold text-lg tracking-widest uppercase">Trust Your ZZIC</p>
                 </div>
 
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 backdrop-blur-xl">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-2xl">
                     <div className="flex gap-4 mb-8">
                         <button 
                             onClick={() => setMode('LOGIN')}
@@ -184,7 +214,7 @@ const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ o
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
              <div className="w-full max-w-sm bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl p-6 relative">
                  <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20}/></button>
                  <h2 className="text-2xl font-black italic text-white mb-1">{t('suggest_title')}</h2>
@@ -237,6 +267,135 @@ const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ o
     );
 };
 
+// --- Desktop Components ---
+
+const DesktopSidebar: React.FC<{ 
+    currentView: ViewState; 
+    onChangeView: (v: ViewState) => void; 
+    onOpenSuggest: () => void;
+    user: UserState | null;
+    language: Language;
+    toggleLanguage: () => void;
+}> = ({ currentView, onChangeView, onOpenSuggest, user, language, toggleLanguage }) => {
+    
+    const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
+
+    const menuItems = [
+        { id: 'HOME', label: '홈', icon: Home },
+        { id: 'RANKING', label: t('ranking_title').split(' ')[0], icon: Trophy },
+        { id: 'PROFILE', label: t('profile_title'), icon: User },
+    ];
+
+    return (
+        <div className="flex flex-col h-full pl-4 pr-6">
+            <div className="mb-10 pl-4">
+                 <h1 className="text-4xl font-black italic tracking-tighter text-white cursor-pointer hover:text-zzic transition-colors" onClick={() => onChangeView('HOME')}>
+                    ZZIC
+                 </h1>
+                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] mt-1">Predict The Future</p>
+            </div>
+
+            <nav className="flex-1 space-y-4">
+                {menuItems.map((item) => {
+                    const isActive = currentView === item.id || (item.id === 'HOME' && currentView === 'DETAIL');
+                    const Icon = item.icon;
+                    return (
+                        <button
+                            key={item.id}
+                            onClick={() => onChangeView(item.id as ViewState)}
+                            className={`flex items-center gap-4 px-4 py-4 rounded-2xl w-full transition-all group ${
+                                isActive 
+                                ? 'bg-zzic text-black font-black' 
+                                : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                            }`}
+                        >
+                            <Icon size={24} className={isActive ? 'text-black' : 'group-hover:text-zzic transition-colors'} strokeWidth={isActive ? 3 : 2}/>
+                            <span className="text-lg tracking-tight">{item.label}</span>
+                        </button>
+                    )
+                })}
+                 <button 
+                    onClick={onOpenSuggest}
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl w-full text-zinc-400 hover:bg-zinc-900 hover:text-white transition-all group"
+                >
+                    <PlusCircle size={24} className="group-hover:text-zzic transition-colors" />
+                    <span className="text-lg tracking-tight font-bold">주제 제안</span>
+                </button>
+            </nav>
+
+            <div className="mt-auto space-y-4">
+                <button 
+                    onClick={toggleLanguage}
+                    className="flex items-center gap-2 text-zinc-500 font-bold text-xs px-4 hover:text-white transition-colors"
+                >
+                    <Globe size={14} />
+                    {language === 'ko' ? '한국어 / English' : 'English / 한국어'}
+                </button>
+
+                {user && (
+                    <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-full bg-black border border-zinc-700 flex items-center justify-center text-zinc-400">
+                             <User size={18} />
+                         </div>
+                         <div className="flex-1 min-w-0">
+                             <div className="text-sm font-bold text-white truncate">{user.name}</div>
+                             <div className="text-xs text-zzic font-mono">{user.balance.toLocaleString()} VP</div>
+                         </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const DesktopRightColumn: React.FC<{
+    markets: Market[];
+    onMarketClick: (id: string) => void;
+    language: Language;
+}> = ({ markets, onMarketClick, language }) => {
+    return (
+        <div className="h-full pl-6 pr-4 overflow-y-auto no-scrollbar">
+            {/* Search (Dummy) */}
+            <div className="relative mb-8 group">
+                <Search size={18} className="absolute left-4 top-3.5 text-zinc-500 group-focus-within:text-zzic transition-colors" />
+                <input 
+                    type="text" 
+                    placeholder="Search ZZIC" 
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-full py-3 pl-11 pr-4 text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-bold text-sm"
+                />
+            </div>
+
+            <div className="bg-zinc-900/50 rounded-3xl p-5 border border-zinc-800 mb-6">
+                <h3 className="text-sm font-black text-white mb-4 uppercase tracking-wide flex items-center gap-2">
+                    <TrendingUp size={16} className="text-zzic" /> Trending
+                </h3>
+                <div className="space-y-4">
+                    {markets.slice(0, 3).map((m, i) => (
+                        <div key={m.id} onClick={() => onMarketClick(m.id)} className="flex items-center gap-3 cursor-pointer group">
+                             <span className="text-zinc-700 font-black italic text-lg w-4">{i + 1}</span>
+                             <div className="flex-1 min-w-0">
+                                 <div className="text-[10px] text-zinc-500 font-bold mb-0.5">{m.category}</div>
+                                 <div className="text-sm font-bold text-zinc-300 truncate group-hover:text-zzic transition-colors">
+                                    {language === 'en' ? (m.titleEn || m.title) : m.title}
+                                 </div>
+                             </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="text-[10px] text-zinc-600 font-medium leading-relaxed px-2">
+                <p>© 2024 ZZIC Inc.</p>
+                <div className="flex gap-2 mt-1">
+                    <span className="hover:text-zinc-400 cursor-pointer">Privacy</span>
+                    <span className="hover:text-zinc-400 cursor-pointer">Terms</span>
+                    <span className="hover:text-zinc-400 cursor-pointer">More</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const App: React.FC = () => {
   // --- State ---
   const [user, setUser] = useState<UserState | null>(null);
@@ -283,6 +442,9 @@ const App: React.FC = () => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
+      // Demo mode check
+      if (!isSupabaseConnected && userId.startsWith('demo_')) return;
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -349,27 +511,32 @@ const App: React.FC = () => {
     }
 
     // 1. Double Check Balance (Server Side Fetch)
-    // 게스트가 아닌 경우, 베팅 전에 서버에서 실제 잔액을 다시 한번 확인합니다.
     if (!user.isGuest) {
-        const { data: currentProfile, error } = await supabase
-            .from('profiles')
-            .select('balance')
-            .eq('id', user.id)
-            .single();
+        if (isSupabaseConnected && !user.id.startsWith('demo_')) {
+             const { data: currentProfile, error } = await supabase
+                .from('profiles')
+                .select('balance')
+                .eq('id', user.id)
+                .single();
 
-        if (error || !currentProfile) {
-            alert(t('alert_server_error'));
-            return;
-        }
+            if (error || !currentProfile) {
+                alert(t('alert_server_error'));
+                return;
+            }
 
-        if (currentProfile.balance < betAmount) {
-            alert(t('msg_insufficient'));
-            // 잔액 정보 갱신
-            fetchProfile(user.id);
-            return;
+            if (currentProfile.balance < betAmount) {
+                alert(t('msg_insufficient'));
+                fetchProfile(user.id);
+                return;
+            }
+        } else {
+             // Demo user check
+             if (user.balance < betAmount) {
+                 alert(t('msg_insufficient'));
+                 return;
+             }
         }
     } else {
-        // 게스트인 경우 클라이언트 상태만 확인
         if (user.balance < betAmount) {
             alert(t('msg_insufficient'));
             return;
@@ -399,8 +566,8 @@ const App: React.FC = () => {
     setUser(updatedUser);
     setLastPurchasedItem(newItem);
 
-    // Database Update (if not guest)
-    if (!user.isGuest) {
+    // Database Update (if not guest/demo)
+    if (!user.isGuest && isSupabaseConnected && !user.id.startsWith('demo_')) {
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -412,7 +579,6 @@ const App: React.FC = () => {
         if (error) {
             console.error("DB Update Failed:", error);
             alert(t('alert_save_fail'));
-            // 실패 시 롤백을 위해 프로필 다시 불러오기
             fetchProfile(user.id);
         }
     }
@@ -445,7 +611,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
       if(confirm(t('msg_logout_confirm'))) {
-          if (!user?.isGuest) {
+          if (!user?.isGuest && isSupabaseConnected && !user?.id.startsWith('demo_')) {
               await supabase.auth.signOut();
           }
           setUser(null);
@@ -465,9 +631,9 @@ const App: React.FC = () => {
   // --- Render Functions ---
 
   const renderHome = () => (
-    <div className="pb-24 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="px-6 py-5 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
+    <div className="pb-24 md:pb-0 animate-in fade-in duration-500">
+      {/* Header (Only on Mobile) */}
+      <div className="md:hidden px-6 py-5 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
         <h1 
             className="text-2xl font-black italic tracking-tighter text-white cursor-pointer" 
             style={{ textShadow: '0 0 10px rgba(204,255,0,0.5)' }}
@@ -505,6 +671,23 @@ const App: React.FC = () => {
             )}
         </div>
       </div>
+      
+      {/* Desktop Header Replacement (Title bar inside feed) */}
+      <div className="hidden md:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
+         <h2 className="text-xl font-bold text-white">Home</h2>
+         <div className="flex items-center gap-2">
+            {!user && (
+                 <button 
+                    onClick={() => setView('AUTH')}
+                    className="flex items-center gap-2 bg-white text-black px-4 py-1.5 rounded-full hover:bg-zinc-200 transition-colors"
+                >
+                    <span className="text-xs font-black uppercase">Login</span>
+                </button>
+            )}
+         </div>
+      </div>
+
+      <DBWarningBanner />
 
       {/* Featured Banner */}
       <div className="px-5 mt-6 mb-8">
@@ -593,10 +776,10 @@ const App: React.FC = () => {
             </div>
         ))}
         
-        {/* Suggestion Button */}
+        {/* Suggestion Button (Mobile Only in feed flow) */}
         <button 
             onClick={() => setShowSuggestModal(true)}
-            className="w-full py-5 mt-6 rounded-3xl border border-dashed border-zinc-700 bg-transparent text-zinc-500 font-bold text-sm flex items-center justify-center gap-2 hover:border-zzic hover:text-zzic transition-all uppercase tracking-wide"
+            className="md:hidden w-full py-5 mt-6 rounded-3xl border border-dashed border-zinc-700 bg-transparent text-zinc-500 font-bold text-sm flex items-center justify-center gap-2 hover:border-zzic hover:text-zzic transition-all uppercase tracking-wide"
         >
             <PlusCircle size={18} />
             {t('home_new_topic')}
@@ -620,10 +803,10 @@ const App: React.FC = () => {
   );
 
   const renderRanking = () => (
-    <div className="pb-24 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="pb-24 md:pb-0 animate-in slide-in-from-bottom-4 duration-500">
         <div className="px-5 py-6 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
             <div className="flex items-center gap-3">
-                 <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
+                 <button onClick={() => setView('HOME')} className="md:hidden p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
                     <ArrowLeft size={24} />
                 </button>
                 <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('ranking_title')}</h1>
@@ -726,7 +909,7 @@ const App: React.FC = () => {
     const marketTitle = language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title;
 
     return (
-        <div className="pb-24 min-h-screen animate-in slide-in-from-right duration-300">
+        <div className="pb-24 md:pb-0 min-h-screen animate-in slide-in-from-right duration-300">
             {/* Nav */}
             <div className="px-4 py-4 flex items-center sticky top-0 bg-black/90 backdrop-blur-xl z-50 border-b border-zinc-900">
                 <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
@@ -934,7 +1117,7 @@ const App: React.FC = () => {
     }
 
     return (
-    <div className="pb-24 animate-in fade-in duration-500">
+    <div className="pb-24 md:pb-0 animate-in fade-in duration-500">
         <div className="px-5 py-8 bg-black border-b border-zinc-900 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-zzic blur-[120px] opacity-10 rounded-full pointer-events-none"></div>
             
@@ -1034,41 +1217,70 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black pb-safe">
-      <div className="mx-auto max-w-md min-h-screen relative shadow-2xl overflow-hidden bg-black">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black flex justify-center">
+      <div className="w-full max-w-7xl flex items-start justify-center gap-0 md:gap-8 md:px-4">
         
-        <div className="relative z-10">
+        {/* Left Sidebar (Desktop) */}
+        <div className="hidden md:block w-64 sticky top-0 h-screen py-8">
+            <DesktopSidebar 
+                currentView={view} 
+                onChangeView={setView} 
+                onOpenSuggest={() => setShowSuggestModal(true)}
+                user={user}
+                language={language}
+                toggleLanguage={toggleLanguage}
+            />
+        </div>
+
+        {/* Main Content (Mobile + Desktop Center) */}
+        <main className="w-full max-w-md md:max-w-lg border-x border-zinc-900 min-h-screen bg-black relative shadow-2xl">
             {view === 'HOME' && renderHome()}
             {view === 'DETAIL' && renderDetail()}
             {view === 'PROFILE' && renderProfile()}
             {view === 'RANKING' && renderRanking()}
-            {view === 'AUTH' && (
-                <AuthScreen 
-                    onLogin={(u) => {
-                        setUser(u);
-                        setView('HOME');
-                    }}
-                    onClose={() => setView('HOME')}
-                    language={language}
-                />
-            )}
-        </div>
-        
-        <BottomNav currentView={view} onChangeView={setView} />
-        
-        {lastPurchasedItem && (
-            <ShareModal 
-                item={lastPurchasedItem} 
-                onClose={() => {
-                    setLastPurchasedItem(null);
-                    setView('PROFILE');
-                }} 
+        </main>
+
+        {/* Right Sidebar (Desktop) */}
+        <div className="hidden lg:block w-80 sticky top-0 h-screen py-8">
+            <DesktopRightColumn 
+                markets={markets} 
+                onMarketClick={(id) => {
+                    setActiveMarketId(id);
+                    setView('DETAIL');
+                }}
                 language={language}
             />
-        )}
+        </div>
 
-        {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} language={language} />}
       </div>
+
+      {/* Mobile Only: Bottom Nav */}
+      <BottomNav currentView={view} onChangeView={setView} />
+      
+      {/* Modals & Overlays */}
+      {view === 'AUTH' && (
+          <AuthScreen 
+              onLogin={(u) => {
+                  setUser(u);
+                  setView('HOME');
+              }}
+              onClose={() => setView('HOME')}
+              language={language}
+          />
+      )}
+      
+      {lastPurchasedItem && (
+          <ShareModal 
+              item={lastPurchasedItem} 
+              onClose={() => {
+                  setLastPurchasedItem(null);
+                  setView('PROFILE');
+              }} 
+              language={language}
+          />
+      )}
+
+      {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} language={language} />}
     </div>
   );
 };

@@ -9,7 +9,7 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentView, onChangeView }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
       {/* Gradient Fade for seamless blend */}
       <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none"></div>
       
