@@ -40,7 +40,11 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
             // 로그인 성공 처리는 App 컴포넌트의 onAuthStateChange에서 감지합니다.
             onClose();
         } catch (error: any) {
-            alert(error.message || '오류가 발생했습니다.');
+            console.error("Auth Error:", error);
+            let msg = '오류가 발생했습니다.';
+            if (error.message.includes('User already registered')) msg = '이미 가입된 이메일입니다.';
+            if (error.message.includes('Invalid login credentials')) msg = '이메일 또는 비밀번호가 일치하지 않습니다.';
+            alert(msg);
         } finally {
             setLoading(false);
         }
@@ -329,9 +333,39 @@ const App: React.FC = () => {
     }
     const market = markets.find(m => m.id === activeMarketId);
     if (!market) return;
-    if (user.balance < betAmount) {
-        alert("ZZIC 포인트(VP)가 부족합니다!");
+    
+    // Safety check for invalid amount
+    if (betAmount <= 0) {
+        alert("올바른 베팅 금액을 입력해주세요.");
         return;
+    }
+
+    // 1. Double Check Balance (Server Side Fetch)
+    // 게스트가 아닌 경우, 베팅 전에 서버에서 실제 잔액을 다시 한번 확인합니다.
+    if (!user.isGuest) {
+        const { data: currentProfile, error } = await supabase
+            .from('profiles')
+            .select('balance')
+            .eq('id', user.id)
+            .single();
+
+        if (error || !currentProfile) {
+            alert("서버 연결 상태가 좋지 않습니다. 다시 시도해주세요.");
+            return;
+        }
+
+        if (currentProfile.balance < betAmount) {
+            alert("보유 VP가 부족합니다. (서버 동기화 완료)");
+            // 잔액 정보 갱신
+            fetchProfile(user.id);
+            return;
+        }
+    } else {
+        // 게스트인 경우 클라이언트 상태만 확인
+        if (user.balance < betAmount) {
+            alert("ZZIC 포인트(VP)가 부족합니다!");
+            return;
+        }
     }
 
     const price = selectedPrediction === 'YES' ? market.yesPrice : (100 - market.yesPrice);
@@ -348,7 +382,7 @@ const App: React.FC = () => {
         timestamp: Date.now()
     };
 
-    // Optimistic Update
+    // Optimistic Update (UI 즉시 반영)
     const updatedUser = {
         ...user,
         balance: user.balance - betAmount,
@@ -359,6 +393,9 @@ const App: React.FC = () => {
 
     // Database Update (if not guest)
     if (!user.isGuest) {
+        // 주의: 이 방식은 클라이언트에서 계산된 값을 저장하므로 보안상 완벽하지 않습니다.
+        // 실제 서비스에서는 Supabase RPC(Stored Procedure)를 사용하여 
+        // 서버 측에서 차감 로직을 수행해야 합니다. (MVP 단계 허용)
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -370,6 +407,8 @@ const App: React.FC = () => {
         if (error) {
             console.error("DB Update Failed:", error);
             alert("저장에 실패했습니다. 새로고침 해주세요.");
+            // 실패 시 롤백을 위해 프로필 다시 불러오기
+            fetchProfile(user.id);
         }
     }
   };
