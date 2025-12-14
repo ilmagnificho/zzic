@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
 import ShareModal from './components/ShareModal';
 import { supabase } from './lib/supabase';
+import { TRANSLATIONS, Language } from './translations';
 
 // --- Helper Components ---
 
-const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void }> = ({ onLogin, onClose }) => {
+const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void; language: Language }> = ({ onLogin, onClose, language }) => {
     const [mode, setMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,7 +32,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                     }
                 });
                 if (error) throw error;
-                alert('회원가입 성공! 자동 로그인됩니다.');
+                alert(t('msg_signup_success'));
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email,
@@ -37,13 +40,12 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                 });
                 if (error) throw error;
             }
-            // 로그인 성공 처리는 App 컴포넌트의 onAuthStateChange에서 감지합니다.
             onClose();
         } catch (error: any) {
             console.error("Auth Error:", error);
-            let msg = '오류가 발생했습니다.';
-            if (error.message.includes('User already registered')) msg = '이미 가입된 이메일입니다.';
-            if (error.message.includes('Invalid login credentials')) msg = '이메일 또는 비밀번호가 일치하지 않습니다.';
+            let msg = t('alert_error');
+            if (error.message.includes('User already registered')) msg = t('msg_email_exist');
+            if (error.message.includes('Invalid login credentials')) msg = t('msg_login_fail');
             alert(msg);
         } finally {
             setLoading(false);
@@ -53,7 +55,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
     const handleGuest = () => {
         onLogin({
             id: 'guest_' + Date.now(),
-            name: '게스트',
+            name: t('profile_guest'),
             balance: INITIAL_BALANCE,
             portfolio: [],
             isGuest: true
@@ -85,13 +87,13 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                             onClick={() => setMode('LOGIN')}
                             className={`flex-1 pb-2 text-sm font-black uppercase tracking-wider transition-all border-b-2 ${mode === 'LOGIN' ? 'text-white border-zzic' : 'text-zinc-600 border-zinc-800'}`}
                         >
-                            로그인
+                            {t('login')}
                         </button>
                         <button 
                              onClick={() => setMode('SIGNUP')}
                              className={`flex-1 pb-2 text-sm font-black uppercase tracking-wider transition-all border-b-2 ${mode === 'SIGNUP' ? 'text-white border-zzic' : 'text-zinc-600 border-zinc-800'}`}
                         >
-                            회원가입
+                            {t('signup')}
                         </button>
                     </div>
 
@@ -101,7 +103,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                                 <User size={18} className="absolute left-4 top-3.5 text-zinc-500 group-focus-within:text-zzic transition-colors" />
                                 <input 
                                     type="text" 
-                                    placeholder="닉네임"
+                                    placeholder={t('nickname')}
                                     required
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
@@ -113,7 +115,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                             <Mail size={18} className="absolute left-4 top-3.5 text-zinc-500 group-focus-within:text-zzic transition-colors" />
                             <input 
                                 type="email" 
-                                placeholder="이메일"
+                                placeholder={t('email')}
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -124,7 +126,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                             <Lock size={18} className="absolute left-4 top-3.5 text-zinc-500 group-focus-within:text-zzic transition-colors" />
                             <input 
                                 type="password" 
-                                placeholder="비밀번호"
+                                placeholder={t('password')}
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -137,20 +139,20 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                             disabled={loading}
                             className="w-full bg-zzic text-black font-black uppercase tracking-wider py-4 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 hover:bg-[#b3e600]"
                         >
-                            {loading ? '처리중...' : (mode === 'LOGIN' ? '로그인' : '회원가입 완료')}
+                            {loading ? 'Processing...' : (mode === 'LOGIN' ? t('auth_login_btn') : t('auth_signup_btn'))}
                         </button>
                     </form>
 
                     <div className="my-6 flex items-center gap-3">
                         <div className="h-px bg-zinc-800 flex-1"></div>
-                        <span className="text-[10px] text-zinc-600 font-bold uppercase">소셜 계정으로 계속하기</span>
+                        <span className="text-[10px] text-zinc-600 font-bold uppercase">{t('auth_social')}</span>
                         <div className="h-px bg-zinc-800 flex-1"></div>
                     </div>
 
                     <div className="space-y-3">
                         <button 
                             type="button"
-                            onClick={() => alert("MVP 버전에서는 이메일 로그인을 이용해주세요.")}
+                            onClick={() => alert(t('auth_google_alert'))}
                             className="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
                         >
                             <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -160,7 +162,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
                             onClick={handleGuest}
                             className="w-full bg-zinc-800 text-zinc-400 font-bold py-3 rounded-xl hover:bg-zinc-700 transition-colors text-sm"
                         >
-                            게스트 모드 (체험하기)
+                            {t('auth_guest')}
                         </button>
                     </div>
                 </div>
@@ -169,14 +171,15 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
     );
 };
 
-const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ onClose, language }) => {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState<Category>('ENTER');
     const [desc, setDesc] = useState('');
 
+    const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
+
     const handleSubmit = () => {
-        // In a real app, send to API
-        alert(`제안해주셔서 감사합니다!\n관리자 검토 후 등록됩니다.\n\n[${category}] ${title}`);
+        alert(t('msg_suggest_thankyou') + `\n\n[${category}] ${title}`);
         onClose();
     };
 
@@ -184,12 +187,12 @@ const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
              <div className="w-full max-w-sm bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl p-6 relative">
                  <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20}/></button>
-                 <h2 className="text-2xl font-black italic text-white mb-1">NEW TOPIC</h2>
-                 <p className="text-xs text-zinc-500 mb-6 font-bold uppercase tracking-wide">여러분이 원하는 주제를 제안해주세요</p>
+                 <h2 className="text-2xl font-black italic text-white mb-1">{t('suggest_title')}</h2>
+                 <p className="text-xs text-zinc-500 mb-6 font-bold uppercase tracking-wide">{t('suggest_subtitle')}</p>
 
                  <div className="space-y-4">
                      <div>
-                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">카테고리</label>
+                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">{t('suggest_category')}</label>
                          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                              {(Object.keys(CATEGORY_COLORS) as Category[]).map(cat => (
                                  <button
@@ -203,21 +206,21 @@ const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                          </div>
                      </div>
                      <div>
-                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">제목</label>
+                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">{t('suggest_input_title')}</label>
                          <input 
                             value={title}
                             onChange={e => setTitle(e.target.value)}
                             className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-zzic font-bold"
-                            placeholder="예: 비트코인 100K 도달"
+                            placeholder={t('suggest_input_title') + "..."}
                          />
                      </div>
                      <div>
-                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">설명 (선택)</label>
+                         <label className="block text-[10px] font-black text-zzic mb-2 uppercase">{t('suggest_input_desc')}</label>
                          <textarea 
                             value={desc}
                             onChange={e => setDesc(e.target.value)}
                             className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-zzic h-24 resize-none font-medium"
-                            placeholder="판정 기준 등 상세 내용을 적어주세요."
+                            placeholder={t('suggest_input_desc')}
                          />
                      </div>
 
@@ -226,7 +229,7 @@ const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         disabled={!title.trim()}
                         className="w-full bg-zzic text-black font-black py-4 rounded-xl mt-2 disabled:opacity-50 uppercase tracking-wide hover:bg-[#b3e600]"
                      >
-                         제안 보내기
+                         {t('suggest_btn')}
                      </button>
                  </div>
              </div>
@@ -240,6 +243,10 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
   const [activeMarketId, setActiveMarketId] = useState<string | null>(null);
   const [markets, setMarkets] = useState<Market[]>(INITIAL_MARKETS);
+  
+  // Localization State
+  const [language, setLanguage] = useState<Language>('ko');
+  const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   
   // Modals
   const [showSuggestModal, setShowSuggestModal] = useState(false);
@@ -319,6 +326,7 @@ const App: React.FC = () => {
 
   const formatNumber = (num: number) => num.toLocaleString();
   const formatPercent = (num: number) => num.toFixed(1);
+  const toggleLanguage = () => setLanguage(prev => prev === 'ko' ? 'en' : 'ko');
 
   const getMultiplier = (price: number, type: 'YES' | 'NO') => {
     const p = type === 'YES' ? price : 100 - price;
@@ -336,7 +344,7 @@ const App: React.FC = () => {
     
     // Safety check for invalid amount
     if (betAmount <= 0) {
-        alert("올바른 베팅 금액을 입력해주세요.");
+        alert(t('msg_bet_amount_error'));
         return;
     }
 
@@ -350,12 +358,12 @@ const App: React.FC = () => {
             .single();
 
         if (error || !currentProfile) {
-            alert("서버 연결 상태가 좋지 않습니다. 다시 시도해주세요.");
+            alert(t('alert_server_error'));
             return;
         }
 
         if (currentProfile.balance < betAmount) {
-            alert("보유 VP가 부족합니다. (서버 동기화 완료)");
+            alert(t('msg_insufficient'));
             // 잔액 정보 갱신
             fetchProfile(user.id);
             return;
@@ -363,7 +371,7 @@ const App: React.FC = () => {
     } else {
         // 게스트인 경우 클라이언트 상태만 확인
         if (user.balance < betAmount) {
-            alert("ZZIC 포인트(VP)가 부족합니다!");
+            alert(t('msg_insufficient'));
             return;
         }
     }
@@ -374,7 +382,7 @@ const App: React.FC = () => {
     const newItem: PortfolioItem = {
         id: Date.now().toString(),
         marketId: market.id,
-        marketTitle: market.title,
+        marketTitle: language === 'en' ? (market.titleEn || market.title) : market.title,
         prediction: selectedPrediction,
         amount: betAmount,
         entryPrice: price,
@@ -393,9 +401,6 @@ const App: React.FC = () => {
 
     // Database Update (if not guest)
     if (!user.isGuest) {
-        // 주의: 이 방식은 클라이언트에서 계산된 값을 저장하므로 보안상 완벽하지 않습니다.
-        // 실제 서비스에서는 Supabase RPC(Stored Procedure)를 사용하여 
-        // 서버 측에서 차감 로직을 수행해야 합니다. (MVP 단계 허용)
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -406,7 +411,7 @@ const App: React.FC = () => {
         
         if (error) {
             console.error("DB Update Failed:", error);
-            alert("저장에 실패했습니다. 새로고침 해주세요.");
+            alert(t('alert_save_fail'));
             // 실패 시 롤백을 위해 프로필 다시 불러오기
             fetchProfile(user.id);
         }
@@ -415,7 +420,7 @@ const App: React.FC = () => {
 
   const handleAddComment = () => {
     if (!user) {
-        if(confirm("댓글을 작성하려면 로그인이 필요합니다. 로그인하시겠습니까?")) {
+        if(confirm(t('msg_comment_login'))) {
             setView('AUTH');
         }
         return;
@@ -439,7 +444,7 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
-      if(confirm('ZZIC에서 로그아웃 하시겠습니까?')) {
+      if(confirm(t('msg_logout_confirm'))) {
           if (!user?.isGuest) {
               await supabase.auth.signOut();
           }
@@ -471,6 +476,14 @@ const App: React.FC = () => {
           ZZIC
         </h1>
         <div className="flex gap-3">
+             {/* Language Toggle */}
+            <button 
+                onClick={toggleLanguage}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 hover:border-white transition-colors text-xs font-black"
+            >
+                {language === 'ko' ? 'EN' : 'KO'}
+            </button>
+
             <button 
                 onClick={() => setView('RANKING')}
                 className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zzic transition-colors group"
@@ -487,7 +500,7 @@ const App: React.FC = () => {
                     onClick={() => setView('AUTH')}
                     className="flex items-center gap-2 bg-zzic px-4 py-1.5 rounded-full border border-zzic hover:bg-[#b3e600] transition-colors"
                 >
-                    <span className="text-xs font-black text-black uppercase">로그인 / 가입</span>
+                    <span className="text-xs font-black text-black uppercase">{t('auth_login_signup')}</span>
                 </button>
             )}
         </div>
@@ -504,14 +517,14 @@ const App: React.FC = () => {
             
             <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">
                 <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-zzic text-black text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">EVENT</span>
+                    <span className="bg-zzic text-black text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">{t('home_event')}</span>
                     <span className="text-zzic text-xs font-bold flex items-center gap-1 drop-shadow-md">
-                        <Flame size={12} className="animate-pulse fill-zzic"/> 총 상금 100만 VP
+                        <Flame size={12} className="animate-pulse fill-zzic"/> {t('home_prize')}
                     </span>
                 </div>
                 <h2 className="text-3xl font-black text-white leading-none tracking-tighter italic uppercase">
-                    ZZIC의 신은<br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">누구인가?</span>
+                    {t('home_banner_1')}<br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{t('home_banner_2')}</span>
                 </h2>
             </div>
         </div>
@@ -521,7 +534,7 @@ const App: React.FC = () => {
       <div className="px-5 space-y-4">
         <h3 className="text-base font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
             <TrendingUp size={18} className="text-zzic" />
-            실시간 트렌딩
+            {t('home_trending')}
         </h3>
         
         {markets.map((market) => (
@@ -547,11 +560,11 @@ const App: React.FC = () => {
                     <div className="flex-1 min-w-0 flex flex-col justify-center gap-2 py-1">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                             <Clock size={10} />
-                            <span>{market.endDate} 마감</span>
+                            <span>{market.endDate} {t('home_close')}</span>
                         </div>
                         
                         <h4 className="text-[15px] font-bold text-white leading-snug line-clamp-2 pr-1 group-hover:text-zzic transition-colors">
-                            {market.title}
+                            {language === 'en' ? (market.titleEn || market.title) : market.title}
                         </h4>
 
                         {/* Bar */}
@@ -586,7 +599,7 @@ const App: React.FC = () => {
             className="w-full py-5 mt-6 rounded-3xl border border-dashed border-zinc-700 bg-transparent text-zinc-500 font-bold text-sm flex items-center justify-center gap-2 hover:border-zzic hover:text-zzic transition-all uppercase tracking-wide"
         >
             <PlusCircle size={18} />
-            새로운 주제 제안하기
+            {t('home_new_topic')}
         </button>
       </div>
 
@@ -594,11 +607,10 @@ const App: React.FC = () => {
       <div className="px-6 py-12 mt-8 text-center border-t border-zinc-900 bg-black">
         <div className="flex justify-center items-center gap-2 text-zinc-600 mb-2">
             <AlertCircle size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Beta Service Disclaimer</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">{t('home_disclaimer_title')}</span>
         </div>
-        <p className="text-[10px] text-zinc-700 leading-relaxed break-keep">
-            본 서비스는 가상 포인트(VP)를 사용하는 시뮬레이션 게임이며, 실제 금전적 이득이나 손실이 발생하지 않습니다. <br/>
-            베타 서비스 기간 동안의 데이터는 예고 없이 초기화될 수 있습니다.
+        <p className="text-[10px] text-zinc-700 leading-relaxed break-keep whitespace-pre-wrap">
+            {t('home_disclaimer')}
         </p>
         <p className="text-[10px] text-zinc-800 font-black mt-4 uppercase tracking-[0.2em]">
             © 2024 ZZIC. All Rights Reserved.
@@ -614,7 +626,7 @@ const App: React.FC = () => {
                  <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
                     <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">랭킹 (God of ZZIC)</h1>
+                <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('ranking_title')}</h1>
             </div>
         </div>
 
@@ -692,7 +704,7 @@ const App: React.FC = () => {
                                         {rankUser.name}
                                         {user && rankUser.name === user.name && <span className="text-[9px] bg-zzic text-black px-1.5 py-0.5 rounded font-black">ME</span>}
                                     </div>
-                                    <div className="text-[10px] text-zinc-500 font-bold">승률 {rankUser.winRate}%</div>
+                                    <div className="text-[10px] text-zinc-500 font-bold">{t('ranking_winrate')} {rankUser.winRate}%</div>
                                 </div>
                             </div>
                         </div>
@@ -711,6 +723,7 @@ const App: React.FC = () => {
 
     const currentMultiplier = getMultiplier(activeMarket.yesPrice, selectedPrediction);
     const potentialReturn = Math.floor(betAmount * currentMultiplier);
+    const marketTitle = language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title;
 
     return (
         <div className="pb-24 min-h-screen animate-in slide-in-from-right duration-300">
@@ -719,7 +732,7 @@ const App: React.FC = () => {
                 <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
                     <ArrowLeft size={24} />
                 </button>
-                <span className="ml-2 font-black text-lg tracking-wide uppercase italic">예측하기</span>
+                <span className="ml-2 font-black text-lg tracking-wide uppercase italic">{t('detail_nav')}</span>
             </div>
 
             <div className="px-5 pt-6">
@@ -732,9 +745,11 @@ const App: React.FC = () => {
                     <span className={`text-[10px] font-black px-3 py-1 rounded text-white mb-3 relative z-10 ${CATEGORY_COLORS[activeMarket.category]}`}>
                         {activeMarket.category}
                     </span>
-                    <h2 className="text-2xl font-black text-center leading-snug mb-3 text-white relative z-10 max-w-[80%] break-keep">{activeMarket.title}</h2>
+                    <h2 className="text-2xl font-black text-center leading-snug mb-3 text-white relative z-10 max-w-[80%] break-keep">
+                        {marketTitle}
+                    </h2>
                     <p className="text-zinc-500 text-xs font-bold flex items-center gap-1 relative z-10 uppercase tracking-wide">
-                        <Clock size={12}/> {activeMarket.endDate} 결과 발표
+                        <Clock size={12}/> {activeMarket.endDate} {t('detail_result')}
                     </p>
                 </div>
 
@@ -751,7 +766,7 @@ const App: React.FC = () => {
                                 : 'bg-black border-zinc-800 text-zinc-600 hover:border-zinc-700'
                             }`}
                         >
-                            <span className="block text-[10px] font-bold opacity-60 mb-1 uppercase tracking-wider">YES 확률</span>
+                            <span className="block text-[10px] font-bold opacity-60 mb-1 uppercase tracking-wider">YES {t('detail_prob')}</span>
                             <span className="text-3xl italic">{formatPercent(activeMarket.yesPrice)}%</span>
                         </button>
                         <button 
@@ -762,7 +777,7 @@ const App: React.FC = () => {
                                 : 'bg-black border-zinc-800 text-zinc-600 hover:border-zinc-700'
                             }`}
                         >
-                             <span className="block text-[10px] font-bold opacity-60 mb-1 uppercase tracking-wider">NO 확률</span>
+                             <span className="block text-[10px] font-bold opacity-60 mb-1 uppercase tracking-wider">NO {t('detail_prob')}</span>
                              <span className="text-3xl italic">{formatPercent(100 - activeMarket.yesPrice)}%</span>
                         </button>
                     </div>
@@ -771,7 +786,7 @@ const App: React.FC = () => {
                     {user ? (
                         <div className="mb-8">
                             <div className="flex justify-between text-sm mb-4 items-end">
-                                <span className="text-zinc-500 font-bold uppercase text-xs tracking-wider">베팅 금액</span>
+                                <span className="text-zinc-500 font-bold uppercase text-xs tracking-wider">{t('detail_bet_amount')}</span>
                                 <span className="text-white font-mono font-bold text-2xl">{formatNumber(betAmount)} VP</span>
                             </div>
                             <div className="relative h-8 flex items-center">
@@ -796,27 +811,27 @@ const App: React.FC = () => {
                                 ></div>
                             </div>
                             <div className="flex justify-between text-[10px] text-zinc-600 mt-2 font-bold uppercase">
-                                <span>최소 100</span>
-                                <span>최대 {formatNumber(user.balance)}</span>
+                                <span>{t('detail_min')} 100</span>
+                                <span>{t('detail_max')} {formatNumber(user.balance)}</span>
                             </div>
                         </div>
                     ) : (
                          <div className="mb-8 p-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-center">
-                             <p className="text-xs text-zinc-500 font-bold uppercase mb-2">투표를 하려면 로그인이 필요합니다</p>
+                             <p className="text-xs text-zinc-500 font-bold uppercase mb-2">{t('detail_login_needed')}</p>
                          </div>
                     )}
 
                     {/* Summary */}
                     <div className="bg-black rounded-xl p-5 mb-6 border border-zinc-800">
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-xs text-zinc-500 font-bold uppercase">배당률</span>
+                            <span className="text-xs text-zinc-500 font-bold uppercase">{t('detail_multiplier')}</span>
                             <span className={`font-black font-mono text-lg ${selectedPrediction === 'YES' ? 'text-blue-500' : 'text-red-500'}`}>
                                 x{currentMultiplier.toFixed(2)}
                             </span>
                         </div>
                         <div className="w-full h-px bg-zinc-900 mb-3"></div>
                         <div className="flex justify-between items-center">
-                            <span className="text-xs text-zinc-500 font-bold uppercase">예상 수익</span>
+                            <span className="text-xs text-zinc-500 font-bold uppercase">{t('detail_return')}</span>
                             <span className="text-xl font-black text-zzic drop-shadow-[0_0_5px_rgba(204,255,0,0.5)]">
                                 + {formatNumber(potentialReturn)} VP
                             </span>
@@ -831,7 +846,7 @@ const App: React.FC = () => {
                             ? 'bg-blue-500 hover:bg-blue-400' 
                             : 'bg-red-500 hover:bg-red-400') : 'bg-zinc-700 hover:bg-zinc-600'} text-white border-b-4 border-black/20`}
                     >
-                        {user ? 'ZZIC 확정하기' : '로그인하고 ZZIC 하기'}
+                        {user ? t('detail_confirm') : t('detail_login_btn')}
                     </button>
                 </div>
 
@@ -839,18 +854,18 @@ const App: React.FC = () => {
                 <div className="border-t border-zinc-900 pt-8">
                     <h3 className="text-sm font-black text-zinc-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
                         <MessageSquare size={16} />
-                        토론방 <span className="text-xs bg-zinc-800 text-white px-2 py-0.5 rounded-full">{marketComments.length}</span>
+                        {t('detail_discussion')} <span className="text-xs bg-zinc-800 text-white px-2 py-0.5 rounded-full">{marketComments.length}</span>
                     </h3>
                     
                     {/* Comment Input */}
                     <div className="flex gap-2 mb-8">
                         <input 
                             type="text" 
-                            placeholder={user ? "의견을 남겨주세요..." : "로그인이 필요합니다."}
+                            placeholder={user ? t('detail_comment_placeholder') : t('detail_comment_login_placeholder')}
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                            onClick={() => !user && confirm("로그인이 필요합니다. 이동하시겠습니까?") && setView('AUTH')}
+                            onClick={() => !user && confirm(t('msg_comment_login')) && setView('AUTH')}
                             readOnly={!user}
                             className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-medium"
                         />
@@ -867,7 +882,7 @@ const App: React.FC = () => {
                     <div className="space-y-4">
                         {marketComments.length === 0 ? (
                             <div className="text-center py-10">
-                                <p className="text-zinc-700 text-sm font-bold uppercase">아직 작성된 의견이 없습니다.</p>
+                                <p className="text-zinc-700 text-sm font-bold uppercase">{t('detail_no_comments')}</p>
                             </div>
                         ) : (
                             marketComments.map(comment => (
@@ -906,13 +921,13 @@ const App: React.FC = () => {
                 <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border border-zinc-800">
                     <User size={40} className="text-zinc-500"/>
                 </div>
-                <h2 className="text-2xl font-black text-white mb-2">로그인이 필요합니다</h2>
-                <p className="text-zinc-500 text-sm mb-8 font-medium">나의 예측 기록과 자산을 확인하려면 로그인하세요.</p>
+                <h2 className="text-2xl font-black text-white mb-2">{t('auth_login_required')}</h2>
+                <p className="text-zinc-500 text-sm mb-8 font-medium">{t('auth_login_profile_desc')}</p>
                 <button 
                     onClick={() => setView('AUTH')}
                     className="w-full max-w-xs bg-zzic text-black font-black py-4 rounded-xl uppercase tracking-wide hover:bg-[#b3e600]"
                 >
-                    로그인 / 가입하기
+                    {t('auth_login_signup')}
                 </button>
             </div>
         );
@@ -924,7 +939,7 @@ const App: React.FC = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-zzic blur-[120px] opacity-10 rounded-full pointer-events-none"></div>
             
             <div className="flex justify-between items-start relative z-10">
-                <h1 className="text-3xl font-black italic mb-8 uppercase text-white tracking-tight">마이 페이지</h1>
+                <h1 className="text-3xl font-black italic mb-8 uppercase text-white tracking-tight">{t('profile_title')}</h1>
                 <button onClick={handleLogout} className="p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors">
                     <LogOut size={16} />
                 </button>
@@ -944,8 +959,8 @@ const App: React.FC = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
                     <div className="flex gap-2">
-                        <p className="text-xs text-zinc-500 bg-zinc-900 inline-block px-2 py-1 rounded font-bold uppercase">루키</p>
-                        {user.isGuest && <p className="text-xs text-yellow-500 bg-yellow-500/10 inline-block px-2 py-1 rounded font-bold uppercase">게스트</p>}
+                        <p className="text-xs text-zinc-500 bg-zinc-900 inline-block px-2 py-1 rounded font-bold uppercase">{t('profile_rookie')}</p>
+                        {user.isGuest && <p className="text-xs text-yellow-500 bg-yellow-500/10 inline-block px-2 py-1 rounded font-bold uppercase">{t('profile_guest')}</p>}
                     </div>
                 </div>
             </div>
@@ -953,18 +968,18 @@ const App: React.FC = () => {
             <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 relative z-10 overflow-hidden group">
                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                 <div className="flex items-center gap-2 mb-2 text-zzic text-xs uppercase font-black tracking-widest">
-                    <Wallet size={14} /> 총 보유 자산
+                    <Wallet size={14} /> {t('profile_assets')}
                 </div>
                 <div className="text-4xl font-black text-white mb-6 tracking-tight relative z-10">
                     {formatNumber(user.balance)} <span className="text-xl text-zinc-600 font-bold">VP</span>
                 </div>
                 <div className="flex gap-3 relative z-10">
                     <div className="flex-1 bg-black rounded-2xl p-3 text-center border border-zinc-800">
-                        <div className="text-[10px] text-zinc-500 font-bold mb-1 uppercase">적중률</div>
+                        <div className="text-[10px] text-zinc-500 font-bold mb-1 uppercase">{t('profile_hit_rate')}</div>
                         <div className="font-black text-white text-lg">75%</div>
                     </div>
                     <div className="flex-1 bg-black rounded-2xl p-3 text-center border border-zinc-800">
-                        <div className="text-[10px] text-zinc-500 font-bold mb-1 uppercase">참여 기록</div>
+                        <div className="text-[10px] text-zinc-500 font-bold mb-1 uppercase">{t('profile_history_count')}</div>
                         <div className="font-black text-white text-lg">{user.portfolio.length}</div>
                     </div>
                 </div>
@@ -972,18 +987,18 @@ const App: React.FC = () => {
             
             <div className="mt-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl text-xs text-zinc-500 flex items-start gap-3 leading-relaxed font-medium">
                  <Info size={16} className="flex-shrink-0 mt-0.5 text-zinc-600" />
-                 <span>브라우저 캐시 삭제 시 게스트 데이터가 초기화될 수 있습니다.</span>
+                 <span>{t('profile_cache_warn')}</span>
             </div>
         </div>
 
         <div className="px-5 mt-8">
-            <h3 className="text-base font-black text-white mb-4 uppercase tracking-wide">최근 활동</h3>
+            <h3 className="text-base font-black text-white mb-4 uppercase tracking-wide">{t('profile_recent')}</h3>
             {user.portfolio.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-zinc-700 bg-zinc-900/30 rounded-3xl border border-zinc-800 border-dashed">
                     <Wallet size={32} className="mb-3 opacity-20"/>
-                    <p className="text-sm font-bold uppercase">아직 참여 내역이 없습니다.</p>
+                    <p className="text-sm font-bold uppercase">{t('profile_no_history')}</p>
                     <button onClick={() => setView('HOME')} className="mt-4 text-xs font-black text-zzic hover:underline uppercase">
-                        시장 둘러보기 &rarr;
+                        {t('profile_explore')} &rarr;
                     </button>
                 </div>
             ) : (
@@ -1007,7 +1022,7 @@ const App: React.FC = () => {
                             </div>
                             <div className="text-right">
                                 <div className="font-black text-white text-base">{formatNumber(item.amount)} VP</div>
-                                <div className="text-[10px] text-zinc-600 uppercase font-black tracking-wider">베팅액</div>
+                                <div className="text-[10px] text-zinc-600 uppercase font-black tracking-wider">{t('profile_bet_label')}</div>
                             </div>
                         </div>
                     ))}
@@ -1034,6 +1049,7 @@ const App: React.FC = () => {
                         setView('HOME');
                     }}
                     onClose={() => setView('HOME')}
+                    language={language}
                 />
             )}
         </div>
@@ -1047,10 +1063,11 @@ const App: React.FC = () => {
                     setLastPurchasedItem(null);
                     setView('PROFILE');
                 }} 
+                language={language}
             />
         )}
 
-        {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} />}
+        {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} language={language} />}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ export type Category = 'ENTER' | 'SPORTS' | 'WEATHER' | 'TECH' | 'STOCK' | 'COIN
 export interface Market {
   id: string;
   title: string;
+  titleEn: string; // Added for English support
   category: Category;
   yesPrice: number; // 0 to 100 representing probability
   volume: number;

@@ -1,13 +1,17 @@
 import React from 'react';
 import { X, Share2, Zap } from 'lucide-react';
 import { PortfolioItem } from '../types';
+import { TRANSLATIONS, Language } from '../translations';
 
 interface ShareModalProps {
   item: PortfolioItem;
   onClose: () => void;
+  language: Language;
 }
 
-const ShareModal: React.FC<ShareModalProps> = ({ item, onClose }) => {
+const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
+  const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
       <div className="relative w-full max-w-sm bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl transform scale-100 transition-all">
@@ -47,11 +51,11 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose }) => {
 
             <div className="w-full bg-white/5 backdrop-blur-md rounded-xl p-5 border border-white/10">
                 <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-gray-500 font-bold">베팅 금액</span>
+                    <span className="text-gray-500 font-bold">{t('share_bet_amount')}</span>
                     <span className="text-white font-mono font-bold">{item.amount.toLocaleString()} VP</span>
                 </div>
                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-bold">예상 수익</span>
+                    <span className="text-gray-500 font-bold">{t('share_return')}</span>
                     <span className="text-zzic font-mono font-black">
                         {Math.floor(item.amount * item.payoutMultiple).toLocaleString()} VP
                     </span>
@@ -61,7 +65,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose }) => {
             <div className="mt-8 pt-6 border-t border-zinc-800 w-full flex flex-col gap-3">
                 <button className="w-full bg-zzic text-black font-black py-4 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#b3e600] transition-colors uppercase tracking-tight">
                     <Share2 size={20} />
-                    스토리 공유하기
+                    {t('share_btn')}
                 </button>
             </div>
           </div>

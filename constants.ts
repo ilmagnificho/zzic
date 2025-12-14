@@ -6,6 +6,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm1',
     title: '뉴진스 2025년 정규 2집 발매 여부',
+    titleEn: 'NewJeans 2nd Regular Album in 2025?',
     category: 'ENTER',
     yesPrice: 65,
     volume: 124500,
@@ -15,6 +16,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm2',
     title: '손흥민 다음 경기 공격포인트 기록',
+    titleEn: 'Son Heung-min Attacking Point in Next Match',
     category: 'SPORTS',
     yesPrice: 42,
     volume: 89300,
@@ -24,6 +26,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm3',
     title: '2024 서울 화이트 크리스마스 (적설량 1cm↑)',
+    titleEn: '2024 Seoul White Christmas (Snow > 1cm)',
     category: 'WEATHER',
     yesPrice: 18,
     volume: 45000,
@@ -33,6 +36,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm5',
     title: 'GPT-5 vs Gemini 2.0: AI 패권 승자는 Gemini?',
+    titleEn: 'GPT-5 vs Gemini 2.0: AI Supremacy?',
     category: 'TECH',
     yesPrice: 35,
     volume: 67000,
@@ -42,6 +46,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm6',
     title: '미국 증시 산타랠리 온다 (S&P500 신고가 갱신)',
+    titleEn: 'US Stock Santa Rally (S&P 500 ATH)',
     category: 'STOCK',
     yesPrice: 72,
     volume: 210000,
@@ -51,6 +56,7 @@ export const INITIAL_MARKETS: Market[] = [
   {
     id: 'm7',
     title: '비트코인(BTC) 연내 10만 달러($100K) 돌파',
+    titleEn: 'Bitcoin (BTC) to hit $100K this year',
     category: 'COIN',
     yesPrice: 48,
     volume: 540000,
