@@ -218,7 +218,23 @@ const SuggestModal: React.FC<{ onClose: () => void; language: Language }> = ({ o
 
     const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        // [UPDATE] Save to Supabase (suggestions table)
+        if (isSupabaseConnected) {
+             const { error } = await supabase.from('suggestions').insert([
+                { 
+                    category,
+                    title, 
+                    description: desc,
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            if (error) {
+                console.error("Failed to save suggestion:", error);
+                // Continue to show success message even if DB fails in this MVP/Demo context
+            }
+        }
+
         alert(t('msg_suggest_thankyou') + `\n\n[${category}] ${title}`);
         onClose();
     };
@@ -336,10 +352,10 @@ const DesktopSidebar: React.FC<{
             <div className="mt-auto space-y-4">
                 <button 
                     onClick={toggleLanguage}
-                    className="flex items-center gap-2 text-zinc-500 font-bold text-xs px-4 hover:text-white transition-colors"
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-zinc-700 hover:border-zzic shadow-lg"
                 >
-                    <Globe size={14} />
-                    {language === 'ko' ? '한국어 / English' : 'English / 한국어'}
+                    <Globe size={18} />
+                    <span>{language === 'ko' ? 'Language: 한국어' : 'Language: English'}</span>
                 </button>
 
                 {user && (
@@ -395,12 +411,7 @@ const DesktopRightColumn: React.FC<{
             </div>
 
             <div className="text-[10px] text-zinc-600 font-medium leading-relaxed px-2">
-                <p>© 2024 ZZIC Inc.</p>
-                <div className="flex gap-2 mt-1">
-                    <span className="hover:text-zinc-400 cursor-pointer">Privacy</span>
-                    <span className="hover:text-zinc-400 cursor-pointer">Terms</span>
-                    <span className="hover:text-zinc-400 cursor-pointer">More</span>
-                </div>
+                <p>© 2025 ZZIC Inc.</p>
             </div>
         </div>
     );
@@ -806,7 +817,7 @@ const App: React.FC = () => {
             {t('home_disclaimer')}
         </p>
         <p className="text-[10px] text-zinc-800 font-black mt-4 uppercase tracking-[0.2em]">
-            © 2024 ZZIC. All Rights Reserved.
+            © 2025 ZZIC. All Rights Reserved.
         </p>
       </div>
     </div>
