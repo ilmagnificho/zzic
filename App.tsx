@@ -4,6 +4,7 @@ import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion,
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
 import ShareModal from './components/ShareModal';
+import { supabase } from './lib/supabase';
 
 // --- Helper Components ---
 
@@ -14,41 +15,35 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleAuth = (e: React.FormEvent) => {
+    const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        setTimeout(() => {
-            const usersDb = JSON.parse(localStorage.getItem('zzic_users_db') || '{}');
-            
+        try {
             if (mode === 'SIGNUP') {
-                if (usersDb[email]) {
-                    alert('이미 존재하는 이메일입니다.');
-                    setLoading(false);
-                    return;
-                }
-                const newUser: UserState = {
-                    id: Date.now().toString(),
+                const { data, error } = await supabase.auth.signUp({
                     email,
-                    name: name || email.split('@')[0],
-                    balance: INITIAL_BALANCE,
-                    portfolio: [],
-                    isGuest: false
-                };
-                usersDb[email] = { ...newUser, password };
-                localStorage.setItem('zzic_users_db', JSON.stringify(usersDb));
-                onLogin(newUser);
+                    password,
+                    options: {
+                        data: { name: name || email.split('@')[0] }
+                    }
+                });
+                if (error) throw error;
+                alert('회원가입 성공! 자동 로그인됩니다.');
             } else {
-                const userRecord = usersDb[email];
-                if (userRecord && userRecord.password === password) {
-                    const { password: _, ...userData } = userRecord;
-                    onLogin(userData);
-                } else {
-                    alert('이메일 또는 비밀번호가 일치하지 않습니다.');
-                }
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                if (error) throw error;
             }
+            // 로그인 성공 처리는 App 컴포넌트의 onAuthStateChange에서 감지합니다.
+            onClose();
+        } catch (error: any) {
+            alert(error.message || '오류가 발생했습니다.');
+        } finally {
             setLoading(false);
-        }, 800);
+        }
     };
 
     const handleGuest = () => {
@@ -59,6 +54,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => 
             portfolio: [],
             isGuest: true
         });
+        onClose();
     };
 
     return (
@@ -236,13 +232,7 @@ const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
 const App: React.FC = () => {
   // --- State ---
-  const [user, setUser] = useState<UserState | null>(() => {
-    // Check session first
-    const session = localStorage.getItem('zzic_current_user');
-    if (session) return JSON.parse(session);
-    return null;
-  });
-
+  const [user, setUser] = useState<UserState | null>(null);
   const [view, setView] = useState<ViewState>('HOME');
   const [activeMarketId, setActiveMarketId] = useState<string | null>(null);
   const [markets, setMarkets] = useState<Market[]>(INITIAL_MARKETS);
@@ -261,29 +251,58 @@ const App: React.FC = () => {
 
   // --- Effects ---
 
-  // Persist Current Session
+  // Auth & Profile Listener
   useEffect(() => {
-    if (user) {
-        localStorage.setItem('zzic_current_user', JSON.stringify(user));
-    } else {
-        localStorage.removeItem('zzic_current_user');
-    }
-  }, [user]);
+    // 1. 세션 확인
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) fetchProfile(session.user.id);
+    });
+
+    // 2. Auth 상태 변경 감지
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+            fetchProfile(session.user.id);
+        } else {
+            // 게스트가 아닌 경우만 로그아웃 처리
+            setUser(prev => prev?.isGuest ? prev : null);
+        }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data) {
+          setUser({
+              id: data.id,
+              email: data.email,
+              name: data.name,
+              balance: data.balance,
+              portfolio: data.portfolio || [],
+              isGuest: false
+          });
+      }
+  };
   
   // Simulate price fluctuation
   useEffect(() => {
     const interval = setInterval(() => {
       setMarkets(prevMarkets => 
         prevMarkets.map(m => {
-          const change = (Math.random() - 0.5) * 2; // -1 to +1 change
+          const change = (Math.random() - 0.5) * 2; 
           let newPrice = m.yesPrice + change;
-          // Clamp price
           if (newPrice > 98) newPrice = 98;
           if (newPrice < 2) newPrice = 2;
           
           return {
             ...m,
-            yesPrice: Number(newPrice.toFixed(1)) // Ensure 1 decimal place internally too
+            yesPrice: Number(newPrice.toFixed(1))
           };
         })
       );
@@ -303,7 +322,7 @@ const App: React.FC = () => {
     return 100 / p;
   };
 
-  const handlePredict = () => {
+  const handlePredict = async () => {
     if (!user) {
         setView('AUTH');
         return;
@@ -329,13 +348,30 @@ const App: React.FC = () => {
         timestamp: Date.now()
     };
 
-    setUser(prev => prev ? ({
-        ...prev,
-        balance: prev.balance - betAmount,
-        portfolio: [newItem, ...prev.portfolio]
-    }) : null);
-
+    // Optimistic Update
+    const updatedUser = {
+        ...user,
+        balance: user.balance - betAmount,
+        portfolio: [newItem, ...user.portfolio]
+    };
+    setUser(updatedUser);
     setLastPurchasedItem(newItem);
+
+    // Database Update (if not guest)
+    if (!user.isGuest) {
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                balance: updatedUser.balance,
+                portfolio: updatedUser.portfolio
+            })
+            .eq('id', user.id);
+        
+        if (error) {
+            console.error("DB Update Failed:", error);
+            alert("저장에 실패했습니다. 새로고침 해주세요.");
+        }
+    }
   };
 
   const handleAddComment = () => {
@@ -347,7 +383,6 @@ const App: React.FC = () => {
     }
     if (!newCommentText.trim() || !activeMarketId) return;
     
-    // Check if user has bet on this market to show stance tag
     const userBet = user.portfolio.find(p => p.marketId === activeMarketId);
     const stance = userBet ? userBet.prediction : undefined;
 
@@ -364,8 +399,11 @@ const App: React.FC = () => {
     setNewCommentText('');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
       if(confirm('ZZIC에서 로그아웃 하시겠습니까?')) {
+          if (!user?.isGuest) {
+              await supabase.auth.signOut();
+          }
           setUser(null);
           setView('HOME');
       }
