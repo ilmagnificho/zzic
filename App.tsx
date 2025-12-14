@@ -723,7 +723,11 @@ const App: React.FC = () => {
             {/* Texture Overlay */}
             <div className="absolute inset-0 z-10 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
             
-            <img src="https://picsum.photos/800/400?random=banner" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700 grayscale mix-blend-luminosity" alt="Banner" />
+            <img 
+                src="https://picsum.photos/800/400?random=banner" 
+                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700 grayscale mix-blend-luminosity" 
+                alt="ZZIC Season 1 Event Banner: Who is the God of ZZIC?" 
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
             
             <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">
@@ -761,7 +765,11 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-4">
                     {/* Thumbnail */}
                     <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-black">
-                         <img src={market.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0" alt="market" />
+                         <img 
+                            src={market.imageUrl} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0" 
+                            alt={language === 'en' ? (market.titleEn || market.title) : market.title} 
+                         />
                          <div className={`absolute top-0 left-0 px-2 py-1 text-[9px] font-black text-white rounded-br-xl ${CATEGORY_COLORS[market.category]}`}>
                              {market.category}
                          </div>
@@ -1005,7 +1013,11 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center mb-8 relative">
                     <div className="absolute inset-0 bg-zzic blur-[80px] opacity-10 rounded-full pointer-events-none"></div>
                      <div className="w-24 h-24 rounded-2xl bg-black overflow-hidden mb-6 shadow-2xl border border-zinc-800 relative z-10">
-                         <img src={activeMarket.imageUrl} className="w-full h-full object-cover grayscale" alt="market" />
+                         <img 
+                            src={activeMarket.imageUrl} 
+                            className="w-full h-full object-cover grayscale" 
+                            alt={marketTitle} 
+                         />
                     </div>
                     <span className={`text-[10px] font-black px-3 py-1 rounded text-white mb-3 relative z-10 ${CATEGORY_COLORS[activeMarket.category]}`}>
                         {activeMarket.category}
