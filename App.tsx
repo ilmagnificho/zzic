@@ -67,7 +67,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void }> = ({ onLogin 
             <div className="absolute top-[-10%] right-[-30%] w-[100%] h-[60%] bg-zzic blur-[150px] opacity-20 rounded-full"></div>
 
             <div className="relative z-10 w-full max-w-sm mx-auto">
-                <div className="mb-12">
+                <div className="mb-12 text-center">
                     <h1 className="text-7xl font-black italic tracking-tighter text-white mb-2" style={{ textShadow: '0 0 20px rgba(204,255,0,0.3)' }}>
                         ZZIC
                     </h1>
@@ -775,7 +775,7 @@ const App: React.FC = () => {
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="text-xs font-bold text-zinc-300">{comment.userName}</span>
                                             {comment.prediction && (
-                                                <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-500'}`}>
                                                     {comment.prediction}
                                                 </span>
                                             )}
