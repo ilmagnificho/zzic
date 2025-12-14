@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
@@ -7,7 +7,7 @@ import ShareModal from './components/ShareModal';
 
 // --- Helper Components ---
 
-const AuthScreen: React.FC<{ onLogin: (user: UserState) => void }> = ({ onLogin }) => {
+const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void }> = ({ onLogin, onClose }) => {
     const [mode, setMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -62,9 +62,14 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void }> = ({ onLogin 
     };
 
     return (
-        <div className="min-h-screen bg-black flex flex-col justify-center px-6 relative overflow-hidden animate-in fade-in duration-500">
+        <div className="min-h-screen bg-black flex flex-col justify-center px-6 relative overflow-hidden animate-in fade-in duration-500 z-[100] fixed inset-0">
             {/* ZZIC Ambience */}
             <div className="absolute top-[-10%] right-[-30%] w-[100%] h-[60%] bg-zzic blur-[150px] opacity-20 rounded-full"></div>
+            
+            {/* Close Button */}
+            <button onClick={onClose} className="absolute top-6 right-6 text-zinc-500 hover:text-white z-50">
+                <X size={28} />
+            </button>
 
             <div className="relative z-10 w-full max-w-sm mx-auto">
                 <div className="mb-12 text-center">
@@ -132,7 +137,7 @@ const AuthScreen: React.FC<{ onLogin: (user: UserState) => void }> = ({ onLogin 
                             disabled={loading}
                             className="w-full bg-zzic text-black font-black uppercase tracking-wider py-4 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 hover:bg-[#b3e600]"
                         >
-                            {loading ? '처리중...' : (mode === 'LOGIN' ? 'ZZIC 시작하기' : '회원가입')}
+                            {loading ? '처리중...' : (mode === 'LOGIN' ? '로그인' : '회원가입 완료')}
                         </button>
                     </form>
 
@@ -203,7 +208,7 @@ const SuggestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             value={title}
                             onChange={e => setTitle(e.target.value)}
                             className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-zzic font-bold"
-                            placeholder="예: 지드래곤 12월 컴백 여부"
+                            placeholder="예: 비트코인 100K 도달"
                          />
                      </div>
                      <div>
@@ -299,7 +304,10 @@ const App: React.FC = () => {
   };
 
   const handlePredict = () => {
-    if (!user) return;
+    if (!user) {
+        setView('AUTH');
+        return;
+    }
     const market = markets.find(m => m.id === activeMarketId);
     if (!market) return;
     if (user.balance < betAmount) {
@@ -331,7 +339,13 @@ const App: React.FC = () => {
   };
 
   const handleAddComment = () => {
-    if (!user || !newCommentText.trim() || !activeMarketId) return;
+    if (!user) {
+        if(confirm("댓글을 작성하려면 로그인이 필요합니다. 로그인하시겠습니까?")) {
+            setView('AUTH');
+        }
+        return;
+    }
+    if (!newCommentText.trim() || !activeMarketId) return;
     
     // Check if user has bet on this market to show stance tag
     const userBet = user.portfolio.find(p => p.marketId === activeMarketId);
@@ -365,10 +379,6 @@ const App: React.FC = () => {
     comments.filter(c => c.marketId === activeMarketId),
   [comments, activeMarketId]);
 
-  // If no user, show Auth Screen
-  if (!user) {
-      return <AuthScreen onLogin={setUser} />;
-  }
 
   // --- Render Functions ---
 
@@ -390,10 +400,19 @@ const App: React.FC = () => {
             >
                 <Trophy size={16} className="text-zinc-500 group-hover:text-zzic transition-colors"/>
             </button>
-            <div className="flex items-center gap-2 bg-zinc-900 px-4 py-1.5 rounded-full border border-zinc-800">
-                <div className="w-2 h-2 rounded-full bg-zzic animate-pulse"></div>
-                <span className="text-sm font-black text-white font-mono tracking-tight">{formatNumber(user.balance)} VP</span>
-            </div>
+            {user ? (
+                <div className="flex items-center gap-2 bg-zinc-900 px-4 py-1.5 rounded-full border border-zinc-800">
+                    <div className="w-2 h-2 rounded-full bg-zzic animate-pulse"></div>
+                    <span className="text-sm font-black text-white font-mono tracking-tight">{formatNumber(user.balance)} VP</span>
+                </div>
+            ) : (
+                <button 
+                    onClick={() => setView('AUTH')}
+                    className="flex items-center gap-2 bg-zzic px-4 py-1.5 rounded-full border border-zzic hover:bg-[#b3e600] transition-colors"
+                >
+                    <span className="text-xs font-black text-black uppercase">로그인 / 가입</span>
+                </button>
+            )}
         </div>
       </div>
 
@@ -578,7 +597,7 @@ const App: React.FC = () => {
                     <div 
                         key={idx} 
                         className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                            rankUser.name === user.name 
+                            user && rankUser.name === user.name 
                             ? 'bg-zzic/10 border-zzic/50 shadow-[0_0_15px_rgba(204,255,0,0.1)]' 
                             : 'bg-zinc-900/50 border-zinc-800 hover:bg-zinc-900'
                         }`}
@@ -594,7 +613,7 @@ const App: React.FC = () => {
                                 <div>
                                     <div className="font-bold text-sm text-white flex items-center gap-2">
                                         {rankUser.name}
-                                        {rankUser.name === user.name && <span className="text-[9px] bg-zzic text-black px-1.5 py-0.5 rounded font-black">ME</span>}
+                                        {user && rankUser.name === user.name && <span className="text-[9px] bg-zzic text-black px-1.5 py-0.5 rounded font-black">ME</span>}
                                     </div>
                                     <div className="text-[10px] text-zinc-500 font-bold">승률 {rankUser.winRate}%</div>
                                 </div>
@@ -672,37 +691,43 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Amount Slider */}
-                    <div className="mb-8">
-                        <div className="flex justify-between text-sm mb-4 items-end">
-                            <span className="text-zinc-500 font-bold uppercase text-xs tracking-wider">베팅 금액</span>
-                            <span className="text-white font-mono font-bold text-2xl">{formatNumber(betAmount)} VP</span>
-                        </div>
-                        <div className="relative h-8 flex items-center">
-                            <input 
-                                type="range" 
-                                min="100" 
-                                max={user.balance} 
-                                step="100"
-                                value={betAmount}
-                                onChange={(e) => setBetAmount(Number(e.target.value))}
-                                className="absolute w-full h-4 bg-zinc-800 rounded-full appearance-none cursor-pointer z-20 opacity-0"
-                            />
-                            <div className="w-full h-4 bg-black border border-zinc-800 rounded-full overflow-hidden relative z-10">
+                    {user ? (
+                        <div className="mb-8">
+                            <div className="flex justify-between text-sm mb-4 items-end">
+                                <span className="text-zinc-500 font-bold uppercase text-xs tracking-wider">베팅 금액</span>
+                                <span className="text-white font-mono font-bold text-2xl">{formatNumber(betAmount)} VP</span>
+                            </div>
+                            <div className="relative h-8 flex items-center">
+                                <input 
+                                    type="range" 
+                                    min="100" 
+                                    max={user.balance} 
+                                    step="100"
+                                    value={betAmount}
+                                    onChange={(e) => setBetAmount(Number(e.target.value))}
+                                    className="absolute w-full h-4 bg-zinc-800 rounded-full appearance-none cursor-pointer z-20 opacity-0"
+                                />
+                                <div className="w-full h-4 bg-black border border-zinc-800 rounded-full overflow-hidden relative z-10">
+                                    <div 
+                                        className="h-full bg-zzic" 
+                                        style={{ width: `${(betAmount / user.balance) * 100}%` }}
+                                    ></div>
+                                </div>
                                 <div 
-                                    className="h-full bg-zzic" 
-                                    style={{ width: `${(betAmount / user.balance) * 100}%` }}
+                                    className="absolute h-7 w-7 bg-white rounded-full shadow-lg border-4 border-black z-10 pointer-events-none transition-all"
+                                    style={{ left: `calc(${(betAmount / user.balance) * 100}% - 14px)` }}
                                 ></div>
                             </div>
-                            <div 
-                                className="absolute h-7 w-7 bg-white rounded-full shadow-lg border-4 border-black z-10 pointer-events-none transition-all"
-                                style={{ left: `calc(${(betAmount / user.balance) * 100}% - 14px)` }}
-                            ></div>
+                            <div className="flex justify-between text-[10px] text-zinc-600 mt-2 font-bold uppercase">
+                                <span>최소 100</span>
+                                <span>최대 {formatNumber(user.balance)}</span>
+                            </div>
                         </div>
-                         <div className="flex justify-between text-[10px] text-zinc-600 mt-2 font-bold uppercase">
-                            <span>최소 100</span>
-                            <span>최대 {formatNumber(user.balance)}</span>
-                        </div>
-                    </div>
+                    ) : (
+                         <div className="mb-8 p-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-center">
+                             <p className="text-xs text-zinc-500 font-bold uppercase mb-2">투표를 하려면 로그인이 필요합니다</p>
+                         </div>
+                    )}
 
                     {/* Summary */}
                     <div className="bg-black rounded-xl p-5 mb-6 border border-zinc-800">
@@ -725,11 +750,11 @@ const App: React.FC = () => {
                     <button 
                         onClick={handlePredict}
                         className={`w-full py-5 rounded-2xl font-black text-black text-lg shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group uppercase tracking-wider
-                        ${selectedPrediction === 'YES' 
+                        ${user ? (selectedPrediction === 'YES' 
                             ? 'bg-blue-500 hover:bg-blue-400' 
-                            : 'bg-red-500 hover:bg-red-400'} text-white border-b-4 border-black/20`}
+                            : 'bg-red-500 hover:bg-red-400') : 'bg-zinc-700 hover:bg-zinc-600'} text-white border-b-4 border-black/20`}
                     >
-                        ZZIC 확정하기
+                        {user ? 'ZZIC 확정하기' : '로그인하고 ZZIC 하기'}
                     </button>
                 </div>
 
@@ -744,16 +769,18 @@ const App: React.FC = () => {
                     <div className="flex gap-2 mb-8">
                         <input 
                             type="text" 
-                            placeholder="의견을 남겨주세요..." 
+                            placeholder={user ? "의견을 남겨주세요..." : "로그인이 필요합니다."}
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                            onClick={() => !user && confirm("로그인이 필요합니다. 이동하시겠습니까?") && setView('AUTH')}
+                            readOnly={!user}
                             className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-medium"
                         />
                         <button 
                             onClick={handleAddComment}
                             className="bg-zinc-800 text-white w-12 rounded-xl hover:bg-zzic hover:text-black transition-colors disabled:opacity-30 flex items-center justify-center"
-                            disabled={!newCommentText.trim()}
+                            disabled={!newCommentText.trim() && !!user}
                         >
                             <Send size={18} />
                         </button>
@@ -795,7 +822,26 @@ const App: React.FC = () => {
     );
   };
 
-  const renderProfile = () => (
+  const renderProfile = () => {
+    if (!user) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border border-zinc-800">
+                    <User size={40} className="text-zinc-500"/>
+                </div>
+                <h2 className="text-2xl font-black text-white mb-2">로그인이 필요합니다</h2>
+                <p className="text-zinc-500 text-sm mb-8 font-medium">나의 예측 기록과 자산을 확인하려면 로그인하세요.</p>
+                <button 
+                    onClick={() => setView('AUTH')}
+                    className="w-full max-w-xs bg-zzic text-black font-black py-4 rounded-xl uppercase tracking-wide hover:bg-[#b3e600]"
+                >
+                    로그인 / 가입하기
+                </button>
+            </div>
+        );
+    }
+
+    return (
     <div className="pb-24 animate-in fade-in duration-500">
         <div className="px-5 py-8 bg-black border-b border-zinc-900 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-zzic blur-[120px] opacity-10 rounded-full pointer-events-none"></div>
@@ -893,6 +939,7 @@ const App: React.FC = () => {
         </div>
     </div>
   );
+  };
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black pb-safe">
@@ -903,6 +950,15 @@ const App: React.FC = () => {
             {view === 'DETAIL' && renderDetail()}
             {view === 'PROFILE' && renderProfile()}
             {view === 'RANKING' && renderRanking()}
+            {view === 'AUTH' && (
+                <AuthScreen 
+                    onLogin={(u) => {
+                        setUser(u);
+                        setView('HOME');
+                    }}
+                    onClose={() => setView('HOME')}
+                />
+            )}
         </div>
         
         <BottomNav currentView={view} onChangeView={setView} />

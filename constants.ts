@@ -31,13 +31,31 @@ export const INITIAL_MARKETS: Market[] = [
     imageUrl: 'https://picsum.photos/400/200?random=3'
   },
   {
-    id: 'm4',
-    title: 'LCK 스프링 T1 우승',
-    category: 'ESPORTS',
-    yesPrice: 55,
+    id: 'm5',
+    title: 'GPT-5 vs Gemini 2.0: AI 패권 승자는 Gemini?',
+    category: 'TECH',
+    yesPrice: 35,
+    volume: 67000,
+    endDate: '2025-06-30',
+    imageUrl: 'https://picsum.photos/400/200?random=5'
+  },
+  {
+    id: 'm6',
+    title: '미국 증시 산타랠리 온다 (S&P500 신고가 갱신)',
+    category: 'STOCK',
+    yesPrice: 72,
     volume: 210000,
-    endDate: '2025-04-14',
-    imageUrl: 'https://picsum.photos/400/200?random=4'
+    endDate: '2024-12-31',
+    imageUrl: 'https://picsum.photos/400/200?random=6'
+  },
+  {
+    id: 'm7',
+    title: '비트코인(BTC) 연내 10만 달러($100K) 돌파',
+    category: 'COIN',
+    yesPrice: 48,
+    volume: 540000,
+    endDate: '2024-12-31',
+    imageUrl: 'https://picsum.photos/400/200?random=7'
   }
 ];
 
@@ -45,14 +63,16 @@ export const CATEGORY_COLORS: Record<string, string> = {
   ENTER: 'bg-pink-600',
   SPORTS: 'bg-orange-600',
   WEATHER: 'bg-cyan-600',
-  ESPORTS: 'bg-violet-600'
+  TECH: 'bg-indigo-600',
+  STOCK: 'bg-red-600',
+  COIN: 'bg-yellow-600'
 };
 
 export const MOCK_COMMENTS: Comment[] = [
   { id: 'c1', marketId: 'm1', userName: '민희진파이팅', text: '솔직히 올해는 힘들지 않을까요?', timestamp: Date.now() - 100000, prediction: 'NO' },
-  { id: 'c2', marketId: 'm1', userName: '버니즈1기', text: '무조건 나옵니다. 믿습니다.', timestamp: Date.now() - 50000, prediction: 'YES' },
-  { id: 'c3', marketId: 'm4', userName: '페이커팬', text: '대상혁이 있는 한 T1은 우승이다', timestamp: Date.now() - 200000, prediction: 'YES' },
-  { id: 'c4', marketId: 'm2', userName: '축구도사', text: '이번 상대 수비가 너무 빡세요', timestamp: Date.now() - 30000, prediction: 'NO' },
+  { id: 'c2', marketId: 'm7', userName: '사토시', text: '무조건 갑니다. 지금이 저점 매수 기회.', timestamp: Date.now() - 50000, prediction: 'YES' },
+  { id: 'c3', marketId: 'm6', userName: '워렌버핏', text: '산타는 없다. 현금 확보해라.', timestamp: Date.now() - 200000, prediction: 'NO' },
+  { id: 'c4', marketId: 'm5', userName: '개발자K', text: 'Gemini 2.0 성능 미쳤던데?', timestamp: Date.now() - 30000, prediction: 'YES' },
 ];
 
 export const MOCK_RANKING: RankedUser[] = [

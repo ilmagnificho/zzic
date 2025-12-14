@@ -1,4 +1,4 @@
-export type Category = 'ENTER' | 'SPORTS' | 'WEATHER' | 'ESPORTS';
+export type Category = 'ENTER' | 'SPORTS' | 'WEATHER' | 'TECH' | 'STOCK' | 'COIN';
 
 export interface Market {
   id: string;
@@ -30,7 +30,7 @@ export interface UserState {
   isGuest: boolean;
 }
 
-export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING';
+export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH';
 
 export interface BetDraft {
   marketId: string;
