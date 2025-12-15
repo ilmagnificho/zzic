@@ -874,7 +874,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="px-5 mt-6">
-            <div className="flex justify-center items-end gap-3 mb-12 pt-10 relative">
+            <div className="flex justify-center items-end gap-3 mb-12 pt-24 relative">
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-zzic/10 blur-[80px] rounded-full pointer-events-none"></div>
 
                 <div className="flex flex-col items-center z-10">
