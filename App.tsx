@@ -11,6 +11,28 @@ import { TRANSLATIONS, Language } from './translations';
 
 const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
 
+// Robust Logo Component with Fallback
+const LogoImage: React.FC<{ className?: string }> = ({ className }) => {
+    const [error, setError] = useState(false);
+    
+    if (error) {
+        return (
+            <div className={`${className} bg-zzic flex items-center justify-center text-black font-black italic shadow-lg border border-zzic/50`}>
+                Z
+            </div>
+        );
+    }
+    
+    return (
+        <img 
+            src="/ZZIC_Favicon.png" 
+            alt="ZZIC" 
+            className={`${className} object-cover`}
+            onError={() => setError(true)}
+        />
+    );
+};
+
 // Hook: Countdown (Robust for long dates)
 const useCountdown = (targetDate: string | undefined) => {
   const calculateTimeLeft = () => {
@@ -402,7 +424,7 @@ const App: React.FC = () => {
       <div className="hidden lg:flex flex-col h-[calc(100vh-2rem)] sticky top-4 gap-6 p-4 w-[280px]">
           <div onClick={() => setView('HOME')} className="cursor-pointer group">
               <div className="flex items-center gap-3">
-                  <img src="/ZZIC_Favicon.png" alt="ZZIC Logo" className="w-10 h-10 rounded-xl shadow-lg group-hover:scale-105 transition-transform" />
+                  <LogoImage className="w-10 h-10 rounded-xl group-hover:scale-105 transition-transform" />
                   <div>
                     <h1 className="text-3xl font-black italic tracking-tighter text-white group-hover:text-zzic transition-colors leading-none">ZZIC</h1>
                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Trust Your Instinct</p>
@@ -590,7 +612,7 @@ const App: React.FC = () => {
       {/* Mobile Header */}
       <div className="lg:hidden px-5 py-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('HOME')}>
-            <img src="/ZZIC_Favicon.png" alt="ZZIC" className="w-8 h-8 rounded-lg shadow-md" />
+            <LogoImage className="w-8 h-8 rounded-lg shadow-md" />
             <h1 className="text-2xl font-black italic tracking-tighter text-white">ZZIC</h1>
         </div>
         <div className="flex gap-3 items-center">
@@ -990,7 +1012,7 @@ const App: React.FC = () => {
             
             <div className="mb-8 relative flex flex-col items-center">
                 <div className="absolute inset-0 bg-zzic blur-[60px] opacity-20 rounded-full"></div>
-                <img src="/ZZIC_Favicon.png" alt="ZZIC" className="w-24 h-24 rounded-3xl shadow-2xl mb-4 relative z-10 border border-zinc-800" />
+                <LogoImage className="w-24 h-24 rounded-3xl shadow-2xl mb-4 relative z-10 border border-zinc-800" />
                 <h1 className="text-5xl font-black italic tracking-tighter text-white relative z-10">ZZIC</h1>
                 <p className="text-xs text-zzic font-bold tracking-[0.3em] uppercase mt-2">{t('about_slogan')}</p>
             </div>

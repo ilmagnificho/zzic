@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Share2, Zap } from 'lucide-react';
 import { PortfolioItem } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
@@ -11,6 +11,7 @@ interface ShareModalProps {
 
 const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
@@ -33,9 +34,19 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
 
           <div className="relative z-10 flex flex-col items-center">
-            {/* Logo Stamp */}
-            <div className="border border-zzic text-zzic px-3 py-1 rounded font-black text-xs tracking-widest mb-6 rotate-[-2deg]">
-              TRUST YOUR ZZIC
+            {/* Logo Stamp - Updated to use Image */}
+            <div className="flex items-center gap-2 mb-6 opacity-80 bg-black/50 px-3 py-1.5 rounded-full border border-zinc-800/50 backdrop-blur-sm">
+              {imgError ? (
+                  <div className="w-5 h-5 rounded bg-zzic flex items-center justify-center text-[10px] font-black text-black">Z</div>
+              ) : (
+                  <img 
+                      src="/ZZIC_Favicon.png" 
+                      onError={() => setImgError(true)} 
+                      alt="ZZIC" 
+                      className="w-5 h-5 rounded" 
+                  />
+              )}
+              <span className="text-zzic font-black text-[10px] tracking-[0.2em]">TRUST YOUR ZZIC</span>
             </div>
 
             <h2 className="text-xl font-bold text-gray-200 mb-2 leading-tight line-clamp-2 break-keep">
