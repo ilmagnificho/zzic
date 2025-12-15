@@ -290,6 +290,13 @@ const App: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+      if(confirm(t('msg_logout_confirm'))) {
+          setUser(null);
+          setView('HOME');
+      }
+  };
+
   const handlePostBillboard = () => {
       if (!user) return setView('AUTH');
       if (user.balance < 1000) return alert("VP가 부족합니다. (비용: 1,000 VP)");
@@ -434,8 +441,11 @@ const App: React.FC = () => {
                             <div className="text-xs text-zzic font-mono">{formatNumber(user.balance)} VP</div>
                         </div>
                     </div>
-                    <button onClick={handlePostBillboard} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <button onClick={() => setShowBillboardModal(true)} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
                         <Megaphone size={12} /> 전광판 등록
+                    </button>
+                    <button onClick={handleLogout} className="w-full mt-2 text-zinc-500 hover:text-white text-xs font-bold py-2 flex items-center justify-center gap-2 transition-colors">
+                        <LogOut size={12} /> {t('profile_logout')}
                     </button>
                 </div>
             ) : (
@@ -938,6 +948,9 @@ const App: React.FC = () => {
             {/* Desktop Profile Header */}
              <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Profile</h2>
+                <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-400 flex items-center gap-1">
+                    <LogOut size={14} /> {t('profile_logout')}
+                </button>
             </div>
 
             <div className="px-5 py-8 bg-black border-b border-zinc-900 relative overflow-hidden">
@@ -963,6 +976,14 @@ const App: React.FC = () => {
                     <button onClick={handleRefill} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-black animate-pulse">구조 요청</button>
                 </div>
             )}
+            
+            {/* Mobile Logout (visible on mobile layout if not in header) */}
+            <div className="px-5 lg:hidden mb-6 flex justify-end">
+                 <button onClick={handleLogout} className="bg-zinc-900 border border-zinc-800 text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
+                    <LogOut size={14} /> {t('profile_logout')}
+                </button>
+            </div>
+
             <div className="px-5 mt-6">
                 <h3 className="text-sm font-black text-zinc-500 mb-4 uppercase">Predict History</h3>
                 {user.portfolio.map(item => (
