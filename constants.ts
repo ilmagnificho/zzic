@@ -12,7 +12,8 @@ export const INITIAL_MARKETS: Market[] = [
     yesPrice: 72,
     volume: 210000,
     endDate: '2025-12-31',
-    imageUrl: 'https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=800&auto=format&fit=crop'
+    // 상승장의 붉은(한국기준)/초록(미국기준) 느낌이 강한 차트 이미지
+    imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800&auto=format&fit=crop'
   },
   {
     id: 'm3',
@@ -22,27 +23,30 @@ export const INITIAL_MARKETS: Market[] = [
     yesPrice: 45,
     volume: 45000,
     endDate: '2025-12-25',
-    imageUrl: 'https://images.unsplash.com/photo-1542601098-8fc114e148e2?q=80&w=800&auto=format&fit=crop'
+    // 눈 내리는 포근한 크리스마스 거리 이미지
+    imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop'
   },
   {
     id: 'm7',
     title: '비트코인(BTC) 2026년 1분기 내 2억원 돌파',
     titleEn: 'Bitcoin (BTC) to hit 200M KRW in Q1 2026',
     category: 'COIN',
-    yesPrice: 48,
+    yesPrice: 55,
     volume: 540000,
     endDate: '2026-03-31',
-    imageUrl: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop'
+    // 비트코인 실물 + 상승 그래프 느낌
+    imageUrl: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800&auto=format&fit=crop'
   },
   {
     id: 'm5',
-    title: 'AGI(일반인공지능) 2026년 상반기 선언될까?',
-    titleEn: 'AGI Declaration in H1 2026?',
-    category: 'TECH',
-    yesPrice: 35,
-    volume: 67000,
+    title: '2026 북중미 월드컵 대한민국 16강 진출',
+    titleEn: 'South Korea to reach Round of 16 in 2026 World Cup',
+    category: 'SPORTS',
+    yesPrice: 42,
+    volume: 150000,
     endDate: '2026-06-30',
-    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop'
+    // [UPDATE] 깨지는 이미지 교체 (안정적인 Unsplash ID 사용)
+    imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop'
   }
 ];
 
@@ -59,7 +63,8 @@ export const MOCK_COMMENTS: Comment[] = [
   { id: 'c2', marketId: 'm7', userName: '사토시', text: '무조건 갑니다. 반감기 효과 이제 시작임.', timestamp: Date.now() - 50000, prediction: 'YES' },
   { id: 'c2-1', marketId: 'm7', userName: '숏충이', text: '경기 침체 오면 코인부터 빠집니다 형님.', timestamp: Date.now() - 20000, parentId: 'c2', prediction: 'NO' },
   { id: 'c3', marketId: 'm6', userName: '워렌버핏', text: '산타는 없다. 현금 확보해라.', timestamp: Date.now() - 200000, prediction: 'NO' },
-  { id: 'c4', marketId: 'm5', userName: '개발자K', text: 'OpenAI o3 모델 보셨나요? 특이점 이미 온듯.', timestamp: Date.now() - 30000, prediction: 'YES' },
+  // 월드컵 관련 댓글로 변경
+  { id: 'c4', marketId: 'm5', userName: '붉은악마', text: '손흥민 마지막 월드컵이다. 무조건 16강 감!', timestamp: Date.now() - 30000, prediction: 'YES' },
 ];
 
 export const MOCK_RANKING: RankedUser[] = [

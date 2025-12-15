@@ -11,17 +11,7 @@ import { TRANSLATIONS, Language } from './translations';
 
 const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
 
-const DBWarningBanner = () => {
-    if (isSupabaseConnected) return null;
-    return (
-        <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2 text-center">
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide flex items-center justify-center gap-2">
-                <AlertCircle size={12} />
-                데이터베이스 연결 안됨 (데모 모드)
-            </p>
-        </div>
-    );
-};
+// [UPDATE] Warning Banner removed to clean up UI
 
 const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void; language: Language }> = ({ onLogin, onClose, language }) => {
     const [mode, setMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
@@ -715,7 +705,7 @@ const App: React.FC = () => {
          </div>
       </div>
 
-      <DBWarningBanner />
+      {/* [UPDATE] Removed DBWarningBanner here */}
 
       {/* Featured Banner */}
       <div className="px-5 mt-6 mb-8">
