@@ -36,9 +36,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
           <div className="relative z-10 flex flex-col items-center">
             {/* Logo Stamp - Updated to use Image */}
             <div className="flex items-center gap-2 mb-6 opacity-80 bg-black/50 px-3 py-1.5 rounded-full border border-zinc-800/50 backdrop-blur-sm">
-              {imgError ? (
-                  <div className="w-5 h-5 rounded bg-zzic flex items-center justify-center text-[10px] font-black text-black">Z</div>
-              ) : (
+              {!imgError && (
                   <img 
                       src="/ZZIC_Favicon.png" 
                       onError={() => setImgError(true)} 

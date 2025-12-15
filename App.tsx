@@ -11,17 +11,12 @@ import { TRANSLATIONS, Language } from './translations';
 
 const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
 
-// Robust Logo Component with Fallback
+// Robust Logo Component: Tries to load Favicon, preserves space if failed
 const LogoImage: React.FC<{ className?: string }> = ({ className }) => {
     const [error, setError] = useState(false);
     
-    if (error) {
-        return (
-            <div className={`${className} bg-zzic flex items-center justify-center text-black font-black italic shadow-lg border border-zzic/50`}>
-                Z
-            </div>
-        );
-    }
+    // Return empty div with same dimensions to prevent layout shift
+    if (error) return <div className={className}></div>;
     
     return (
         <img 
@@ -991,6 +986,145 @@ const App: React.FC = () => {
     </div>
   );
 
+  const renderProfile = () => (
+    <div className="pb-24 lg:pb-0 animate-in slide-in-from-right duration-300 min-h-screen">
+        {/* Mobile Header */}
+        <div className="px-5 py-6 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 lg:hidden">
+            <div className="flex items-center gap-3">
+                 <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('profile_title')}</h1>
+            </div>
+        </div>
+        
+        {/* Desktop Header */}
+        <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
+            <h2 className="text-xl font-bold text-white">Profile</h2>
+        </div>
+
+        <div className="px-5 pt-6">
+            {!user ? (
+                 <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-6">
+                    <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center border-2 border-zinc-800 mb-4">
+                        <User size={40} className="text-zinc-500" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white">{t('auth_login_required')}</h2>
+                    <p className="text-zinc-500 text-sm max-w-[250px]">{t('auth_login_profile_desc')}</p>
+                    <button 
+                        onClick={() => setView('AUTH')}
+                        className="bg-zzic text-black font-black py-3 px-8 rounded-xl hover:bg-[#b3e600] transition-colors uppercase tracking-wide flex items-center gap-2"
+                    >
+                        <LogInIcon size={18} /> {t('profile_login_btn')}
+                    </button>
+                 </div>
+            ) : (
+                <div className="space-y-6">
+                     {/* User Info Card */}
+                     <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-3">
+                             <span className="text-[10px] font-black bg-zinc-800 text-zinc-500 px-2 py-1 rounded uppercase tracking-wider">{user.isGuest ? t('profile_guest') : t('profile_rookie')}</span>
+                        </div>
+                        <div className="flex items-center gap-4 mb-6">
+                             <div className="w-16 h-16 rounded-full bg-black border-2 border-zinc-700 flex items-center justify-center">
+                                <User size={30} className="text-zinc-300"/>
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-white">{user.name}</h2>
+                                <p className="text-xs text-zinc-500 font-bold">{user.email || 'No Email'}</p>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                             <div className="bg-black/50 rounded-xl p-4 border border-zinc-800">
+                                 <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">{t('profile_assets')}</div>
+                                 <div className="text-xl font-mono font-black text-zzic">{formatNumber(user.balance)} VP</div>
+                             </div>
+                              <div className="bg-black/50 rounded-xl p-4 border border-zinc-800">
+                                 <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">{t('profile_hit_rate')}</div>
+                                 <div className="text-xl font-mono font-black text-white">- %</div>
+                             </div>
+                        </div>
+
+                        {user.isGuest && (
+                             <div className="mt-4 flex items-start gap-2 text-[10px] text-orange-500 bg-orange-950/30 p-3 rounded-xl border border-orange-900/50">
+                                <AlertCircle size={14} className="shrink-0 mt-0.5"/>
+                                {t('profile_cache_warn')}
+                             </div>
+                        )}
+                     </div>
+                     
+                     {/* Bankruptcy Rescue */}
+                     {user.balance < 500 && (
+                        <div className="bg-red-950/20 border border-red-900/50 rounded-3xl p-5 flex items-center justify-between animate-pulse">
+                            <div>
+                                <h3 className="text-sm font-black text-red-500 flex items-center gap-2 uppercase"><AlertCircle size={16}/> {t('profile_bankruptcy_title')}</h3>
+                                <p className="text-xs text-red-400 mt-1">{t('profile_bankruptcy_desc')}</p>
+                            </div>
+                            <button onClick={handleRefill} className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-lg hover:bg-red-500 transition-colors">
+                                {t('profile_rescue_btn')}
+                            </button>
+                        </div>
+                     )}
+
+                     {/* History */}
+                     <div>
+                        <h3 className="text-base font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
+                            <Clock size={18} className="text-zzic"/> {t('profile_recent')}
+                        </h3>
+                        
+                        {user.portfolio.length === 0 ? (
+                            <div className="text-center py-12 border border-dashed border-zinc-800 rounded-3xl">
+                                <p className="text-zinc-600 text-sm font-bold mb-4">{t('profile_no_history')}</p>
+                                <button onClick={() => setView('HOME')} className="text-zzic text-xs font-black hover:underline uppercase tracking-wide">
+                                    {t('profile_explore')}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {user.portfolio.map((item) => (
+                                    <div key={item.id} className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800 flex justify-between items-center group hover:bg-zinc-900 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black italic text-lg ${item.prediction === 'YES' ? 'bg-blue-900/20 text-blue-500 border border-blue-900/50' : 'bg-red-900/20 text-red-500 border border-red-900/50'}`}>
+                                                {item.prediction}
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-white mb-0.5 line-clamp-1">{item.marketTitle}</div>
+                                                <div className="text-[10px] text-zinc-500 font-mono">{new Date(item.timestamp).toLocaleDateString()}</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm font-mono font-bold text-zinc-300">{formatNumber(item.amount)} VP</div>
+                                            <div className="text-[10px] text-zzic font-mono">x {formatPercent(item.payoutMultiple)}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                     </div>
+                     
+                     {/* Settings / Logout */}
+                     <div className="pt-4 space-y-3">
+                         <button onClick={() => setView('ABOUT')} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold py-3 rounded-xl hover:text-white transition-colors flex items-center justify-center gap-2 text-sm">
+                             <Info size={16}/> {t('profile_about_btn')}
+                         </button>
+                         <button onClick={handleLogout} className="w-full bg-black border border-zinc-800 text-zinc-500 font-bold py-3 rounded-xl hover:text-red-500 hover:border-red-900/30 transition-colors flex items-center justify-center gap-2 text-sm">
+                             <LogOut size={16}/> {t('profile_logout')}
+                         </button>
+                     </div>
+                     
+                     {/* Footer Disclaimer */}
+                     <div className="py-8 text-center px-4 lg:hidden">
+                        <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
+                           {t('footer_text')}
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div>
+    </div>
+  );
+
   const renderAbout = () => (
     <div className="pb-24 lg:pb-0 animate-in fade-in duration-500 min-h-screen flex flex-col">
         {/* Mobile Header */}
@@ -1081,77 +1215,6 @@ const App: React.FC = () => {
         </div>
     </div>
   );
-
-  const renderProfile = () => {
-    if (!user) return <div className="min-h-screen flex items-center justify-center"><button onClick={() => setView('AUTH')} className="bg-zzic px-6 py-3 rounded-xl font-black text-black">{t('profile_login_btn')}</button></div>;
-    const tier = getTier(user.balance);
-
-    return (
-        <div className="pb-24 lg:pb-0 animate-in fade-in">
-            {/* Desktop Profile Header */}
-             <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Profile</h2>
-                <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-400 flex items-center gap-1">
-                    <LogOut size={14} /> {t('profile_logout')}
-                </button>
-            </div>
-
-            <div className="px-5 py-8 bg-black border-b border-zinc-900 relative overflow-hidden">
-                <div className={`absolute top-[-20%] right-[-20%] w-64 h-64 blur-[100px] opacity-20 rounded-full ${tier.bg.split(' ')[0].replace('/30','/50')}`}></div>
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className={`w-24 h-24 rounded-full border-4 flex items-center justify-center mb-4 bg-black ${tier.color.replace('text', 'border')}`}>
-                        <tier.icon size={40} className={tier.color} />
-                    </div>
-                    <div className={`text-xs font-black px-3 py-1 rounded-full border mb-2 ${tier.color} ${tier.bg}`}>
-                        {tier.name} TIER
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
-                    <h1 className="text-4xl font-black text-white font-mono">{formatNumber(user.balance)} <span className="text-lg text-zinc-600">VP</span></h1>
-                </div>
-            </div>
-             {/* Refill CTA */}
-             {user.balance < 1000 && (
-                <div className="m-5 p-4 bg-red-950/30 border border-red-900/50 rounded-2xl flex items-center justify-between">
-                    <div>
-                        <h4 className="font-bold text-red-400 text-sm">{t('profile_bankruptcy_title')}</h4>
-                        <p className="text-[10px] text-red-300">{t('profile_bankruptcy_desc')}</p>
-                    </div>
-                    <button onClick={handleRefill} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-black animate-pulse">{t('profile_rescue_btn')}</button>
-                </div>
-            )}
-            
-            {/* Mobile Actions: Logout & About */}
-            <div className="px-5 lg:hidden mb-6 flex justify-end gap-2">
-                 <button onClick={() => setView('ABOUT')} className="bg-zinc-900 border border-zinc-800 text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
-                    <Info size={14} /> {t('profile_about_btn')}
-                </button>
-                 <button onClick={handleLogout} className="bg-zinc-900 border border-zinc-800 text-red-500 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
-                    <LogOut size={14} /> {t('profile_logout')}
-                </button>
-            </div>
-
-            <div className="px-5 mt-6">
-                <h3 className="text-sm font-black text-zinc-500 mb-4 uppercase">Predict History</h3>
-                {user.portfolio.map(item => (
-                    <div key={item.id} className="bg-zinc-900 rounded-xl p-4 mb-3 border border-zinc-800 flex justify-between items-center">
-                        <div>
-                             <h4 className="font-bold text-sm text-white mb-1">{item.marketTitle}</h4>
-                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${item.prediction === 'YES' ? 'bg-blue-900 text-blue-400' : 'bg-red-900 text-red-400'}`}>
-                                 {t('profile_history_item').replace('{0}', item.prediction).replace('{1}', formatNumber(item.amount))}
-                             </span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-             {/* Mobile Footer Disclaimer for Profile Page */}
-             <div className="py-8 text-center px-4 lg:hidden">
-                <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
-                   {t('footer_text')}
-                </p>
-            </div>
-        </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black flex justify-center">
