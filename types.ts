@@ -3,9 +3,10 @@ export type Category = 'ENTER' | 'SPORTS' | 'WEATHER' | 'TECH' | 'STOCK' | 'COIN
 export interface Market {
   id: string;
   title: string;
-  titleEn: string; // Added for English support
+  titleEn: string;
   category: Category;
-  yesPrice: number; // 0 to 100 representing probability
+  yesPrice: number; // Current probability (0-100)
+  priceHistory: number[]; // Array of historical prices for the chart
   volume: number;
   endDate: string;
   imageUrl: string;
@@ -17,8 +18,8 @@ export interface PortfolioItem {
   marketTitle: string;
   prediction: 'YES' | 'NO';
   amount: number;
-  entryPrice: number; // Price at the time of purchase
-  payoutMultiple: number; // calculated multiplier
+  entryPrice: number;
+  payoutMultiple: number;
   timestamp: number;
 }
 
@@ -33,21 +34,14 @@ export interface UserState {
 
 export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH';
 
-export interface BetDraft {
-  marketId: string;
-  prediction: 'YES' | 'NO';
-  amount: number;
-  potentialReturn: number;
-}
-
 export interface Comment {
   id: string;
   marketId: string;
   userName: string;
   text: string;
   timestamp: number;
-  prediction?: 'YES' | 'NO'; // The stance of the commenter
-  parentId?: string; // For nested replies
+  prediction?: 'YES' | 'NO';
+  parentId?: string;
 }
 
 export interface RankedUser {
@@ -58,8 +52,9 @@ export interface RankedUser {
   isCurrentUser?: boolean;
 }
 
-export interface MarketSuggestion {
-    title: string;
-    category: Category;
-    description: string;
+export interface BillboardMessage {
+    id: string;
+    text: string;
+    sender: string;
+    color: string; // text color based on tier or random
 }
