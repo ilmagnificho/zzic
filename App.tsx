@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
@@ -724,9 +724,9 @@ const App: React.FC = () => {
             <div className="absolute inset-0 z-10 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
             
             <img 
-                src="https://picsum.photos/800/400?random=banner" 
-                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700 grayscale mix-blend-luminosity" 
-                alt="ZZIC Season 1 Event Banner: Who is the God of ZZIC?" 
+                src="https://images.unsplash.com/photo-1634128221889-82ed6efebfc3?q=80&w=1200&auto=format&fit=crop" 
+                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 mix-blend-overlay" 
+                alt="ZZIC Event" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
             
@@ -812,14 +812,30 @@ const App: React.FC = () => {
             </div>
         ))}
         
-        {/* Suggestion Button (Mobile Only in feed flow) */}
-        <button 
+        {/* Suggestion Card */}
+        <div 
             onClick={() => setShowSuggestModal(true)}
-            className="md:hidden w-full py-5 mt-6 rounded-3xl border border-dashed border-zinc-700 bg-transparent text-zinc-500 font-bold text-sm flex items-center justify-center gap-2 hover:border-zzic hover:text-zzic transition-all uppercase tracking-wide"
+            className="group relative bg-zinc-900/40 rounded-3xl p-6 border-2 border-dashed border-zinc-800 hover:border-zzic transition-all cursor-pointer flex flex-col items-center justify-center text-center gap-3 mt-6 active:scale-[0.98]"
         >
-            <PlusCircle size={18} />
-            {t('home_new_topic')}
-        </button>
+            <div className="w-12 h-12 rounded-full bg-zinc-800 group-hover:bg-zzic flex items-center justify-center transition-colors mb-1">
+                <PlusCircle size={24} className="text-zinc-400 group-hover:text-black" />
+            </div>
+            <div>
+                 <h4 className="text-sm font-black text-white uppercase tracking-wide">{language === 'en' ? 'Don\'t see what you want?' : '원하는 주제가 없나요?'}</h4>
+                 <p className="text-xs text-zinc-500 font-bold mt-1">{t('home_new_topic')}</p>
+            </div>
+        </div>
+
+        {/* Coming Soon Card */}
+        <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-6 border border-zinc-800 mt-4 relative overflow-hidden opacity-80">
+             <div className="absolute top-0 right-0 p-4 opacity-10">
+                 <Sparkles size={60} className="text-white" />
+             </div>
+             <span className="text-[10px] font-black text-zzic uppercase tracking-widest border border-zzic/30 px-2 py-1 rounded mb-3 inline-block">Coming Soon</span>
+             <h4 className="text-lg font-black text-white italic tracking-tight">2026 World Cup<br/>Prediction</h4>
+             <p className="text-xs text-zinc-500 font-bold mt-2">More sports & crypto events are coming.</p>
+        </div>
+
       </div>
 
       {/* Footer Disclaimer */}
@@ -937,53 +953,65 @@ const App: React.FC = () => {
     </div>
   );
 
-  // Recursive Comment Renderer
+  // Recursive Comment Renderer (Polymarket / Reddit Style)
   const CommentItem: React.FC<{ comment: Comment, depth?: number }> = ({ comment, depth = 0 }) => {
       const replies = marketComments.filter(c => c.parentId === comment.id);
+      const hasReplies = replies.length > 0;
       
       return (
-          <div className={`animate-in fade-in slide-in-from-bottom-2 ${depth > 0 ? 'ml-6 md:ml-10 mt-2 relative' : 'mt-4'}`}>
-              {/* Vertical line for threaded look */}
-              {depth > 0 && (
-                  <div className="absolute -left-4 top-0 bottom-0 w-px bg-zinc-800 rounded-full"></div>
-              )}
-              {depth > 0 && (
-                  <div className="absolute -left-4 top-4 w-3 h-px bg-zinc-800 rounded-full"></div>
-              )}
-
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0 border border-zinc-800">
-                    <User size={14} className="text-zinc-500"/>
+          <div className={`animate-in fade-in slide-in-from-bottom-2 ${depth > 0 ? 'mt-3 pl-0' : 'mt-4 border-b border-zinc-900/50 pb-4 last:border-0'}`}>
+              <div className="flex gap-3 group">
+                {/* Avatar Column */}
+                <div className="flex flex-col items-center shrink-0 w-8">
+                    <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 overflow-hidden">
+                        <User size={14} className="text-zinc-500"/>
+                    </div>
+                    {/* Thread Line - only if it has replies or is part of a chain, but here we simplify to indent container */}
+                    {hasReplies && (
+                        <div className="w-px h-full bg-zinc-800 my-1 group-hover:bg-zinc-700 transition-colors"></div>
+                    )}
                 </div>
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-zinc-300">{comment.userName}</span>
+
+                {/* Content Column */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs font-bold text-zinc-200">{comment.userName}</span>
                         {comment.prediction && (
-                            <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-500'}`}>
+                            <span className={`text-[9px] font-black px-1.5 py-[1px] rounded uppercase ${comment.prediction === 'YES' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                                 {comment.prediction}
                             </span>
                         )}
-                        <span className="text-[10px] text-zinc-600 ml-auto font-mono">{new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span className="text-[10px] text-zinc-600 font-medium ml-1">
+                            {new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
                     </div>
-                    <div className={`text-sm text-zinc-400 leading-relaxed bg-black/40 p-3 rounded-2xl border border-zinc-900 ${depth === 0 ? 'rounded-tl-none' : ''} relative group`}>
+                    
+                    <div className="text-sm text-zinc-400 leading-relaxed font-medium break-words">
                         {comment.text}
+                    </div>
+                    
+                    {/* Action Bar */}
+                    <div className="flex items-center gap-4 mt-2">
                         {user && (
                             <button 
                                 onClick={() => setReplyToId(comment.id)}
-                                className="absolute bottom-2 right-2 p-1.5 rounded-full bg-zinc-800/50 text-zinc-500 hover:text-zzic hover:bg-zinc-800 transition-all opacity-0 group-hover:opacity-100"
-                                title={t('detail_reply')}
+                                className="flex items-center gap-1.5 text-[10px] text-zinc-500 hover:text-zzic font-bold uppercase tracking-wide transition-colors"
                             >
-                                <MessageCircle size={12} />
+                                <MessageCircle size={12} /> {t('detail_reply')}
                             </button>
                         )}
                     </div>
                 </div>
               </div>
 
-              {/* Recursive Replies */}
-              {replies.map(reply => (
-                  <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
-              ))}
+              {/* Nested Replies Container */}
+              {hasReplies && (
+                  <div className="pl-3 ml-4 border-l-2 border-zinc-800 mt-1">
+                      {replies.map(reply => (
+                          <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
+                      ))}
+                  </div>
+              )}
           </div>
       );
   };
@@ -1015,7 +1043,7 @@ const App: React.FC = () => {
                      <div className="w-24 h-24 rounded-2xl bg-black overflow-hidden mb-6 shadow-2xl border border-zinc-800 relative z-10">
                          <img 
                             src={activeMarket.imageUrl} 
-                            className="w-full h-full object-cover grayscale" 
+                            className="w-full h-full object-cover" 
                             alt={marketTitle} 
                          />
                     </div>
@@ -1128,40 +1156,49 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Comments Section */}
-                <div className="border-t border-zinc-900 pt-8">
-                    <h3 className="text-sm font-black text-zinc-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <div className="border-t border-zinc-900 pt-8 pb-10">
+                    <h3 className="text-sm font-black text-zinc-400 mb-6 flex items-center gap-2 uppercase tracking-wide">
                         <MessageSquare size={16} />
                         {t('detail_discussion')} <span className="text-xs bg-zinc-800 text-white px-2 py-0.5 rounded-full">{marketComments.length}</span>
                     </h3>
                     
-                    {/* Comment Input */}
-                    <div className="flex gap-2 mb-8 items-end relative">
+                    {/* Comment Input Block (New Style) */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-8 focus-within:border-zzic transition-colors">
                         {replyToId && (
-                            <div className="absolute -top-7 left-1 flex items-center gap-2 text-xs font-bold text-zzic animate-in fade-in slide-in-from-bottom-1">
-                                <CornerDownRight size={12} />
-                                {t('detail_reply_to')} @{replyTargetComment?.userName}
-                                <button onClick={() => setReplyToId(null)} className="ml-2 text-zinc-500 hover:text-white">
-                                    <X size={12} />
+                             <div className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-3 py-2 mb-3">
+                                <div className="flex items-center gap-2 text-xs font-bold text-zzic">
+                                    <CornerDownRight size={14} />
+                                    <span>{t('detail_reply_to')} <span className="text-white">@{replyTargetComment?.userName}</span></span>
+                                </div>
+                                <button onClick={() => setReplyToId(null)} className="p-1 text-zinc-500 hover:text-white rounded-full hover:bg-zinc-700">
+                                    <X size={14} />
                                 </button>
-                            </div>
+                             </div>
                         )}
-                        <input 
-                            type="text" 
+                        <textarea 
                             placeholder={user ? (replyToId ? t('detail_reply_placeholder') : t('detail_comment_placeholder')) : t('detail_comment_login_placeholder')}
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleAddComment();
+                                }
+                            }}
                             onClick={() => !user && confirm(t('msg_comment_login')) && setView('AUTH')}
                             readOnly={!user}
-                            className={`flex-1 bg-zinc-900 border ${replyToId ? 'border-zzic' : 'border-zinc-800'} rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-600 font-medium`}
+                            className="w-full bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none resize-none min-h-[50px] font-medium"
+                            rows={2}
                         />
-                        <button 
-                            onClick={handleAddComment}
-                            className="bg-zinc-800 text-white w-12 h-[46px] rounded-xl hover:bg-zzic hover:text-black transition-colors disabled:opacity-30 flex items-center justify-center"
-                            disabled={!newCommentText.trim() && !!user}
-                        >
-                            <Send size={18} />
-                        </button>
+                        <div className="flex justify-end mt-2">
+                            <button 
+                                onClick={handleAddComment}
+                                disabled={!newCommentText.trim() && !!user}
+                                className="bg-white text-black text-xs font-black px-4 py-2 rounded-lg hover:bg-zzic transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 uppercase tracking-wide"
+                            >
+                                <Send size={12} /> Comment
+                            </button>
+                        </div>
                     </div>
 
                     {/* Comments List */}
