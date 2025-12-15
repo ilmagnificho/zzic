@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS } from './constants';
 import BottomNav from './components/BottomNav';
@@ -415,6 +415,9 @@ const App: React.FC = () => {
               <button onClick={() => setView('PROFILE')} className={`flex items-center gap-4 px-4 py-3 rounded-xl w-full text-left transition-all ${view === 'PROFILE' ? 'bg-white text-black font-black' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'}`}>
                   <User size={24} /> <span className="text-lg">Profile</span>
               </button>
+              <button onClick={() => setView('ABOUT')} className={`flex items-center gap-4 px-4 py-3 rounded-xl w-full text-left transition-all ${view === 'ABOUT' ? 'bg-white text-black font-black' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'}`}>
+                  <Info size={24} /> <span className="text-lg">About</span>
+              </button>
           </nav>
 
           <div className="space-y-4">
@@ -507,7 +510,7 @@ const App: React.FC = () => {
 
          <div className="mt-auto text-[10px] text-zinc-600 font-medium leading-relaxed px-2">
              <p>© 2025 ZZIC Inc.</p>
-             <p>Terms · Privacy · Cookies</p>
+             <p>{t('footer_text')}</p>
          </div>
     </div>
   );
@@ -695,6 +698,13 @@ const App: React.FC = () => {
                     ))}
                 </div>
             </div>
+            
+             {/* Mobile Footer Disclaimer */}
+             <div className="py-8 text-center px-4 lg:hidden">
+                <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
+                   {t('footer_text')}
+                </p>
+            </div>
         </div>
       </div>
     </div>
@@ -837,6 +847,12 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
+             {/* Mobile Footer Disclaimer for Detail Page */}
+             <div className="py-8 text-center px-4 lg:hidden">
+                <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
+                   {t('footer_text')}
+                </p>
+            </div>
         </div>
     );
   };
@@ -935,6 +951,102 @@ const App: React.FC = () => {
                     </div>
                 ))}
             </div>
+             {/* Mobile Footer Disclaimer for Ranking Page */}
+             <div className="py-8 text-center px-4 lg:hidden">
+                <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
+                   {t('footer_text')}
+                </p>
+            </div>
+        </div>
+    </div>
+  );
+
+  const renderAbout = () => (
+    <div className="pb-24 lg:pb-0 animate-in fade-in duration-500 min-h-screen flex flex-col">
+        {/* Mobile Header */}
+        <div className="px-5 py-6 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 lg:hidden">
+            <div className="flex items-center gap-3">
+                 <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('about_nav')}</h1>
+            </div>
+        </div>
+        
+        {/* Desktop Header */}
+        <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
+            <h2 className="text-xl font-bold text-white">About ZZIC</h2>
+        </div>
+
+        <div className="px-6 py-10 flex-1 flex flex-col items-center text-center">
+            
+            <div className="mb-8 relative">
+                <div className="absolute inset-0 bg-zzic blur-[60px] opacity-20 rounded-full"></div>
+                <h1 className="text-5xl font-black italic tracking-tighter text-white relative z-10">ZZIC</h1>
+                <p className="text-xs text-zzic font-bold tracking-[0.3em] uppercase mt-2">{t('about_slogan')}</p>
+            </div>
+
+            <p className="text-lg font-bold text-zinc-300 mb-12 leading-relaxed max-w-sm">
+                {t('about_desc_1')}<br/>
+                <span className="text-white">{t('about_desc_2')}</span>
+            </p>
+
+            <div className="w-full space-y-4 max-w-md">
+                {/* Card 1: No Real Money */}
+                <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-zzic/50 transition-all">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <ShieldCheck size={64} className="text-white"/>
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
+                            <ShieldCheck size={20} className="text-zzic"/>
+                            {t('about_card_1_title')}
+                        </h3>
+                        <p className="text-sm text-zinc-400 font-medium leading-relaxed">
+                            {t('about_card_1_desc')}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Card 2: Beta */}
+                <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-yellow-500/50 transition-all">
+                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Bug size={64} className="text-yellow-500"/>
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
+                             <Bug size={20} className="text-yellow-500"/>
+                             {t('about_card_2_title')}
+                        </h3>
+                         <p className="text-sm text-zinc-400 font-medium leading-relaxed">
+                            {t('about_card_2_desc')}
+                        </p>
+                    </div>
+                </div>
+
+                 {/* Card 3: Community */}
+                 <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-blue-500/50 transition-all">
+                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Users size={64} className="text-blue-500"/>
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
+                             <Users size={20} className="text-blue-500"/>
+                             {t('about_card_3_title')}
+                        </h3>
+                         <p className="text-sm text-zinc-400 font-medium leading-relaxed">
+                            {t('about_card_3_desc')}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+             <div className="mt-auto pt-12 pb-6">
+                <p className="text-[10px] text-zinc-600 font-mono">
+                    © 2025 ZZIC Inc. All rights reserved.<br/>
+                    Contact: support@zzic.app
+                </p>
+            </div>
         </div>
     </div>
   );
@@ -977,9 +1089,12 @@ const App: React.FC = () => {
                 </div>
             )}
             
-            {/* Mobile Logout (visible on mobile layout if not in header) */}
-            <div className="px-5 lg:hidden mb-6 flex justify-end">
-                 <button onClick={handleLogout} className="bg-zinc-900 border border-zinc-800 text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
+            {/* Mobile Actions: Logout & About */}
+            <div className="px-5 lg:hidden mb-6 flex justify-end gap-2">
+                 <button onClick={() => setView('ABOUT')} className="bg-zinc-900 border border-zinc-800 text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
+                    <Info size={14} /> {t('profile_about_btn')}
+                </button>
+                 <button onClick={handleLogout} className="bg-zinc-900 border border-zinc-800 text-red-500 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
                     <LogOut size={14} /> {t('profile_logout')}
                 </button>
             </div>
@@ -994,6 +1109,12 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+             {/* Mobile Footer Disclaimer for Profile Page */}
+             <div className="py-8 text-center px-4 lg:hidden">
+                <p className="text-[10px] text-zinc-600 font-medium leading-relaxed">
+                   {t('footer_text')}
+                </p>
             </div>
         </div>
     );
@@ -1013,6 +1134,7 @@ const App: React.FC = () => {
             {view === 'DETAIL' && renderDetail()}
             {view === 'PROFILE' && renderProfile()}
             {view === 'RANKING' && renderRanking()}
+            {view === 'ABOUT' && renderAbout()}
         </main>
 
         {/* Right Sidebar (Fixed, 320px) */}

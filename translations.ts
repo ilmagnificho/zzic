@@ -1,3 +1,4 @@
+
 export type Language = 'ko' | 'en';
 
 export const TRANSLATIONS = {
@@ -24,7 +25,6 @@ export const TRANSLATIONS = {
 
     // Home
     home_event: 'EVENT',
-    // [UPDATE] Adjusted prize to match 1,000 VP start economy
     home_prize: '시즌1 상금 50,000 VP',
     home_banner_1: 'ZZIC의 신은',
     home_banner_2: '누구인가?',
@@ -33,6 +33,9 @@ export const TRANSLATIONS = {
     home_new_topic: '새로운 주제 제안하기',
     home_disclaimer_title: 'Beta Service Disclaimer',
     home_disclaimer: '본 서비스는 가상 포인트(VP)를 사용하는 시뮬레이션 게임이며, 실제 금전적 이득이나 손실이 발생하지 않습니다. \n베타 서비스 기간 동안의 데이터는 예고 없이 초기화될 수 있습니다.',
+    
+    // Footer Disclaimer
+    footer_text: 'ZZIC은 가상 포인트(VP)를 사용하는 모의 예측 게임이며, 실제 금전적 가치가 없습니다. (Beta v0.1)',
 
     // Ranking
     ranking_title: '랭킹 (God of ZZIC)',
@@ -72,6 +75,19 @@ export const TRANSLATIONS = {
     profile_no_history: '아직 참여 내역이 없습니다.',
     profile_explore: '시장 둘러보기',
     profile_bet_label: '투자액',
+    profile_about_btn: '서비스 소개 (About)',
+
+    // About
+    about_nav: '서비스 소개',
+    about_slogan: 'Trust Your Instinct',
+    about_desc_1: 'ZZIC은 세상의 모든 이슈를 예측하고',
+    about_desc_2: '결과를 증명하는 소셜 플랫폼입니다.',
+    about_card_1_title: 'No Real Money',
+    about_card_1_desc: 'ZZIC에서 사용되는 VP(Virtual Point)는 게임 내 재화일 뿐이며, 현금으로 환전되거나 실제 금전적 가치를 지니지 않습니다. 안심하고 즐기세요.',
+    about_card_2_title: 'Beta Service',
+    about_card_2_desc: '현재 베타 테스트 중입니다. 서비스 안정화를 위해 데이터가 초기화될 수 있으며, 예상치 못한 버그가 발생할 수 있습니다.',
+    about_card_3_title: 'Community',
+    about_card_3_desc: '건전한 토론 문화를 지향합니다. 욕설, 비방, 허위사실 유포 시 제재될 수 있습니다.',
 
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',
@@ -131,6 +147,9 @@ export const TRANSLATIONS = {
     home_new_topic: 'Suggest New Topic',
     home_disclaimer_title: 'Beta Service Disclaimer',
     home_disclaimer: 'This is a simulation using virtual points (VP). No real money involved.\nData may be reset during beta.',
+    
+    // Footer Disclaimer
+    footer_text: 'ZZIC is a simulation game using Virtual Points (VP) and has no real monetary value. (Beta v0.1)',
 
     // Ranking
     ranking_title: 'Ranking (God of ZZIC)',
@@ -170,6 +189,19 @@ export const TRANSLATIONS = {
     profile_no_history: 'No history yet.',
     profile_explore: 'Explore Markets',
     profile_bet_label: 'Invested',
+    profile_about_btn: 'Service Info (About)',
+
+    // About
+    about_nav: 'About',
+    about_slogan: 'Trust Your Instinct',
+    about_desc_1: 'ZZIC is a social platform where you',
+    about_desc_2: 'predict trends and prove your instincts.',
+    about_card_1_title: 'No Real Money',
+    about_card_1_desc: 'VP (Virtual Point) is just for game currency. It cannot be exchanged for cash and has no monetary value.',
+    about_card_2_title: 'Beta Service',
+    about_card_2_desc: 'We are in Beta. Data may be reset for service stability, and unexpected bugs may occur.',
+    about_card_3_title: 'Community',
+    about_card_3_desc: 'We aim for a healthy discussion culture. Abusive language or spreading false info may result in bans.',
 
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',

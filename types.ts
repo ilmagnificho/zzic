@@ -1,3 +1,4 @@
+
 export type Category = 'ENTER' | 'SPORTS' | 'WEATHER' | 'TECH' | 'STOCK' | 'COIN';
 
 export interface Market {
@@ -32,7 +33,7 @@ export interface UserState {
   isGuest: boolean;
 }
 
-export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH';
+export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH' | 'ABOUT';
 
 export interface Comment {
   id: string;
