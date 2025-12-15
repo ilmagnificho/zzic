@@ -42,6 +42,8 @@ export interface Comment {
   timestamp: number;
   prediction?: 'YES' | 'NO';
   parentId?: string;
+  likeCount: number; // [Added] For community engagement
+  isLiked?: boolean; // [Added] Local state for user interaction
 }
 
 export interface RankedUser {
