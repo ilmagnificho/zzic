@@ -230,7 +230,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
                   onClick={() => setIsLogin(!isLogin)}
                   className="text-xs text-zinc-500 hover:text-white underline decoration-zinc-700 underline-offset-4"
               >
-                  {isLogin ? "계정이 없으신가요? 회원가입" : "이미 계정이 있으신가요? 로그인"}
+                  {isLogin ? t('auth_toggle_msg_signup') : t('auth_toggle_msg_login')}
               </button>
           </div>
         </div>
@@ -283,9 +283,9 @@ const App: React.FC = () => {
   // Handlers
   const handleRefill = () => {
     if (user && user.balance < 1000) {
-        if(confirm("광고를 시청하고(Mock) 3,000 VP를 충전하시겠습니까?")) {
+        if(confirm(t('confirm_ad_refill'))) {
             setUser({ ...user, balance: user.balance + 3000 });
-            alert("충전 완료! 다시 게임을 즐겨보세요.");
+            alert(t('alert_refill_success'));
         }
     }
   };
@@ -299,7 +299,7 @@ const App: React.FC = () => {
 
   const handlePostBillboard = () => {
       if (!user) return setView('AUTH');
-      if (user.balance < 1000) return alert("VP가 부족합니다. (비용: 1,000 VP)");
+      if (user.balance < 1000) return alert(t('alert_vp_insufficient'));
       if (!billboardText.trim()) return;
 
       setUser({ ...user, balance: user.balance - 1000 });
@@ -312,7 +312,7 @@ const App: React.FC = () => {
       setBillboardMsgs([newMsg, ...billboardMsgs]);
       setBillboardText('');
       setShowBillboardModal(false);
-      alert("전광판 등록 완료!");
+      alert(t('alert_billboard_success'));
   };
 
   const handleSuggest = () => {
@@ -359,7 +359,7 @@ const App: React.FC = () => {
     }
     const userBet = user.portfolio.find(p => p.marketId === activeMarketId);
     if (!userBet) {
-        alert("⚠️ 투표에 참여한 '플레이어'만 발언권이 있습니다!\n먼저 예측을 진행해주세요.");
+        alert(t('alert_vote_required'));
         return;
     }
 
@@ -400,9 +400,14 @@ const App: React.FC = () => {
 
   const SidebarLeft = () => (
       <div className="hidden lg:flex flex-col h-[calc(100vh-2rem)] sticky top-4 gap-6 p-4 w-[280px]">
-          <div onClick={() => setView('HOME')} className="cursor-pointer">
-              <h1 className="text-3xl font-black italic tracking-tighter text-white hover:text-zzic transition-colors">ZZIC</h1>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] mt-1">Trust Your Instinct</p>
+          <div onClick={() => setView('HOME')} className="cursor-pointer group">
+              <div className="flex items-center gap-3">
+                  <img src="/ZZIC_Favicon.png" alt="ZZIC Logo" className="w-10 h-10 rounded-xl shadow-lg group-hover:scale-105 transition-transform" />
+                  <div>
+                    <h1 className="text-3xl font-black italic tracking-tighter text-white group-hover:text-zzic transition-colors leading-none">ZZIC</h1>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Trust Your Instinct</p>
+                  </div>
+              </div>
           </div>
           
           <nav className="flex-1 space-y-2">
@@ -445,7 +450,7 @@ const App: React.FC = () => {
                         </div>
                     </div>
                     <button onClick={() => setShowBillboardModal(true)} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <Megaphone size={12} /> 전광판 등록
+                        <Megaphone size={12} /> {t('sidebar_billboard_btn')}
                     </button>
                     <button onClick={handleLogout} className="w-full mt-2 text-zinc-500 hover:text-white text-xs font-bold py-2 flex items-center justify-center gap-2 transition-colors">
                         <LogOut size={12} /> {t('profile_logout')}
@@ -482,8 +487,8 @@ const App: React.FC = () => {
                     <Lightbulb size={20} />
                 </div>
                 <div className="text-left">
-                    <div className="text-sm font-bold text-white group-hover:text-zzic transition-colors">주제 제안하기</div>
-                    <div className="text-[10px] text-zinc-500">원하는 주제를 만들어보세요</div>
+                    <div className="text-sm font-bold text-white group-hover:text-zzic transition-colors">{t('sidebar_suggest_title')}</div>
+                    <div className="text-[10px] text-zinc-500">{t('sidebar_suggest_desc')}</div>
                 </div>
             </div>
             <ChevronRight size={16} className="text-zinc-600 group-hover:text-zzic" />
@@ -534,7 +539,7 @@ const App: React.FC = () => {
                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${comment.prediction === 'YES' ? 'text-blue-400 border-blue-400' : 'text-red-400 border-red-400'}`}>
-                          {comment.prediction === 'YES' ? 'YES팀' : 'NO팀'}
+                          {comment.prediction === 'YES' ? t('comment_team_yes') : t('comment_team_no')}
                       </span>
                       <span className="text-xs font-bold text-white">{comment.userName}</span>
                       <span className="text-[10px] text-zinc-600 ml-auto">{new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -559,7 +564,7 @@ const App: React.FC = () => {
                               className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-white transition-colors"
                           >
                               <MessageCircle size={14} /> 
-                              <span>답글</span>
+                              <span>{t('detail_reply')}</span>
                           </button>
                       )}
                   </div>
@@ -584,7 +589,10 @@ const App: React.FC = () => {
 
       {/* Mobile Header */}
       <div className="lg:hidden px-5 py-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
-        <h1 className="text-2xl font-black italic tracking-tighter text-white cursor-pointer" onClick={() => setView('HOME')}>ZZIC</h1>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('HOME')}>
+            <img src="/ZZIC_Favicon.png" alt="ZZIC" className="w-8 h-8 rounded-lg shadow-md" />
+            <h1 className="text-2xl font-black italic tracking-tighter text-white">ZZIC</h1>
+        </div>
         <div className="flex gap-3 items-center">
             <button onClick={toggleLanguage} className="bg-zinc-900 p-1.5 rounded-full border border-zinc-800 text-zinc-400">
                 <Globe size={18} />
@@ -593,7 +601,7 @@ const App: React.FC = () => {
                 <>
                 {user.balance < 1000 && (
                      <button onClick={handleRefill} className="animate-bounce bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-                        <BatteryCharging size={12} /> 무료 충전
+                        <BatteryCharging size={12} /> {t('home_free_refill')}
                      </button>
                 )}
                 <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800" onClick={() => setShowBillboardModal(true)}>
@@ -614,7 +622,7 @@ const App: React.FC = () => {
          <h2 className="text-xl font-bold text-white">Home</h2>
          {user && user.balance < 1000 && (
             <button onClick={handleRefill} className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black animate-pulse shadow-lg flex items-center gap-1">
-               <BatteryCharging size={12}/> Low Battery
+               <BatteryCharging size={12}/> {t('home_low_battery')}
             </button>
          )}
       </div>
@@ -653,7 +661,7 @@ const App: React.FC = () => {
                                 <div className="flex justify-between items-start mb-1">
                                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                                         <Clock size={10} />
-                                        <span>{new Date(market.endDate).getFullYear() === new Date().getFullYear() ? new Date(market.endDate).toLocaleDateString() + ' 마감' : '장기 예측'}</span>
+                                        <span>{new Date(market.endDate).getFullYear() === new Date().getFullYear() ? new Date(market.endDate).toLocaleDateString() + ' ' + t('market_closed') : t('market_long_term')}</span>
                                     </div>
                                     <div className="w-16 h-6 opacity-50 group-hover:opacity-100 transition-opacity">
                                         <MiniChart history={market.priceHistory} color={market.yesPrice > 50 ? 'text-blue-500' : 'text-red-500'} />
@@ -775,8 +783,8 @@ const App: React.FC = () => {
                     {user ? (
                         <div className="bg-zinc-950/50 rounded-2xl p-4 mb-4 border border-zinc-800">
                              <div className="flex justify-between items-center mb-3">
-                                <span className="text-xs text-zinc-400 font-bold flex items-center gap-1"><Wallet size={12} /> 주문 수량</span>
-                                <span className="text-xs font-mono font-bold text-zinc-500">보유: <span className="text-white ml-1">{formatNumber(user.balance)}</span></span>
+                                <span className="text-xs text-zinc-400 font-bold flex items-center gap-1"><Wallet size={12} /> {t('detail_bet_amount')}</span>
+                                <span className="text-xs font-mono font-bold text-zinc-500">{t('detail_holding')}: <span className="text-white ml-1">{formatNumber(user.balance)}</span></span>
                             </div>
                             <input
                                 type="number"
@@ -793,22 +801,22 @@ const App: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center p-4 bg-zinc-950 rounded-xl border border-zinc-800 mb-4 text-zinc-500 text-xs font-bold">로그인이 필요합니다.</div>
+                        <div className="text-center p-4 bg-zinc-950 rounded-xl border border-zinc-800 mb-4 text-zinc-500 text-xs font-bold">{t('detail_login_required')}</div>
                     )}
 
                     <button 
                         onClick={handlePredict}
                         className={`w-full py-4 rounded-xl font-black text-lg shadow-lg uppercase tracking-wider ${user ? (selectedPrediction === 'YES' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white') : 'bg-zinc-800 text-zinc-500'}`}
                     >
-                        {user ? '구매 확정' : '로그인 필요'}
+                        {user ? t('detail_confirm') : t('detail_login_btn')}
                     </button>
                 </div>
 
                 {/* Community (Fandom War) */}
                 <div className="pb-10">
                     <h3 className="text-sm font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
-                        <MessageSquare size={16} className="text-zzic"/> 실시간 진영 토론
-                        <span className="text-xs text-zinc-500 ml-auto font-normal">총 {comments.filter(c => c.marketId === activeMarketId).length}개 의견</span>
+                        <MessageSquare size={16} className="text-zzic"/> {t('detail_discussion')}
+                        <span className="text-xs text-zinc-500 ml-auto font-normal">{t('detail_discussion_count').replace('{0}', comments.filter(c => c.marketId === activeMarketId).length.toString())}</span>
                     </h3>
 
                     {/* Input */}
@@ -817,13 +825,13 @@ const App: React.FC = () => {
                             <div className="flex justify-between items-center bg-zinc-800/50 px-3 py-2 rounded-lg mb-2">
                                 <span className="text-xs text-zinc-400">
                                     <CornerDownRight size={12} className="inline mr-1"/>
-                                    @{comments.find(c => c.id === replyToId)?.userName} 님에게 답글 작성 중
+                                    {t('detail_reply_to').replace('{0}', comments.find(c => c.id === replyToId)?.userName || 'User')}
                                 </span>
                                 <button onClick={() => setReplyToId(null)} className="text-zinc-500 hover:text-white"><X size={14}/></button>
                             </div>
                         )}
                         <textarea 
-                            placeholder={user ? "참여자만 댓글을 남길 수 있습니다 (Clean Bot 작동중)" : "로그인이 필요합니다."}
+                            placeholder={user ? t('detail_input_placeholder_participant') : t('detail_input_placeholder_login')}
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
                             className="w-full bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none resize-none font-medium mb-2"
@@ -831,7 +839,7 @@ const App: React.FC = () => {
                         />
                         <div className="flex justify-end">
                             <button onClick={handleAddComment} className="bg-white text-black text-xs font-black px-4 py-2 rounded-lg hover:bg-zzic transition-colors flex items-center gap-1">
-                                <Send size={12} /> {replyToId ? '답글 달기' : '전송'}
+                                <Send size={12} /> {replyToId ? t('detail_reply_action') : t('detail_send_action')}
                             </button>
                         </div>
                     </div>
@@ -839,7 +847,7 @@ const App: React.FC = () => {
                     {/* List */}
                     <div className="space-y-0">
                         {comments.filter(c => c.marketId === activeMarketId && !c.parentId).length === 0 && (
-                            <div className="text-center py-8 text-zinc-600 text-xs font-bold">아직 작성된 의견이 없습니다. 첫 번째로 작성해보세요!</div>
+                            <div className="text-center py-8 text-zinc-600 text-xs font-bold">{t('detail_no_comments')}</div>
                         )}
                         {comments.filter(c => c.marketId === activeMarketId && !c.parentId).map(comment => (
                             <CommentItem key={comment.id} comment={comment} allComments={comments.filter(c => c.marketId === activeMarketId)} />
@@ -980,8 +988,9 @@ const App: React.FC = () => {
 
         <div className="px-6 py-10 flex-1 flex flex-col items-center text-center">
             
-            <div className="mb-8 relative">
+            <div className="mb-8 relative flex flex-col items-center">
                 <div className="absolute inset-0 bg-zzic blur-[60px] opacity-20 rounded-full"></div>
+                <img src="/ZZIC_Favicon.png" alt="ZZIC" className="w-24 h-24 rounded-3xl shadow-2xl mb-4 relative z-10 border border-zinc-800" />
                 <h1 className="text-5xl font-black italic tracking-tighter text-white relative z-10">ZZIC</h1>
                 <p className="text-xs text-zzic font-bold tracking-[0.3em] uppercase mt-2">{t('about_slogan')}</p>
             </div>
@@ -1052,7 +1061,7 @@ const App: React.FC = () => {
   );
 
   const renderProfile = () => {
-    if (!user) return <div className="min-h-screen flex items-center justify-center"><button onClick={() => setView('AUTH')} className="bg-zzic px-6 py-3 rounded-xl font-black text-black">로그인하기</button></div>;
+    if (!user) return <div className="min-h-screen flex items-center justify-center"><button onClick={() => setView('AUTH')} className="bg-zzic px-6 py-3 rounded-xl font-black text-black">{t('profile_login_btn')}</button></div>;
     const tier = getTier(user.balance);
 
     return (
@@ -1082,10 +1091,10 @@ const App: React.FC = () => {
              {user.balance < 1000 && (
                 <div className="m-5 p-4 bg-red-950/30 border border-red-900/50 rounded-2xl flex items-center justify-between">
                     <div>
-                        <h4 className="font-bold text-red-400 text-sm">파산 위기!</h4>
-                        <p className="text-[10px] text-red-300">지금 무료로 충전하고 복구하세요.</p>
+                        <h4 className="font-bold text-red-400 text-sm">{t('profile_bankruptcy_title')}</h4>
+                        <p className="text-[10px] text-red-300">{t('profile_bankruptcy_desc')}</p>
                     </div>
-                    <button onClick={handleRefill} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-black animate-pulse">구조 요청</button>
+                    <button onClick={handleRefill} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-black animate-pulse">{t('profile_rescue_btn')}</button>
                 </div>
             )}
             
@@ -1105,7 +1114,9 @@ const App: React.FC = () => {
                     <div key={item.id} className="bg-zinc-900 rounded-xl p-4 mb-3 border border-zinc-800 flex justify-between items-center">
                         <div>
                              <h4 className="font-bold text-sm text-white mb-1">{item.marketTitle}</h4>
-                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${item.prediction === 'YES' ? 'bg-blue-900 text-blue-400' : 'bg-red-900 text-red-400'}`}>{item.prediction}에 {formatNumber(item.amount)} VP</span>
+                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${item.prediction === 'YES' ? 'bg-blue-900 text-blue-400' : 'bg-red-900 text-red-400'}`}>
+                                 {t('profile_history_item').replace('{0}', item.prediction).replace('{1}', formatNumber(item.amount))}
+                             </span>
                         </div>
                     </div>
                 ))}
@@ -1147,17 +1158,17 @@ const App: React.FC = () => {
         {showBillboardModal && (
             <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
                 <div className="bg-zinc-900 w-full max-w-sm rounded-3xl p-6 border border-zinc-800">
-                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Megaphone size={20} className="text-zzic"/> Burning Billboard</h3>
-                    <p className="text-xs text-zinc-500 mb-6">전체 사용자에게 메시지를 띄웁니다. (1,000 VP 소모)</p>
+                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Megaphone size={20} className="text-zzic"/> {t('billboard_modal_title')}</h3>
+                    <p className="text-xs text-zinc-500 mb-6">{t('billboard_modal_desc')}</p>
                     <input 
                         value={billboardText}
                         onChange={e => setBillboardText(e.target.value)}
-                        placeholder="하고 싶은 말을 적어주세요!"
+                        placeholder={t('billboard_input_placeholder')}
                         className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white mb-4 focus:border-zzic outline-none"
                     />
                     <div className="flex gap-2">
-                        <button onClick={() => setShowBillboardModal(false)} className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-bold text-sm">취소</button>
-                        <button onClick={handlePostBillboard} className="flex-1 py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">등록 (-1,000)</button>
+                        <button onClick={() => setShowBillboardModal(false)} className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-bold text-sm">{t('billboard_btn_cancel')}</button>
+                        <button onClick={handlePostBillboard} className="flex-1 py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">{t('billboard_btn_register')}</button>
                     </div>
                 </div>
             </div>
@@ -1168,29 +1179,29 @@ const App: React.FC = () => {
             <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
                 <div className="bg-zinc-900 w-full max-w-sm rounded-3xl p-6 border border-zinc-800 relative">
                     <button onClick={() => setShowSuggestModal(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20}/></button>
-                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Lightbulb size={20} className="text-zzic"/> Suggest Topic</h3>
-                    <p className="text-xs text-zinc-500 mb-6">다루고 싶은 주제가 있다면 알려주세요.</p>
+                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Lightbulb size={20} className="text-zzic"/> {t('suggest_title')}</h3>
+                    <p className="text-xs text-zinc-500 mb-6">{t('suggest_desc')}</p>
                     
                     <div className="space-y-4">
                         <div>
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">Title</label>
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t('suggest_input_title')}</label>
                             <input 
                                 value={suggestTitle}
                                 onChange={e => setSuggestTitle(e.target.value)}
-                                placeholder="예: 2026 월드컵 우승국은?"
+                                placeholder={t('suggest_input_placeholder_title')}
                                 className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white focus:border-zzic outline-none"
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">Description</label>
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t('suggest_input_desc')}</label>
                             <textarea 
                                 value={suggestDesc}
                                 onChange={e => setSuggestDesc(e.target.value)}
-                                placeholder="추가 설명이 필요하다면 적어주세요."
+                                placeholder={t('suggest_input_placeholder_desc')}
                                 className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white focus:border-zzic outline-none resize-none h-24"
                             />
                         </div>
-                        <button onClick={handleSuggest} className="w-full py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">제안하기</button>
+                        <button onClick={handleSuggest} className="w-full py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">{t('suggest_btn')}</button>
                     </div>
                 </div>
             </div>

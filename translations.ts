@@ -22,6 +22,8 @@ export const TRANSLATIONS = {
     auth_login_desc: '투표를 하려면 로그인이 필요합니다',
     auth_login_profile_desc: '나의 예측 기록과 자산을 확인하려면 로그인하세요.',
     auth_login_signup: '로그인 / 가입하기',
+    auth_toggle_msg_login: '이미 계정이 있으신가요? 로그인',
+    auth_toggle_msg_signup: '계정이 없으신가요? 회원가입',
 
     // Home
     home_event: 'EVENT',
@@ -33,6 +35,10 @@ export const TRANSLATIONS = {
     home_new_topic: '새로운 주제 제안하기',
     home_disclaimer_title: 'Beta Service Disclaimer',
     home_disclaimer: '본 서비스는 가상 포인트(VP)를 사용하는 시뮬레이션 게임이며, 실제 금전적 이득이나 손실이 발생하지 않습니다. \n베타 서비스 기간 동안의 데이터는 예고 없이 초기화될 수 있습니다.',
+    home_free_refill: '무료 충전',
+    home_low_battery: '배터리 부족',
+    market_closed: '마감',
+    market_long_term: '장기 예측',
     
     // Footer Disclaimer
     footer_text: 'ZZIC은 가상 포인트(VP)를 사용하는 모의 예측 게임이며, 실제 금전적 가치가 없습니다. (Beta v0.1)',
@@ -46,24 +52,34 @@ export const TRANSLATIONS = {
     detail_result: '결과 발표',
     detail_prob: '확률',
     detail_bet_amount: '주문 수량',
+    detail_holding: '보유',
     detail_min: '최소',
     detail_max: '최대',
     detail_login_needed: '투표를 하려면 로그인이 필요합니다',
+    detail_login_required: '로그인이 필요합니다',
     detail_multiplier: '배당률',
     detail_return: '예상 수익',
     detail_confirm: '구매 확정',
-    detail_login_btn: '로그인하고 구매하기',
-    detail_discussion: '토론방',
+    detail_login_btn: '로그인 필요',
+    detail_discussion: '실시간 진영 토론',
+    detail_discussion_count: '총 {0}개 의견',
     detail_comment_placeholder: '의견을 남겨주세요...',
     detail_comment_login_placeholder: '로그인이 필요합니다.',
-    detail_no_comments: '아직 작성된 의견이 없습니다.',
+    detail_input_placeholder_participant: '참여자만 댓글을 남길 수 있습니다 (Clean Bot 작동중)',
+    detail_input_placeholder_login: '로그인이 필요합니다.',
+    detail_no_comments: '아직 작성된 의견이 없습니다. 첫 번째로 작성해보세요!',
     detail_reply: '답글',
-    detail_reply_to: '님에게 답글 작성 중...',
+    detail_reply_to: '님에게 답글 작성 중',
     detail_reply_placeholder: '답글을 입력하세요...',
     detail_cancel_reply: '취소',
+    detail_reply_action: '답글 달기',
+    detail_send_action: '전송',
+    comment_team_yes: 'YES팀',
+    comment_team_no: 'NO팀',
 
     // Profile
     profile_title: '마이 페이지',
+    profile_login_btn: '로그인하기',
     profile_logout: '로그아웃',
     profile_rookie: '루키',
     profile_guest: '게스트',
@@ -76,6 +92,10 @@ export const TRANSLATIONS = {
     profile_explore: '시장 둘러보기',
     profile_bet_label: '투자액',
     profile_about_btn: '서비스 소개 (About)',
+    profile_bankruptcy_title: '파산 위기!',
+    profile_bankruptcy_desc: '지금 무료로 충전하고 복구하세요.',
+    profile_rescue_btn: '구조 요청',
+    profile_history_item: '{0}에 {1} VP',
 
     // About
     about_nav: '서비스 소개',
@@ -89,13 +109,28 @@ export const TRANSLATIONS = {
     about_card_3_title: 'Community',
     about_card_3_desc: '건전한 토론 문화를 지향합니다. 욕설, 비방, 허위사실 유포 시 제재될 수 있습니다.',
 
+    // Sidebar
+    sidebar_billboard_btn: '전광판 등록',
+    sidebar_suggest_title: '주제 제안하기',
+    sidebar_suggest_desc: '원하는 주제를 만들어보세요',
+
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',
     suggest_subtitle: '여러분이 원하는 주제를 제안해주세요',
+    suggest_desc: '다루고 싶은 주제가 있다면 알려주세요.',
     suggest_category: '카테고리',
     suggest_input_title: '제목',
+    suggest_input_placeholder_title: '예: 2026 월드컵 우승국은?',
     suggest_input_desc: '설명 (선택)',
+    suggest_input_placeholder_desc: '추가 설명이 필요하다면 적어주세요.',
     suggest_btn: '제안 보내기',
+
+    // Modal - Billboard
+    billboard_modal_title: 'Burning Billboard',
+    billboard_modal_desc: '전체 사용자에게 메시지를 띄웁니다. (1,000 VP 소모)',
+    billboard_input_placeholder: '하고 싶은 말을 적어주세요!',
+    billboard_btn_cancel: '취소',
+    billboard_btn_register: '등록 (-1,000)',
 
     // Modal - Share
     share_bet_amount: '베팅 금액',
@@ -114,7 +149,12 @@ export const TRANSLATIONS = {
     msg_suggest_thankyou: '제안해주셔서 감사합니다!\n관리자 검토 후 등록됩니다.',
     alert_error: '오류가 발생했습니다.',
     alert_server_error: '서버 오류가 발생했습니다.',
-    alert_save_fail: '데이터 저장에 실패했습니다.'
+    alert_save_fail: '데이터 저장에 실패했습니다.',
+    alert_refill_success: '충전 완료! 다시 게임을 즐겨보세요.',
+    alert_billboard_success: '전광판 등록 완료!',
+    alert_vp_insufficient: 'VP가 부족합니다. (비용: 1,000 VP)',
+    confirm_ad_refill: '광고를 시청하고(Mock) 3,000 VP를 충전하시겠습니까?',
+    alert_vote_required: "⚠️ 투표에 참여한 '플레이어'만 발언권이 있습니다!\n먼저 예측을 진행해주세요."
   },
   en: {
     // General
@@ -136,6 +176,8 @@ export const TRANSLATIONS = {
     auth_login_desc: 'You need to login to vote.',
     auth_login_profile_desc: 'Login to see your history and assets.',
     auth_login_signup: 'Login / Sign Up',
+    auth_toggle_msg_login: 'Already have an account? Login',
+    auth_toggle_msg_signup: "Don't have an account? Sign Up",
 
     // Home
     home_event: 'EVENT',
@@ -147,6 +189,10 @@ export const TRANSLATIONS = {
     home_new_topic: 'Suggest New Topic',
     home_disclaimer_title: 'Beta Service Disclaimer',
     home_disclaimer: 'This is a simulation using virtual points (VP). No real money involved.\nData may be reset during beta.',
+    home_free_refill: 'Free Refill',
+    home_low_battery: 'Low Battery',
+    market_closed: 'Closed',
+    market_long_term: 'Long Term',
     
     // Footer Disclaimer
     footer_text: 'ZZIC is a simulation game using Virtual Points (VP) and has no real monetary value. (Beta v0.1)',
@@ -160,24 +206,34 @@ export const TRANSLATIONS = {
     detail_result: 'Result',
     detail_prob: 'Prob',
     detail_bet_amount: 'Order Amount',
+    detail_holding: 'Holding',
     detail_min: 'Min',
     detail_max: 'Max',
     detail_login_needed: 'Login required to vote',
+    detail_login_required: 'Login required',
     detail_multiplier: 'Odds',
     detail_return: 'Exp. Return',
     detail_confirm: 'Confirm Order',
-    detail_login_btn: 'Login & Buy',
-    detail_discussion: 'Discussion',
+    detail_login_btn: 'Login Needed',
+    detail_discussion: 'Live Discussion',
+    detail_discussion_count: '{0} Comments',
     detail_comment_placeholder: 'Leave a comment...',
     detail_comment_login_placeholder: 'Login required.',
-    detail_no_comments: 'No comments yet.',
+    detail_input_placeholder_participant: 'Only participants can comment (Clean Bot Active)',
+    detail_input_placeholder_login: 'Login required.',
+    detail_no_comments: 'No comments yet. Be the first!',
     detail_reply: 'Reply',
     detail_reply_to: 'Replying to',
     detail_reply_placeholder: 'Write a reply...',
     detail_cancel_reply: 'Cancel',
+    detail_reply_action: 'Reply',
+    detail_send_action: 'Send',
+    comment_team_yes: 'TEAM YES',
+    comment_team_no: 'TEAM NO',
 
     // Profile
     profile_title: 'My Page',
+    profile_login_btn: 'Login',
     profile_logout: 'Logout',
     profile_rookie: 'Rookie',
     profile_guest: 'Guest',
@@ -190,6 +246,10 @@ export const TRANSLATIONS = {
     profile_explore: 'Explore Markets',
     profile_bet_label: 'Invested',
     profile_about_btn: 'Service Info (About)',
+    profile_bankruptcy_title: 'Bankrupt Risk!',
+    profile_bankruptcy_desc: 'Get free refill and recover now.',
+    profile_rescue_btn: 'SOS Refill',
+    profile_history_item: '{1} VP on {0}',
 
     // About
     about_nav: 'About',
@@ -203,13 +263,28 @@ export const TRANSLATIONS = {
     about_card_3_title: 'Community',
     about_card_3_desc: 'We aim for a healthy discussion culture. Abusive language or spreading false info may result in bans.',
 
+    // Sidebar
+    sidebar_billboard_btn: 'Post Billboard',
+    sidebar_suggest_title: 'Suggest Topic',
+    sidebar_suggest_desc: 'Create your own market',
+
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',
     suggest_subtitle: 'Suggest a topic you want',
+    suggest_desc: 'Let us know if there is a topic you want.',
     suggest_category: 'Category',
     suggest_input_title: 'Title',
+    suggest_input_placeholder_title: 'Ex: Who will win 2026 World Cup?',
     suggest_input_desc: 'Description (Optional)',
+    suggest_input_placeholder_desc: 'Add more details if needed.',
     suggest_btn: 'Send Suggestion',
+
+    // Modal - Billboard
+    billboard_modal_title: 'Burning Billboard',
+    billboard_modal_desc: 'Broadcast message to everyone. (Cost: 1,000 VP)',
+    billboard_input_placeholder: 'What is on your mind?',
+    billboard_btn_cancel: 'Cancel',
+    billboard_btn_register: 'Post (-1,000)',
 
     // Modal - Share
     share_bet_amount: 'Bet Amount',
@@ -228,6 +303,11 @@ export const TRANSLATIONS = {
     msg_suggest_thankyou: 'Thanks for suggestion!\nPending admin review.',
     alert_error: 'An error occurred.',
     alert_server_error: 'Server error occurred.',
-    alert_save_fail: 'Failed to save data.'
+    alert_save_fail: 'Failed to save data.',
+    alert_refill_success: 'Refill successful! Enjoy the game.',
+    alert_billboard_success: 'Billboard posted!',
+    alert_vp_insufficient: 'Insufficient VP. (Cost: 1,000 VP)',
+    confirm_ad_refill: 'Watch Ad (Mock) and get 3,000 VP?',
+    alert_vote_required: "⚠️ Only 'Players' who voted can comment!\nPlease make a prediction first."
   }
 };
