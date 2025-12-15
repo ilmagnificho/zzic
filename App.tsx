@@ -1139,53 +1139,63 @@ const App: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* [UPDATE] New Cleaner Order Amount UI */}
+                    {/* [UPDATE] New Cleaner Order Amount UI with Fixes */}
                     {user ? (
-                        <div className="bg-zinc-950/50 rounded-xl p-4 mb-6 border border-zinc-800/50">
-                            <div className="flex justify-between items-center mb-5">
-                                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{t('detail_bet_amount')}</span>
-                                <div className="flex items-center bg-black border border-zinc-800 rounded-lg px-3 py-2 w-36 focus-within:border-zzic transition-colors shadow-inner">
-                                    <input
-                                        type="number"
-                                        value={betAmount.toString()}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value) || 0;
-                                            if (val <= user.balance) {
-                                                setBetAmount(val);
-                                            }
-                                        }}
-                                        className="w-full bg-transparent text-right font-mono font-bold text-white outline-none text-lg"
-                                        placeholder="0"
-                                    />
-                                    <span className="ml-2 text-xs font-black text-zinc-500 select-none">VP</span>
+                        <div className="bg-zinc-950/50 rounded-2xl p-5 mb-6 border border-zinc-800/50">
+                            <div className="flex justify-between items-center mb-3">
+                                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <Wallet size={12} /> {t('detail_bet_amount')}
+                                </span>
+                                <div className="text-xs font-mono font-bold text-zinc-500">
+                                    {t('profile_assets')}: <span className="text-white text-sm ml-1">{formatNumber(user.balance)}</span>
                                 </div>
-                            </div>
-                            
-                            <div className="relative h-6 flex items-center mb-1 group">
-                                <input 
-                                    type="range" 
-                                    min="0" 
-                                    max={user.balance}
-                                    step="10" 
-                                    value={betAmount}
-                                    onChange={(e) => setBetAmount(Number(e.target.value))}
-                                    className="absolute w-full h-full opacity-0 cursor-pointer z-20"
-                                />
-                                <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden relative">
-                                    <div 
-                                        className="h-full bg-zzic shadow-[0_0_10px_rgba(204,255,0,0.5)]" 
-                                        style={{ width: `${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}%` }}
-                                    ></div>
-                                </div>
-                                <div 
-                                    className="absolute h-5 w-5 bg-white rounded-full shadow-lg border-2 border-black z-10 pointer-events-none transition-transform group-active:scale-125"
-                                    style={{ left: `calc(${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}% - 10px)` }}
-                                ></div>
                             </div>
 
-                            <div className="flex justify-between text-[10px] text-zinc-600 font-bold font-mono uppercase">
-                                <span>0</span>
-                                <span>{formatNumber(user.balance)} MAX</span>
+                            <div className="relative group mb-3">
+                                <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    value={betAmount === 0 ? '' : betAmount.toString()}
+                                    onChange={(e) => {
+                                        const valStr = e.target.value;
+                                        if (valStr === '') {
+                                            setBetAmount(0);
+                                            return;
+                                        }
+                                        const val = parseInt(valStr);
+                                        if (!isNaN(val)) {
+                                            if (val > user.balance) {
+                                                setBetAmount(user.balance);
+                                            } else if (val < 0) {
+                                                setBetAmount(0);
+                                            } else {
+                                                setBetAmount(val);
+                                            }
+                                        }
+                                    }}
+                                    placeholder="0"
+                                    className="w-full bg-black border-2 border-zinc-800 rounded-2xl py-4 text-center text-3xl font-black text-white focus:outline-none focus:border-zzic transition-all placeholder:text-zinc-800"
+                                />
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-700 pointer-events-none group-focus-within:text-zzic transition-colors">VP</span>
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div className="grid grid-cols-4 gap-2">
+                                {[100, 500, 1000].map((amt) => (
+                                    <button
+                                        key={amt}
+                                        onClick={() => setBetAmount(prev => Math.min(prev + amt, user.balance))}
+                                        className="bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold py-3 rounded-xl transition-all active:scale-95 active:bg-zinc-700"
+                                    >
+                                        +{amt}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => setBetAmount(user.balance)}
+                                    className="bg-zzic/10 hover:bg-zzic/20 border border-zzic/30 text-zzic text-xs font-black py-3 rounded-xl transition-all active:scale-95"
+                                >
+                                    MAX
+                                </button>
                             </div>
                         </div>
                     ) : (
