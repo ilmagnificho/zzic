@@ -24,7 +24,8 @@ export const TRANSLATIONS = {
 
     // Home
     home_event: 'EVENT',
-    home_prize: '총 상금 100만 VP',
+    // [UPDATE] Adjusted prize to match 1,000 VP start economy
+    home_prize: '시즌1 상금 50,000 VP',
     home_banner_1: 'ZZIC의 신은',
     home_banner_2: '누구인가?',
     home_trending: '실시간 트렌딩',
@@ -41,14 +42,14 @@ export const TRANSLATIONS = {
     detail_nav: '예측하기',
     detail_result: '결과 발표',
     detail_prob: '확률',
-    detail_bet_amount: '베팅 금액',
+    detail_bet_amount: '주문 수량',
     detail_min: '최소',
     detail_max: '최대',
     detail_login_needed: '투표를 하려면 로그인이 필요합니다',
     detail_multiplier: '배당률',
     detail_return: '예상 수익',
-    detail_confirm: 'ZZIC 확정하기',
-    detail_login_btn: '로그인하고 ZZIC 하기',
+    detail_confirm: '구매 확정',
+    detail_login_btn: '로그인하고 구매하기',
     detail_discussion: '토론방',
     detail_comment_placeholder: '의견을 남겨주세요...',
     detail_comment_login_placeholder: '로그인이 필요합니다.',
@@ -70,7 +71,7 @@ export const TRANSLATIONS = {
     profile_recent: '최근 활동',
     profile_no_history: '아직 참여 내역이 없습니다.',
     profile_explore: '시장 둘러보기',
-    profile_bet_label: '베팅액',
+    profile_bet_label: '투자액',
 
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',
@@ -122,7 +123,7 @@ export const TRANSLATIONS = {
 
     // Home
     home_event: 'EVENT',
-    home_prize: 'Prize 1M VP',
+    home_prize: 'Prize 50,000 VP',
     home_banner_1: 'Who is the',
     home_banner_2: 'God of ZZIC?',
     home_trending: 'Trending Now',
@@ -139,14 +140,14 @@ export const TRANSLATIONS = {
     detail_nav: 'Predict',
     detail_result: 'Result',
     detail_prob: 'Prob',
-    detail_bet_amount: 'Bet Amount',
+    detail_bet_amount: 'Order Amount',
     detail_min: 'Min',
     detail_max: 'Max',
     detail_login_needed: 'Login required to vote',
     detail_multiplier: 'Odds',
     detail_return: 'Exp. Return',
-    detail_confirm: 'Confirm ZZIC',
-    detail_login_btn: 'Login & ZZIC',
+    detail_confirm: 'Confirm Order',
+    detail_login_btn: 'Login & Buy',
     detail_discussion: 'Discussion',
     detail_comment_placeholder: 'Leave a comment...',
     detail_comment_login_placeholder: 'Login required.',
@@ -168,7 +169,7 @@ export const TRANSLATIONS = {
     profile_recent: 'Recent Activity',
     profile_no_history: 'No history yet.',
     profile_explore: 'Explore Markets',
-    profile_bet_label: 'Bet',
+    profile_bet_label: 'Invested',
 
     // Modal - Suggest
     suggest_title: 'NEW TOPIC',

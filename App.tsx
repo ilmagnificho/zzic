@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, MarketSuggestion, Category } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING } from './constants';
 import BottomNav from './components/BottomNav';
@@ -11,7 +11,42 @@ import { TRANSLATIONS, Language } from './translations';
 
 const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
 
-// [UPDATE] Warning Banner removed to clean up UI
+// Hook: Countdown
+const useCountdown = (targetDate: string | undefined) => {
+  const calculateTimeLeft = () => {
+    if (!targetDate) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    // Assuming targetDate is YYYY-MM-DD, we set it to end of that day
+    const target = new Date(targetDate.includes('T') ? targetDate : `${targetDate}T23:59:59`);
+    
+    // Validation
+    if (isNaN(target.getTime())) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    
+    const difference = +target - +new Date();
+    
+    if (difference > 0) {
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+        expired: false
+      };
+    }
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+  useEffect(() => {
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return timeLeft;
+};
 
 const AuthScreen: React.FC<{ onLogin: (user: UserState) => void; onClose: () => void; language: Language }> = ({ onLogin, onClose, language }) => {
     const [mode, setMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
@@ -636,6 +671,9 @@ const App: React.FC = () => {
   const activeMarket = useMemo(() => 
     markets.find(m => m.id === activeMarketId), 
   [markets, activeMarketId]);
+  
+  // [FIX] React Error #310: useCountdown must be called at the top level
+  const timeLeft = useCountdown(activeMarket?.endDate);
 
   const marketComments = useMemo(() => 
     comments.filter(c => c.marketId === activeMarketId),
@@ -705,8 +743,6 @@ const App: React.FC = () => {
          </div>
       </div>
 
-      {/* [UPDATE] Removed DBWarningBanner here */}
-
       {/* Featured Banner */}
       <div className="px-5 mt-6 mb-8">
         <div onClick={() => setView('RANKING')} className="relative w-full aspect-[2/1] rounded-[2rem] overflow-hidden bg-zinc-900 group cursor-pointer border border-zinc-800">
@@ -748,7 +784,8 @@ const App: React.FC = () => {
                 onClick={() => {
                     setActiveMarketId(market.id);
                     setView('DETAIL');
-                    setBetAmount(100);
+                    // [UPDATE] Default to 10 VP or a safe minimum to encourage micro-betting
+                    setBetAmount(10);
                 }}
                 className="group relative bg-zinc-900 rounded-3xl p-4 border border-zinc-800 active:scale-[0.98] transition-all cursor-pointer hover:border-zzic/50 overflow-hidden"
             >
@@ -1010,9 +1047,14 @@ const App: React.FC = () => {
     if (!activeMarket) return null;
 
     const currentMultiplier = getMultiplier(activeMarket.yesPrice, selectedPrediction);
-    const potentialReturn = Math.floor(betAmount * currentMultiplier);
+    const currentPrice = selectedPrediction === 'YES' ? activeMarket.yesPrice : (100 - activeMarket.yesPrice);
+    const estimatedShares = Math.floor(betAmount / (currentPrice / 100));
+    const potentialReturn = estimatedShares; // 1 Share = 1 VP outcome
+    
     const marketTitle = language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title;
-
+    
+    // timeLeft is now passed from the top level, available via closure
+    
     // Filter root comments for rendering
     const rootComments = marketComments.filter(c => !c.parentId);
 
@@ -1043,9 +1085,29 @@ const App: React.FC = () => {
                     <h2 className="text-2xl font-black text-center leading-snug mb-3 text-white relative z-10 max-w-[80%] break-keep">
                         {marketTitle}
                     </h2>
-                    <p className="text-zinc-500 text-xs font-bold flex items-center gap-1 relative z-10 uppercase tracking-wide">
-                        <Clock size={12}/> {activeMarket.endDate} {t('detail_result')}
-                    </p>
+                    
+                    {/* [UPDATE] Countdown Timer UI */}
+                    <div className="relative z-10 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-2">
+                        <Timer size={14} className="text-zzic animate-pulse" />
+                        <div className="flex gap-1 font-mono font-black text-white text-sm">
+                            {!timeLeft.expired ? (
+                                <>
+                                    <span className="text-red-500 drop-shadow-sm">{timeLeft.days}d</span>
+                                    <span>:</span>
+                                    <span>{String(timeLeft.hours).padStart(2, '0')}h</span>
+                                    <span>:</span>
+                                    <span>{String(timeLeft.minutes).padStart(2, '0')}m</span>
+                                    <span>:</span>
+                                    <span>{String(timeLeft.seconds).padStart(2, '0')}s</span>
+                                </>
+                            ) : (
+                                <span className="text-zinc-500">CLOSED</span>
+                            )}
+                        </div>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase ml-1 border-l border-zinc-700 pl-2">
+                            {t('home_close')}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Interaction Area */}
@@ -1077,37 +1139,53 @@ const App: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Amount Slider */}
+                    {/* [UPDATE] New Cleaner Order Amount UI */}
                     {user ? (
-                        <div className="mb-8">
-                            <div className="flex justify-between text-sm mb-4 items-end">
-                                <span className="text-zinc-500 font-bold uppercase text-xs tracking-wider">{t('detail_bet_amount')}</span>
-                                <span className="text-white font-mono font-bold text-2xl">{formatNumber(betAmount)} VP</span>
+                        <div className="bg-zinc-950/50 rounded-xl p-4 mb-6 border border-zinc-800/50">
+                            <div className="flex justify-between items-center mb-5">
+                                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{t('detail_bet_amount')}</span>
+                                <div className="flex items-center bg-black border border-zinc-800 rounded-lg px-3 py-2 w-36 focus-within:border-zzic transition-colors shadow-inner">
+                                    <input
+                                        type="number"
+                                        value={betAmount.toString()}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value) || 0;
+                                            if (val <= user.balance) {
+                                                setBetAmount(val);
+                                            }
+                                        }}
+                                        className="w-full bg-transparent text-right font-mono font-bold text-white outline-none text-lg"
+                                        placeholder="0"
+                                    />
+                                    <span className="ml-2 text-xs font-black text-zinc-500 select-none">VP</span>
+                                </div>
                             </div>
-                            <div className="relative h-8 flex items-center">
+                            
+                            <div className="relative h-6 flex items-center mb-1 group">
                                 <input 
                                     type="range" 
-                                    min="100" 
-                                    max={Math.max(100, user.balance)}
-                                    step="100"
+                                    min="0" 
+                                    max={user.balance}
+                                    step="10" 
                                     value={betAmount}
                                     onChange={(e) => setBetAmount(Number(e.target.value))}
                                     className="absolute w-full h-full opacity-0 cursor-pointer z-20"
                                 />
-                                <div className="w-full h-4 bg-black border border-zinc-800 rounded-full overflow-hidden relative z-10">
+                                <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden relative">
                                     <div 
-                                        className="h-full bg-zzic" 
+                                        className="h-full bg-zzic shadow-[0_0_10px_rgba(204,255,0,0.5)]" 
                                         style={{ width: `${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}%` }}
                                     ></div>
                                 </div>
                                 <div 
-                                    className="absolute h-7 w-7 bg-white rounded-full shadow-lg border-4 border-black z-10 pointer-events-none transition-all"
-                                    style={{ left: `calc(${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}% - 14px)` }}
+                                    className="absolute h-5 w-5 bg-white rounded-full shadow-lg border-2 border-black z-10 pointer-events-none transition-transform group-active:scale-125"
+                                    style={{ left: `calc(${user.balance > 0 ? (betAmount / user.balance) * 100 : 0}% - 10px)` }}
                                 ></div>
                             </div>
-                            <div className="flex justify-between text-[10px] text-zinc-600 mt-2 font-bold uppercase">
-                                <span>{t('detail_min')} 100</span>
-                                <span>{t('detail_max')} {formatNumber(user.balance)}</span>
+
+                            <div className="flex justify-between text-[10px] text-zinc-600 font-bold font-mono uppercase">
+                                <span>0</span>
+                                <span>{formatNumber(user.balance)} MAX</span>
                             </div>
                         </div>
                     ) : (
@@ -1120,15 +1198,20 @@ const App: React.FC = () => {
                     <div className="bg-black rounded-xl p-5 mb-6 border border-zinc-800">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-xs text-zinc-500 font-bold uppercase">{t('detail_multiplier')}</span>
-                            <span className={`font-black font-mono text-lg ${selectedPrediction === 'YES' ? 'text-blue-500' : 'text-red-500'}`}>
-                                x{currentMultiplier.toFixed(2)}
-                            </span>
+                            <div className="text-right">
+                                <span className={`font-black font-mono text-lg block ${selectedPrediction === 'YES' ? 'text-blue-500' : 'text-red-500'}`}>
+                                    {estimatedShares.toLocaleString()} Shares
+                                </span>
+                                <span className="text-[10px] text-zinc-600 font-medium">
+                                    Price: {currentPrice}¢ / Share
+                                </span>
+                            </div>
                         </div>
                         <div className="w-full h-px bg-zinc-900 mb-3"></div>
                         <div className="flex justify-between items-center">
                             <span className="text-xs text-zinc-500 font-bold uppercase">{t('detail_return')}</span>
                             <span className="text-xl font-black text-zzic drop-shadow-[0_0_5px_rgba(204,255,0,0.5)]">
-                                + {formatNumber(potentialReturn)} VP
+                                {formatNumber(potentialReturn)} VP
                             </span>
                         </div>
                     </div>
