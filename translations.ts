@@ -135,7 +135,8 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: '베팅 금액',
     share_return: '예상 수익',
-    share_btn: '스토리 공유하기',
+    share_btn: '친구에게 링크 공유하기',
+    share_copied: '링크 복사 완료!',
 
     // Alerts
     msg_signup_success: '회원가입 성공! 자동 로그인됩니다.',
@@ -289,7 +290,8 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: 'Bet Amount',
     share_return: 'Exp. Return',
-    share_btn: 'Share Story',
+    share_btn: 'Share Link',
+    share_copied: 'Link Copied!',
 
     // Alerts
     msg_signup_success: 'Sign up successful! Logging in.',

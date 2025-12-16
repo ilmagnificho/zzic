@@ -3,43 +3,43 @@ import { Market, Comment, RankedUser, BillboardMessage } from './types';
 // [ECONOMY] Start with 3,000 VP
 export const INITIAL_BALANCE = 3000;
 
-// [STRATEGY] End of Year Special Topics (Minimal Resource, Max Viral)
+// [STRATEGY] End of Year Viral Topics (Guerrilla Marketing: Community Focused)
 export const INITIAL_MARKETS: Market[] = [
-  // 1. White Christmas (Viral for Couples/Instagram)
+  // 1. White Christmas (Target: Solo vs Couple / Blind, Instiz)
   {
     id: 'm_xmas_2025',
-    title: '[날씨] 2025년 크리스마스, 서울에 눈이 내릴까? (White Christmas)',
-    titleEn: '[Weather] Will it snow in Seoul on Christmas 2025?',
+    title: '[날씨] 크리스마스 눈 올 확률 0%? 솔로부대 vs 커플지옥 승자는?',
+    titleEn: '[Weather] White Christmas in Seoul? Solo vs Couple',
     category: 'WEATHER',
-    yesPrice: 45, // Slightly less than 50% usually creates tension
-    priceHistory: [20, 25, 30, 42, 40, 44, 45],
-    volume: 1250000,
+    yesPrice: 30, // Low probability provokes couples to bet YES
+    priceHistory: [20, 22, 25, 28, 32, 29, 30],
+    volume: 1540000,
     endDate: '2025-12-25T00:00:00',
-    imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop' // Snowy street
+    imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop'
   },
-  // 2. Dispatch Jan 1st (Viral for Community/Twitter)
+  // 2. Bitcoin 200M (Target: Greed vs Logic / Coinpan, DC Bitgall)
+  {
+    id: 'm_btc_2026',
+    title: '[코인] 비트코인, 2026년 1월 1일 전까지 "2억" 찍는다 vs 못 간다',
+    titleEn: '[Crypto] Will Bitcoin hit 200M KRW by Jan 1st 2026?',
+    category: 'COIN',
+    yesPrice: 75, // FOMO driven high price
+    priceHistory: [40, 55, 62, 70, 78, 74, 75], 
+    volume: 8200000, // Highest volume
+    endDate: '2026-01-01T00:00:00',
+    imageUrl: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop'
+  },
+  // 3. Dispatch Jan 1st (Target: Gossip / TheQoo, Twitter)
   {
     id: 'm_dispatch_2026',
-    title: '[이슈] 2026년 1월 1일, 디스패치 "초대형 열애설" 터질까?',
-    titleEn: '[Issue] Will Dispatch reveal a Top Star Couple on Jan 1st, 2026?',
+    title: '[이슈] 1월 1일 디스패치 주인공, "3세대 아이돌"이다?',
+    titleEn: '[Issue] Dispatch Jan 1st Couple: 3rd Gen Idol?',
     category: 'ENTER',
-    yesPrice: 82, // High expectation
-    priceHistory: [60, 65, 70, 75, 80, 81, 82],
+    yesPrice: 88, // High conviction in community rumors
+    priceHistory: [60, 75, 80, 82, 85, 87, 88],
     volume: 5400000,
     endDate: '2025-12-31T23:59:59',
-    imageUrl: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=800&auto=format&fit=crop' // Paparazzi vibe
-  },
-  // 3. Samsung Stock (Viral for 3040/Investors)
-  {
-    id: 'm_samsung_end',
-    title: '[금융] 삼성전자, 2025년 종가 "8만 전자" 위에서 마감할까?',
-    titleEn: '[Stock] Will Samsung close above 80k KRW in 2025?',
-    category: 'STOCK',
-    yesPrice: 35, // Pessimism vs Hope
-    priceHistory: [50, 45, 40, 38, 32, 34, 35], 
-    volume: 3100000,
-    endDate: '2025-12-30T15:30:00', // Last trading day usually
-    imageUrl: 'https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=800&auto=format&fit=crop' // Stock chart
+    imageUrl: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=800&auto=format&fit=crop'
   }
 ];
 
@@ -48,11 +48,11 @@ export const COMING_SOON_ITEMS = [
     { id: 'cs2', title: '2026 북중미 월드컵 우승국', date: '2026.05 Open' }
 ];
 
-// Holiday Vibe Billboard
+// Community Style Billboard (Real vibes)
 export const INITIAL_BILLBOARD: BillboardMessage[] = [
-    { id: 'b1', text: "🎄 솔로부대: 크리스마스에 제발 눈 오지 마라...", sender: "커플지옥", color: "text-red-400" },
-    { id: 'b2', text: "주식왕: 삼성전자 연말 랠리 간다! 지금이 기회!", sender: "희망회로", color: "text-blue-400" },
-    { id: 'b3', text: "K-POP덕후: 1월 1일 제발 내 최애만 아니길 🙏", sender: "탈덕위기", color: "text-yellow-400" },
+    { id: 'b1', text: "🔥 비트코인 숏 친 흑우 없제? 2억 간다 꽉 잡아", sender: "코인판", color: "text-red-400" },
+    { id: 'b2', text: "☃️ 기상청 피셜: 이브날 맑음^^ 솔로부대 승리!", sender: "솔로천국", color: "text-blue-400" },
+    { id: 'b3', text: "💔 내 최애만 아니면 돼... 제발 배우랑 사겨라", sender: "덕후", color: "text-yellow-400" },
 ];
 
 export const CATEGORY_COLORS: Record<string, string> = {
@@ -65,16 +65,16 @@ export const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export const MOCK_COMMENTS: Comment[] = [
-  { id: 'c1', marketId: 'm_dispatch_2026', userName: '안방1열', text: '솔직히 이제 터질 때 됐다. 3세대 아이돌 중 하나일 듯.', timestamp: Date.now() - 50000, prediction: 'YES', likeCount: 1242, isLiked: true },
-  { id: 'c2', marketId: 'm_xmas_2025', userName: '기상청', text: '엘니뇨 현상 때문에 올해는 눈 힘들어요. 팩트 체크 하세요.', timestamp: Date.now() - 20000, prediction: 'NO', likeCount: 45, isLiked: false },
-  { id: 'c3', marketId: 'm_samsung_end', userName: '구조대', text: '8만? 지금 5만도 간당간당한데 무슨 소리냐 ㅋㅋ', timestamp: Date.now() - 100000, prediction: 'NO', likeCount: 88, isLiked: false },
-  { id: 'c4', marketId: 'm_xmas_2025', userName: '로맨티스트', text: '이브 날 눈 오면 고백합니다. 제발 YES 가즈아!', timestamp: Date.now() - 150000, prediction: 'YES', likeCount: 320, isLiked: true },
+  { id: 'c1', marketId: 'm_dispatch_2026', userName: '성지순례', text: '이 글은 성지가 됩니다. A군 B양 100%임.', timestamp: Date.now() - 50000, prediction: 'YES', likeCount: 1242, isLiked: true },
+  { id: 'c2', marketId: 'm_btc_2026', userName: '숏충이', text: '지금이 고점이다. 인간지표 폭발했네 ㅋㅋ 돔황챠', timestamp: Date.now() - 20000, prediction: 'NO', likeCount: 45, isLiked: false },
+  { id: 'c3', marketId: 'm_btc_2026', userName: '화성갈끄니까', text: '반감기 아직 반영 안 됐다. 2억은 보수적으로 잡은 거임.', timestamp: Date.now() - 100000, prediction: 'YES', likeCount: 88, isLiked: true },
+  { id: 'c4', marketId: 'm_xmas_2025', userName: '모솔25년차', text: '눈 오면 차 막히고 사고 난다. 나라를 위해 NO에 걸어라.', timestamp: Date.now() - 150000, prediction: 'NO', likeCount: 320, isLiked: true },
 ];
 
 export const MOCK_RANKING: RankedUser[] = [
-  { rank: 1, name: '예언가', balance: 2540000, winRate: 95 },
-  { rank: 2, name: '디스패치', balance: 1812000, winRate: 88 },
-  { rank: 3, name: '개미투자자', balance: 500, winRate: 12 }, 
-  { rank: 4, name: '기상캐스터', balance: 92000, winRate: 60 },
+  { rank: 1, name: '워렌버핏', balance: 5240000, winRate: 95 },
+  { rank: 2, name: '일론머스크', balance: 3812000, winRate: 88 },
+  { rank: 3, name: '한강뷰가자', balance: 500, winRate: 12 }, 
+  { rank: 4, name: '인간지표', balance: 92000, winRate: 40 },
   { rank: 5, name: '뉴비', balance: 3000, winRate: 0 },
 ];
