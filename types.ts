@@ -11,6 +11,7 @@ export interface Market {
   volume: number;
   endDate: string;
   imageUrl: string;
+  result?: 'YES' | 'NO' | null; // [Added] Result state: null(ongoing), YES, NO
 }
 
 export interface PortfolioItem {
@@ -22,6 +23,7 @@ export interface PortfolioItem {
   entryPrice: number;
   payoutMultiple: number;
   timestamp: number;
+  isClaimed?: boolean; // [Added] To track if payout has been received
 }
 
 export interface UserState {
@@ -31,6 +33,7 @@ export interface UserState {
   name: string;
   portfolio: PortfolioItem[];
   isGuest: boolean;
+  isAdmin?: boolean; // [Added] Simple admin flag
 }
 
 export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH' | 'ABOUT';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS } from './constants';
 import BottomNav from './components/BottomNav';
@@ -117,13 +117,17 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
     const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   
     const handleSubmit = () => {
+      // ADMIN CHECK: If email contains 'admin', grant admin rights
+      const isAdmin = email.toLowerCase().includes('admin');
+
       const mockUser: UserState = {
         id: isLogin ? 'u_demo' : Date.now().toString(),
         email: email || 'user@example.com',
         balance: INITIAL_BALANCE,
         name: isLogin ? (email ? email.split('@')[0] : 'DemoUser') : (name || 'New User'),
         portfolio: [],
-        isGuest: false
+        isGuest: false,
+        isAdmin: isAdmin
       };
       onLogin(mockUser);
     };
@@ -134,7 +138,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
             balance: INITIAL_BALANCE,
             name: 'Guest ' + Math.floor(Math.random() * 1000),
             portfolio: [],
-            isGuest: true
+            isGuest: true,
+            isAdmin: false 
         };
         onLogin(guest);
     };
@@ -167,7 +172,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-white focus:border-zzic outline-none transition-colors"
-                      placeholder="user@example.com"
+                      placeholder="user@example.com (Tip: 'admin' for Manager)"
                   />
               </div>
                <div>
@@ -199,7 +204,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
     );
 };
 
-// --- Independent Components (Fixing React2shell Vulnerability) ---
+// --- Independent Components ---
 
 interface SidebarProps {
     view: ViewState;
@@ -357,7 +362,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, depth = 0, allCommen
     );
 };
 
-// --- View Components (Extracted from App) ---
+// --- View Components ---
 
 const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowBillboardModal, handleRefill, setView, markets, setActiveMarketId, setBetAmount, comments, language, t }) => (
     <div className="pb-24 lg:pb-0 animate-in fade-in duration-500">
@@ -410,6 +415,8 @@ const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowB
             {markets.map((market: Market) => {
                 const recentComment = comments.find((c: Comment) => c.marketId === market.id);
                 const commentCount = comments.filter((c: Comment) => c.marketId === market.id).length;
+                const isClosed = market.result || (new Date(market.endDate) < new Date());
+
                 return (
                 <div 
                     key={market.id}
@@ -417,10 +424,25 @@ const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowB
                     className="group relative bg-zinc-900 rounded-3xl p-4 border border-zinc-800 active:scale-[0.99] transition-all cursor-pointer hover:border-zzic/50 overflow-hidden hover:bg-zinc-800/50"
                 >
                     <div className="absolute top-0 right-0 z-10">
-                        <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-lg animate-pulse">
-                            D-{Math.ceil((new Date(market.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
-                        </div>
+                        {isClosed ? (
+                             <div className="bg-zinc-700 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-lg">
+                                CLOSED
+                            </div>
+                        ) : (
+                            <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-lg animate-pulse">
+                                D-{Math.ceil((new Date(market.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
+                            </div>
+                        )}
                     </div>
+                    {/* [Added] Result Overlay if ended */}
+                    {market.result && (
+                         <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center backdrop-blur-sm">
+                             <div className={`text-4xl font-black italic tracking-tighter uppercase ${market.result === 'YES' ? 'text-blue-500' : 'text-red-500'} drop-shadow-[0_0_15px_rgba(0,0,0,1)] border-4 border-current px-6 py-2 rounded-xl -rotate-12`}>
+                                 {market.result} WIN
+                             </div>
+                         </div>
+                    )}
+
                     <div className="flex items-center gap-4">
                         <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-black border border-zinc-800">
                             <img src={market.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={market.title} />
@@ -431,7 +453,7 @@ const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowB
                                 <div className="flex justify-between items-start mb-1">
                                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                                         <Clock size={10} />
-                                        <span>{new Date(market.endDate).getFullYear() === new Date().getFullYear() ? new Date(market.endDate).toLocaleDateString() + ' ' + t('market_closed') : t('market_long_term')}</span>
+                                        <span>{isClosed ? t('market_closed') : t('market_long_term')}</span>
                                     </div>
                                 </div>
                                 <h4 className="text-[16px] font-bold text-white leading-snug line-clamp-2 pr-1 group-hover:text-zzic transition-colors">{language === 'en' ? (market.titleEn || market.title) : market.title}</h4>
@@ -495,9 +517,11 @@ const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowB
     </div>
 );
 
-const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, selectedPrediction, setSelectedPrediction, betAmount, setBetAmount, handlePredict, comments, activeMarketId, replyToId, setReplyToId, newCommentText, setNewCommentText, handleAddComment, handleLikeComment, language }) => {
+const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, selectedPrediction, setSelectedPrediction, betAmount, setBetAmount, handlePredict, comments, activeMarketId, replyToId, setReplyToId, newCommentText, setNewCommentText, handleAddComment, handleLikeComment, language, handleSettleMarket }) => {
     if (!activeMarket) return null;
     const tier = user ? getTier(user.balance) : null;
+    const isClosed = activeMarket.result || (timeLeft.expired);
+
     return (
         <div className="pb-24 lg:pb-0 min-h-screen animate-in slide-in-from-right duration-300">
             <div className="px-4 py-4 flex items-center sticky top-0 bg-black/90 backdrop-blur-xl z-50 border-b border-zinc-900 justify-between">
@@ -511,8 +535,10 @@ const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, s
                 <div className="text-center mb-6">
                     <h2 className="text-2xl font-black text-white leading-snug mb-2 break-keep">{language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title}</h2>
                     <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full mb-4">
-                        <Timer size={12} className="text-zzic animate-pulse" />
-                        <span className="text-xs font-mono font-bold text-zinc-300">{timeLeft.expired ? "CLOSED" : `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m left`}</span>
+                        <Timer size={12} className={`animate-pulse ${isClosed ? 'text-red-500' : 'text-zzic'}`} />
+                        <span className={`text-xs font-mono font-bold ${isClosed ? 'text-red-500' : 'text-zinc-300'}`}>
+                            {activeMarket.result ? `RESULT: ${activeMarket.result} WIN` : (timeLeft.expired ? "CLOSED" : `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m left`)}
+                        </span>
                     </div>
                     <div className="w-full h-32 bg-zinc-900/50 rounded-xl border border-zinc-800 p-4 mb-4 relative overflow-hidden">
                         <div className="absolute top-2 left-4 text-[10px] font-bold text-zinc-500">YES Price Trend</div>
@@ -520,13 +546,30 @@ const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, s
                         <div className="absolute bottom-2 right-4 text-xs font-black text-white">{activeMarket.yesPrice}%</div>
                     </div>
                 </div>
-                <div className="bg-zinc-900 rounded-[2rem] p-6 border border-zinc-800 shadow-2xl mb-8">
+
+                <div className="bg-zinc-900 rounded-[2rem] p-6 border border-zinc-800 shadow-2xl mb-8 relative overflow-hidden">
+                    {isClosed && !activeMarket.result && (
+                         <div className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center p-6 text-center">
+                             <Lock size={40} className="text-zinc-500 mb-2"/>
+                             <h3 className="text-xl font-black text-white">VOTING CLOSED</h3>
+                             <p className="text-sm text-zinc-400">Waiting for result announcement.</p>
+                         </div>
+                    )}
+                    
+                    {activeMarket.result && (
+                         <div className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center p-6 text-center">
+                             <Trophy size={40} className={activeMarket.result === 'YES' ? 'text-blue-500' : 'text-red-500'} />
+                             <h3 className="text-2xl font-black text-white mt-2">WINNER: {activeMarket.result}</h3>
+                             <p className="text-sm text-zinc-400 mt-1">Payouts distributed.</p>
+                         </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3 mb-6">
-                        <button onClick={() => setSelectedPrediction('YES')} className={`py-6 rounded-2xl font-black text-sm transition-all border-2 ${selectedPrediction === 'YES' ? 'bg-blue-600 border-blue-400 text-white shadow-lg scale-105' : 'bg-black border-zinc-800 text-zinc-600'}`}>
+                        <button onClick={() => setSelectedPrediction('YES')} disabled={isClosed} className={`py-6 rounded-2xl font-black text-sm transition-all border-2 ${selectedPrediction === 'YES' ? 'bg-blue-600 border-blue-400 text-white shadow-lg scale-105' : 'bg-black border-zinc-800 text-zinc-600'}`}>
                             <span className="block text-[10px] opacity-60 mb-1">YES</span>
                             <span className="text-3xl italic">{activeMarket.yesPrice}%</span>
                         </button>
-                        <button onClick={() => setSelectedPrediction('NO')} className={`py-6 rounded-2xl font-black text-sm transition-all border-2 ${selectedPrediction === 'NO' ? 'bg-red-600 border-red-400 text-white shadow-lg scale-105' : 'bg-black border-zinc-800 text-zinc-600'}`}>
+                        <button onClick={() => setSelectedPrediction('NO')} disabled={isClosed} className={`py-6 rounded-2xl font-black text-sm transition-all border-2 ${selectedPrediction === 'NO' ? 'bg-red-600 border-red-400 text-white shadow-lg scale-105' : 'bg-black border-zinc-800 text-zinc-600'}`}>
                              <span className="block text-[10px] opacity-60 mb-1">NO</span>
                              <span className="text-3xl italic">{100 - activeMarket.yesPrice}%</span>
                         </button>
@@ -537,17 +580,30 @@ const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, s
                                 <span className="text-xs text-zinc-400 font-bold flex items-center gap-1"><Wallet size={12} /> {t('detail_bet_amount')}</span>
                                 <span className="text-xs font-mono font-bold text-zinc-500">{t('detail_holding')}: <span className="text-white ml-1">{formatNumber(user.balance)}</span></span>
                             </div>
-                            <input type="number" value={betAmount === 0 ? '' : betAmount} onChange={(e) => setBetAmount(Math.min(parseInt(e.target.value) || 0, user.balance))} placeholder="0" className="w-full bg-black border-2 border-zinc-800 rounded-xl py-3 text-center text-2xl font-black text-white focus:border-zzic outline-none mb-3" />
+                            <input type="number" value={betAmount === 0 ? '' : betAmount} onChange={(e) => setBetAmount(Math.min(parseInt(e.target.value) || 0, user.balance))} placeholder="0" disabled={isClosed} className="w-full bg-black border-2 border-zinc-800 rounded-xl py-3 text-center text-2xl font-black text-white focus:border-zzic outline-none mb-3 disabled:opacity-50" />
                             <div className="grid grid-cols-4 gap-2">
-                                {[100, 500, 1000].map(amt => <button key={amt} onClick={() => setBetAmount(Math.min(betAmount + amt, user.balance))} className="bg-zinc-800 text-zinc-400 text-xs font-bold py-2 rounded-lg hover:text-white">+{amt}</button>)}
-                                <button onClick={() => setBetAmount(user.balance)} className="bg-zzic/20 text-zzic text-xs font-black py-2 rounded-lg">MAX</button>
+                                {[100, 500, 1000].map(amt => <button key={amt} disabled={isClosed} onClick={() => setBetAmount(Math.min(betAmount + amt, user.balance))} className="bg-zinc-800 text-zinc-400 text-xs font-bold py-2 rounded-lg hover:text-white disabled:opacity-50">+{amt}</button>)}
+                                <button onClick={() => setBetAmount(user.balance)} disabled={isClosed} className="bg-zzic/20 text-zzic text-xs font-black py-2 rounded-lg disabled:opacity-50">MAX</button>
                             </div>
                         </div>
                     ) : (
                         <div className="text-center p-4 bg-zinc-950 rounded-xl border border-zinc-800 mb-4 text-zinc-500 text-xs font-bold">{t('detail_login_required')}</div>
                     )}
-                    <button onClick={handlePredict} className={`w-full py-4 rounded-xl font-black text-lg shadow-lg uppercase tracking-wider ${user ? (selectedPrediction === 'YES' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white') : 'bg-zinc-800 text-zinc-500'}`}>{user ? t('detail_confirm') : t('detail_login_btn')}</button>
+                    <button onClick={handlePredict} disabled={isClosed} className={`w-full py-4 rounded-xl font-black text-lg shadow-lg uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed ${user ? (selectedPrediction === 'YES' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white') : 'bg-zinc-800 text-zinc-500'}`}>{user ? t('detail_confirm') : t('detail_login_btn')}</button>
                 </div>
+                
+                {/* --- ADMIN SETTLEMENT PANEL (Visible to Admin Only) --- */}
+                {user?.isAdmin && !activeMarket.result && (
+                    <div className="mb-8 border-2 border-dashed border-zinc-700 bg-zinc-900/50 rounded-3xl p-6">
+                        <h3 className="text-white font-black flex items-center gap-2 mb-2"><Gavel size={18} className="text-yellow-500" /> ADMIN ZONE</h3>
+                        <p className="text-zinc-500 text-xs mb-4">Simulate the payout process. This will close the market and distribute winnings to you.</p>
+                        <div className="flex gap-2">
+                            <button onClick={() => handleSettleMarket('YES')} className="flex-1 bg-blue-900/50 text-blue-400 border border-blue-500/50 py-3 rounded-xl font-black text-xs hover:bg-blue-900 transition-colors">WIN: YES</button>
+                            <button onClick={() => handleSettleMarket('NO')} className="flex-1 bg-red-900/50 text-red-400 border border-red-500/50 py-3 rounded-xl font-black text-xs hover:bg-red-900 transition-colors">WIN: NO</button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="pb-10">
                     <h3 className="text-sm font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wide"><MessageSquare size={16} className="text-zzic"/> {t('detail_discussion')} <span className="text-xs text-zinc-500 ml-auto font-normal">{t('detail_discussion_count').replace('{0}', comments.filter((c: Comment) => c.marketId === activeMarketId).length.toString())}</span></h3>
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-6 relative focus-within:border-zzic transition-colors">
@@ -642,7 +698,13 @@ const ProfileView: React.FC<any> = ({ setView, t, user, handleRefill, handleLogo
                                     <div key={item.id} className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800 flex justify-between items-center group hover:bg-zinc-900 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black italic text-lg ${item.prediction === 'YES' ? 'bg-blue-900/20 text-blue-500 border border-blue-900/50' : 'bg-red-900/20 text-red-500 border border-red-900/50'}`}>{item.prediction}</div>
-                                            <div><div className="text-sm font-bold text-white mb-0.5 line-clamp-1">{item.marketTitle}</div><div className="text-[10px] text-zinc-500 font-mono">{new Date(item.timestamp).toLocaleDateString()}</div></div>
+                                            <div>
+                                                <div className="text-sm font-bold text-white mb-0.5 line-clamp-1">{item.marketTitle}</div>
+                                                <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
+                                                    {new Date(item.timestamp).toLocaleDateString()}
+                                                    {item.isClaimed && <span className="text-zzic ml-1 flex items-center gap-0.5"><Check size={10} /> Paid</span>}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="text-right"><div className="text-sm font-mono font-bold text-zinc-300">{formatNumber(item.amount)} VP</div><div className="text-[10px] text-zzic font-mono">x {formatPercent(item.payoutMultiple)}</div></div>
                                     </div>
@@ -803,7 +865,8 @@ const App: React.FC = () => {
         amount: betAmount,
         entryPrice: price,
         payoutMultiple: multiplier,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        isClaimed: false
     };
 
     setUser({
@@ -859,6 +922,53 @@ const App: React.FC = () => {
       }));
   };
 
+  // --- [SETTLEMENT LOGIC] ---
+  const handleSettleMarket = (result: 'YES' | 'NO') => {
+      if (!user || !user.isAdmin || !activeMarketId) return;
+      
+      // 1. Update Market Result
+      const updatedMarkets = markets.map(m => 
+          m.id === activeMarketId ? { ...m, result: result } : m
+      );
+      setMarkets(updatedMarkets);
+
+      // 2. Calculate Payout for Current User
+      let totalPayout = 0;
+      let wonCount = 0;
+
+      const updatedPortfolio = user.portfolio.map(item => {
+          if (item.marketId === activeMarketId && !item.isClaimed) {
+              if (item.prediction === result) {
+                  // WINNER
+                  const payout = Math.floor(item.amount * item.payoutMultiple);
+                  totalPayout += payout;
+                  wonCount++;
+                  return { ...item, isClaimed: true };
+              } else {
+                  // LOSER (Mark as claimed so they don't get processed again, but 0 payout)
+                  return { ...item, isClaimed: true };
+              }
+          }
+          return item;
+      });
+
+      // 3. Update User Balance & Portfolio
+      if (totalPayout > 0) {
+          setUser({
+              ...user,
+              balance: user.balance + totalPayout,
+              portfolio: updatedPortfolio
+          });
+          alert(`MARKET CLOSED! Result: ${result}\nCongratulations! You won ${formatNumber(totalPayout)} VP from ${wonCount} bets.`);
+      } else {
+           setUser({
+              ...user,
+              portfolio: updatedPortfolio
+          });
+          alert(`MARKET CLOSED! Result: ${result}\nMarket resolved.`);
+      }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black flex justify-center">
       <div className="w-full max-w-[1200px] flex items-start gap-0 lg:gap-8 justify-center min-h-screen relative shadow-2xl">
@@ -866,13 +976,14 @@ const App: React.FC = () => {
             view={view} 
             setView={setView} 
             user={user} 
-            language={language} 
-            toggleLanguage={toggleLanguage} 
-            handleLogout={handleLogout} 
-            setShowBillboardModal={setShowBillboardModal} 
-            t={t} 
+            language={language}
+            toggleLanguage={toggleLanguage}
+            handleLogout={handleLogout}
+            setShowBillboardModal={setShowBillboardModal}
+            t={t}
         />
-        <main className="flex-1 w-full max-w-[600px] border-x border-zinc-900 min-h-screen bg-black relative pb-20 lg:pb-0">
+        
+        <main className="w-full lg:max-w-[600px] border-x border-zinc-900 min-h-screen bg-black relative">
             {view === 'HOME' && (
                 <HomeView 
                     billboardMsgs={billboardMsgs} 
@@ -885,8 +996,8 @@ const App: React.FC = () => {
                     setActiveMarketId={setActiveMarketId} 
                     setBetAmount={setBetAmount} 
                     comments={comments} 
-                    language={language} 
-                    t={t} 
+                    language={language}
+                    t={t}
                 />
             )}
             {view === 'DETAIL' && (
@@ -910,48 +1021,67 @@ const App: React.FC = () => {
                     handleAddComment={handleAddComment}
                     handleLikeComment={handleLikeComment}
                     language={language}
+                    handleSettleMarket={handleSettleMarket}
                 />
             )}
             {view === 'RANKING' && <RankingView setView={setView} t={t} user={user} />}
             {view === 'PROFILE' && <ProfileView setView={setView} t={t} user={user} handleRefill={handleRefill} handleLogout={handleLogout} />}
             {view === 'ABOUT' && <AboutView setView={setView} t={t} />}
+            {view === 'AUTH' && <AuthScreen onLogin={(u) => { setUser(u); setView('HOME'); }} onClose={() => setView('HOME')} language={language} />}
         </main>
+
         <SidebarRight 
             view={view} 
             setView={setView} 
-            user={user} 
-            language={language} 
             setShowSuggestModal={setShowSuggestModal}
             t={t}
         />
-        <BottomNav currentView={view} onChangeView={setView} />
-        {showBillboardModal && (
-            <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-                <div className="bg-zinc-900 w-full max-w-sm rounded-3xl p-6 border border-zinc-800">
-                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Megaphone size={20} className="text-zzic"/> {t('billboard_modal_title')}</h3>
-                    <p className="text-xs text-zinc-500 mb-6">{t('billboard_modal_desc')}</p>
-                    <input value={billboardText} onChange={e => setBillboardText(e.target.value)} placeholder={t('billboard_input_placeholder')} className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white mb-4 focus:border-zzic outline-none"/>
-                    <div className="flex gap-2"><button onClick={() => setShowBillboardModal(false)} className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-bold text-sm">{t('billboard_btn_cancel')}</button><button onClick={handlePostBillboard} className="flex-1 py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">{t('billboard_btn_register')}</button></div>
-                </div>
-            </div>
-        )}
-        {showSuggestModal && (
-            <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-                <div className="bg-zinc-900 w-full max-w-sm rounded-3xl p-6 border border-zinc-800 relative">
-                    <button onClick={() => setShowSuggestModal(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20}/></button>
-                    <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Lightbulb size={20} className="text-zzic"/> {t('suggest_title')}</h3>
-                    <p className="text-xs text-zinc-500 mb-6">{t('suggest_desc')}</p>
-                    <div className="space-y-4">
-                        <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t('suggest_input_title')}</label><input value={suggestTitle} onChange={e => setSuggestTitle(e.target.value)} placeholder={t('suggest_input_placeholder_title')} className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white focus:border-zzic outline-none"/></div>
-                        <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t('suggest_input_desc')}</label><textarea value={suggestDesc} onChange={e => setSuggestDesc(e.target.value)} placeholder={t('suggest_input_placeholder_desc')} className="w-full bg-black border border-zinc-700 rounded-xl p-3 text-white focus:border-zzic outline-none resize-none h-24"/></div>
-                        <button onClick={handleSuggest} className="w-full py-3 rounded-xl bg-zzic text-black font-black text-sm hover:bg-[#b3e600]">{t('suggest_btn')}</button>
-                    </div>
-                </div>
-            </div>
-        )}
-        {view === 'AUTH' && <AuthScreen onLogin={(u) => { setUser(u); setView('HOME'); }} onClose={() => setView('HOME')} language={language} />}
-        {lastPurchasedItem && <ShareModal item={lastPurchasedItem} onClose={() => { setLastPurchasedItem(null); setView('PROFILE'); }} language={language} />}
       </div>
+
+      <BottomNav currentView={view} onChangeView={setView} />
+      
+      {/* Share Modal */}
+      {lastPurchasedItem && (
+          <ShareModal 
+            item={lastPurchasedItem} 
+            onClose={() => setLastPurchasedItem(null)} 
+            language={language}
+          />
+      )}
+
+      {/* Suggest Modal */}
+      {showSuggestModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-in fade-in">
+              <div className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 border border-zinc-800 relative shadow-2xl">
+                  <button onClick={() => setShowSuggestModal(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={24}/></button>
+                  <h2 className="text-xl font-black text-white mb-1 uppercase italic">{t('suggest_title')}</h2>
+                  <p className="text-xs text-zinc-500 mb-6">{t('suggest_subtitle')}</p>
+                  <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-zinc-400 mb-1 block">{t('suggest_input_title')}</label><input value={suggestTitle} onChange={(e)=>setSuggestTitle(e.target.value)} className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-white text-sm focus:border-zzic outline-none" placeholder={t('suggest_input_placeholder_title')} /></div>
+                      <div><label className="text-xs font-bold text-zinc-400 mb-1 block">{t('suggest_input_desc')}</label><textarea value={suggestDesc} onChange={(e)=>setSuggestDesc(e.target.value)} className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-white text-sm focus:border-zzic outline-none resize-none" rows={3} placeholder={t('suggest_input_placeholder_desc')} /></div>
+                      <button onClick={handleSuggest} className="w-full bg-white text-black font-black py-3 rounded-xl hover:bg-zzic transition-colors">{t('suggest_btn')}</button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* Billboard Modal */}
+      {showBillboardModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-in fade-in">
+              <div className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 border border-zinc-800 relative shadow-2xl">
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2"><div className="bg-zzic text-black p-3 rounded-full shadow-[0_0_20px_rgba(204,255,0,0.5)]"><Megaphone size={24} className="fill-black"/></div></div>
+                  <h2 className="text-xl font-black text-white mb-1 mt-4 text-center uppercase italic">{t('billboard_modal_title')}</h2>
+                  <p className="text-xs text-zinc-500 mb-6 text-center">{t('billboard_modal_desc')}</p>
+                  <div className="space-y-4">
+                      <input value={billboardText} onChange={(e)=>setBillboardText(e.target.value)} className="w-full bg-black border border-zinc-800 rounded-xl p-4 text-white text-center font-bold focus:border-zzic outline-none" placeholder={t('billboard_input_placeholder')} />
+                      <div className="grid grid-cols-2 gap-3">
+                          <button onClick={() => setShowBillboardModal(false)} className="w-full bg-zinc-800 text-zinc-400 font-bold py-3 rounded-xl hover:text-white transition-colors">{t('billboard_btn_cancel')}</button>
+                          <button onClick={handlePostBillboard} className="w-full bg-zzic text-black font-black py-3 rounded-xl hover:bg-[#b3e600] transition-colors shadow-lg">{t('billboard_btn_register')}</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      )}
     </div>
   );
 };
