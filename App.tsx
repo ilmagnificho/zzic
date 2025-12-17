@@ -128,7 +128,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
                     password,
                 });
                 if (error) throw error;
-                // Login successful, App component will handle state update via onAuthStateChange
+                // App will detect session change
             } else {
                 // Check banned nicknames
                 const lowerName = name.toLowerCase();
@@ -139,6 +139,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
                     return;
                 }
 
+                // metadata 'display_name' triggers the handle_new_user SQL function
                 const { error } = await supabase.auth.signUp({
                     email,
                     password,
@@ -153,24 +154,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
             }
             onClose();
         } catch (error: any) {
+            console.error(error);
             alert(error.message || t('alert_error'));
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleGuest = async () => {
-        // Guest mode doesn't use Supabase Auth usually, but for consistency in this app structure,
-        // we might create an anonymous user or just use local state.
-        // For now, let's keep the local mock user generation for Guest to be fast.
-        // The App component will handle this if we pass a special flag or just handle it here.
-        // Since App expects auth state change for real users, we need a way to set guest.
-        // For MVP, Guest = Local State User.
-        
-        // This function needs to communicate back to App.
-        // Since we removed 'onLogin' prop to rely on Supabase, we need a way to set Guest.
-        // We will dispatch a custom event or use a callback if we re-add it.
-        // Let's re-add onGuestLogin prop for cleaner code.
     };
   
     return (
@@ -672,7 +660,7 @@ const RankingView: React.FC<any> = ({ setView, t, user }) => (
                     <div className="absolute -top-[60px] animate-bounce"><Crown size={40} className="text-zzic fill-zzic drop-shadow-[0_0_15px_rgba(204,255,0,0.6)]" /></div>
                     <div className="relative"><div className="w-24 h-24 rounded-full bg-zinc-900 border-4 border-zzic flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(204,255,0,0.2)]"><User size={40} className="text-zzic"/></div></div>
                     <div className="text-xs font-black text-zzic mb-2 max-w-[100px] truncate text-center uppercase tracking-widest">Gold</div>
-                    <div className="w-28 h-40 bg-gradient-to-b from-zzic to-black rounded-t-xl flex flex-col items-center pt-4 border-t border-zzic relative overflow-hidden"><div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div><span className="text-5xl font-black text-black italic">1</span></div>
+                    <div className="w-28 h-40 bg-gradient-to-b from-zzic to-black rounded-t-xl flex flex-col items-center pt-4 border-t border-zinc-700"><span className="text-5xl font-black text-black italic">1</span></div>
                 </div>
                 <div className="flex flex-col items-center z-10">
                     <div className="relative"><div className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center mb-3 shadow-lg"><User size={28} className="text-zinc-500"/></div></div>
@@ -925,19 +913,73 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const initializeUser = (authUser: any) => {
-      const email = authUser.email || '';
-      const isAdmin = email === 'yjcho@tetracorp.co.kr' || email.includes('admin');
-      
-      setUser({
-          id: authUser.id,
-          email: email,
-          name: authUser.user_metadata?.display_name || email.split('@')[0],
-          balance: INITIAL_BALANCE, // [NOTE] Reset on refresh as we don't have DB for balance yet
-          portfolio: [], // [NOTE] Reset on refresh
-          isGuest: false,
-          isAdmin: isAdmin
-      });
+  // Fetch full profile from Supabase DB with retry logic
+  const initializeUser = async (authUser: any, retries = 3) => {
+      try {
+          const email = authUser.email || '';
+          
+          // 1. Get Profile (Balance, Admin, Nickname)
+          const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', authUser.id)
+              .single();
+
+          if (profileError) {
+              // Retry if it's a "No rows found" error likely due to trigger latency
+              if (retries > 0 && (profileError.code === 'PGRST116' || !profile)) {
+                  console.log(`Profile not found yet, retrying... (${retries} left)`);
+                  setTimeout(() => initializeUser(authUser, retries - 1), 1000);
+                  return;
+              }
+
+              console.error("Error fetching profile:", profileError);
+              // Fallback to basic auth info if profile missing (e.g. if triggers failed permanently)
+              setUser({
+                  id: authUser.id,
+                  email: email,
+                  name: authUser.user_metadata?.display_name || email.split('@')[0],
+                  balance: INITIAL_BALANCE, 
+                  portfolio: [], 
+                  isGuest: false,
+                  isAdmin: email === 'yjcho@tetracorp.co.kr'
+              });
+              return;
+          }
+
+          // 2. Get Portfolio (Betting History)
+          const { data: portfolio, error: portfolioError } = await supabase
+              .from('portfolios')
+              .select('*')
+              .eq('user_id', authUser.id)
+              .order('created_at', { ascending: false });
+
+          // Map DB Portfolio to Client Types
+          const mappedPortfolio: PortfolioItem[] = (portfolio || []).map((p: any) => ({
+              id: p.id,
+              marketId: p.market_id,
+              marketTitle: p.market_title,
+              prediction: p.prediction,
+              amount: p.amount,
+              entryPrice: p.entry_price,
+              payoutMultiple: p.payout_multiple,
+              timestamp: Number(p.timestamp), // ensure number
+              isClaimed: p.is_claimed
+          }));
+
+          setUser({
+              id: authUser.id,
+              email: email,
+              name: profile.display_name || email.split('@')[0],
+              balance: profile.balance,
+              portfolio: mappedPortfolio,
+              isGuest: false,
+              isAdmin: profile.is_admin
+          });
+
+      } catch (error) {
+          console.error("User initialization failed:", error);
+      }
   };
 
   // [DEEP LINKING] Handle ?marketId=xyz
@@ -953,11 +995,20 @@ const App: React.FC = () => {
     }
   }, [markets]);
 
-  const handleRefill = () => {
+  const handleRefill = async () => {
     if (user && user.balance < 1000) {
         if(confirm(t('confirm_ad_refill'))) {
-            setUser({ ...user, balance: user.balance + 3000 });
+            const newBalance = user.balance + 3000;
+            
+            // Optimistic Update
+            setUser({ ...user, balance: newBalance });
             alert(t('alert_refill_success'));
+
+            // DB Update
+            await supabase
+                .from('profiles')
+                .update({ balance: newBalance })
+                .eq('id', user.id);
         }
     }
   };
@@ -975,11 +1026,16 @@ const App: React.FC = () => {
         // Optimistic update
         setUser({ ...user, name: newName });
         
-        // Supabase update
         try {
+            // Update Auth Metadata (optional but good for consistency)
             await supabase.auth.updateUser({
                 data: { display_name: newName }
             });
+            // Update Public Profile Table (Critical)
+            await supabase
+                .from('profiles')
+                .update({ display_name: newName })
+                .eq('id', user.id);
         } catch (e) {
             console.error("Nickname update failed", e);
             alert("Failed to save nickname on server.");
@@ -992,7 +1048,11 @@ const App: React.FC = () => {
       if (user.balance < 1000) return alert(t('alert_vp_insufficient'));
       if (!billboardText.trim()) return;
 
-      setUser({ ...user, balance: user.balance - 1000 });
+      // In a real app, this would also be a DB insert into a 'billboards' table.
+      // For MVP, we just decrement balance in DB and update local state.
+      const newBalance = user.balance - 1000;
+      setUser({ ...user, balance: newBalance });
+      
       const newMsg: BillboardMessage = {
           id: Date.now().toString(),
           text: billboardText,
@@ -1003,6 +1063,9 @@ const App: React.FC = () => {
       setBillboardText('');
       setShowBillboardModal(false);
       alert(t('alert_billboard_success'));
+
+      // Sync Balance
+      supabase.from('profiles').update({ balance: newBalance }).eq('id', user.id);
   };
 
   const handleSuggest = () => {
@@ -1021,26 +1084,73 @@ const App: React.FC = () => {
 
     const price = selectedPrediction === 'YES' ? activeMarket.yesPrice : (100 - activeMarket.yesPrice);
     const multiplier = 100 / price;
+    const now = Date.now();
 
     const newItem: PortfolioItem = {
-        id: Date.now().toString(),
+        id: 'pending-' + now, // Temporary ID
         marketId: activeMarket.id,
         marketTitle: language === 'en' ? (activeMarket.titleEn || activeMarket.title) : activeMarket.title,
         prediction: selectedPrediction,
         amount: betAmount,
         entryPrice: price,
         payoutMultiple: multiplier,
-        timestamp: Date.now(),
+        timestamp: now,
         isClaimed: false
     };
 
+    const newBalance = user.balance - betAmount;
+
+    // Optimistic Update
     setUser({
         ...user,
-        balance: user.balance - betAmount,
+        balance: newBalance,
         portfolio: [newItem, ...user.portfolio]
     });
     setLastPurchasedItem(newItem);
     setBetAmount(0);
+
+    // DB Update
+    try {
+        // 1. Insert Portfolio
+        const { data, error } = await supabase
+            .from('portfolios')
+            .insert({
+                user_id: user.id,
+                market_id: activeMarket.id,
+                market_title: newItem.marketTitle,
+                prediction: selectedPrediction,
+                amount: betAmount,
+                entry_price: price,
+                payout_multiple: multiplier,
+                timestamp: now,
+                is_claimed: false
+            })
+            .select()
+            .single();
+        
+        if (error) throw error;
+
+        // Update local state with real ID
+        if (data) {
+            setUser(prev => prev ? ({
+                ...prev,
+                portfolio: prev.portfolio.map(p => p.id === newItem.id ? { ...p, id: data.id } : p)
+            }) : null);
+            setLastPurchasedItem(prev => prev ? { ...prev, id: data.id } : null);
+        }
+
+        // 2. Update Balance
+        await supabase
+            .from('profiles')
+            .update({ balance: newBalance })
+            .eq('id', user.id);
+
+    } catch (e) {
+        console.error("Betting failed:", e);
+        alert(t('alert_save_fail'));
+        // Rollback (simplified)
+        // window.location.reload(); 
+    }
   };
 
   const handleAddComment = () => {
@@ -1088,18 +1198,21 @@ const App: React.FC = () => {
   };
 
   // --- [SETTLEMENT LOGIC] ---
-  const handleSettleMarket = (result: 'YES' | 'NO') => {
+  const handleSettleMarket = async (result: 'YES' | 'NO') => {
       if (!user || !user.isAdmin || !activeMarketId) return;
       
-      // 1. Update Market Result
+      // 1. Update Market Result (Local State)
       const updatedMarkets = markets.map(m => 
           m.id === activeMarketId ? { ...m, result: result } : m
       );
       setMarkets(updatedMarkets);
 
-      // 2. Calculate Payout for Current User
+      // 2. Calculate Payout for Current User (Client-side Simulation for Admin)
+      // In a real app, this should be a backend job or Edge Function iterating all users.
+      // Here we only settle for the logged-in admin for demonstration.
       let totalPayout = 0;
       let wonCount = 0;
+      const winningIds: string[] = [];
 
       const updatedPortfolio = user.portfolio.map(item => {
           if (item.marketId === activeMarketId && !item.isClaimed) {
@@ -1108,29 +1221,48 @@ const App: React.FC = () => {
                   const payout = Math.floor(item.amount * item.payoutMultiple);
                   totalPayout += payout;
                   wonCount++;
+                  winningIds.push(item.id);
                   return { ...item, isClaimed: true };
               } else {
-                  // LOSER (Mark as claimed so they don't get processed again, but 0 payout)
+                  // LOSER
+                  // We mark as claimed to ignore future processing, effectively 0 payout
+                  winningIds.push(item.id); // Mark these as processed in DB too
                   return { ...item, isClaimed: true };
               }
           }
           return item;
       });
 
-      // 3. Update User Balance & Portfolio
-      if (totalPayout > 0) {
+      // 3. Update User Balance & Portfolio (Local & DB)
+      if (winningIds.length > 0) {
+          const newBalance = user.balance + totalPayout;
+          
           setUser({
               ...user,
-              balance: user.balance + totalPayout,
+              balance: newBalance,
               portfolio: updatedPortfolio
           });
-          alert(`MARKET CLOSED! Result: ${result}\nCongratulations! You won ${formatNumber(totalPayout)} VP from ${wonCount} bets.`);
+
+          // DB Updates
+          try {
+              // Mark portfolios as claimed
+              await supabase
+                  .from('portfolios')
+                  .update({ is_claimed: true })
+                  .in('id', winningIds);
+              
+              // Update balance
+              await supabase
+                  .from('profiles')
+                  .update({ balance: newBalance })
+                  .eq('id', user.id);
+
+              alert(`MARKET CLOSED! Result: ${result}\n(Admin Mode) Settle complete for your account.\nWon: ${formatNumber(totalPayout)} VP.`);
+          } catch (e) {
+              console.error("Settlement sync failed", e);
+          }
       } else {
-           setUser({
-              ...user,
-              portfolio: updatedPortfolio
-          });
-          alert(`MARKET CLOSED! Result: ${result}\nMarket resolved.`);
+           alert(`MARKET CLOSED! Result: ${result}\nNo active bets to settle for you.`);
       }
   };
 
