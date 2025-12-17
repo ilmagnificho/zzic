@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket, Scale, Siren, Camera, TrendingUp } from 'lucide-react';
+import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket, Scale, Siren, Camera, TrendingUp, Trees, Gift, Star } from 'lucide-react';
 import { PortfolioItem, Market } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
@@ -23,10 +23,10 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   const getTheme = () => {
     switch (category) {
       case 'WEATHER':
-        return 'SNOW';
+        return 'CHRISTMAS';
       case 'ENTER':
       case 'SPORTS':
-        return 'NEWS';
+        return 'TABLOID';
       case 'COIN':
       case 'STOCK':
       default:
@@ -42,10 +42,10 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
     // 1. Text Generation based on Category
     if (category === 'WEATHER') {
         if (isPredictionShare) {
-            const pred = item?.prediction === 'YES' ? '눈이 온다! ❄️' : '눈 안 온다 ☀️';
-            shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${pred} ] 입니다.\n크리스마스의 기적, 함께 지켜보시죠!`;
+            const pred = item?.prediction === 'YES' ? '화이트 크리스마스 ☃️' : '그냥 크리스마스 ☀️';
+            shareText = `[ZZIC 시즌 특보] 🎄\n\n"${displayTitle}"\n\n제 예측은 [ ${pred} ] 입니다.\n성탄절의 기적, 함께 지켜보시죠!`;
         } else {
-            shareText = `[ZZIC 기상청 투표] ☃️\n\n"${displayTitle}"\n\n이번 크리스마스, 과연 화이트 크리스마스일까요?\n당신의 촉을 보여주세요!`;
+            shareText = `[ZZIC 시즌 특보] 🎄\n\n"${displayTitle}"\n\n올해 크리스마스, 눈이 올까요?\n당신의 촉을 보여주세요!`;
         }
     } 
     else if (category === 'ENTER' || category === 'SPORTS') {
@@ -100,40 +100,42 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
         {/* --- CARD VISUALS --- */}
         <div className={`w-full aspect-[3/4.5] relative select-none overflow-hidden flex flex-col shadow-2xl transition-transform duration-500 hover:scale-[1.01] ${
             theme === 'GOLD' ? 'rounded-[4px] rounded-tr-[30px] rounded-bl-[30px] border-4 border-[#b45309]' : 
-            theme === 'SNOW' ? 'rounded-[32px] border border-white/30' : 
-            'rounded-none border-y-8 border-red-600' // NEWS theme
+            theme === 'CHRISTMAS' ? 'rounded-[20px] border-4 border-white/20' : 
+            'rounded-none border-y-8 border-red-600' // TABLOID theme
         }`}>
             
             {/* 1. BACKGROUNDS */}
             {theme === 'GOLD' && (
                 <div className="absolute inset-0 bg-gradient-to-br from-[#854d0e] via-[#facc15] to-[#713f12]">
-                     {/* Gold Texture */}
                      <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1h2v2H1V1zm4 4h2v2H5V5zm4 4h2v2H9V9z' fill='%23000000' fill-opacity='0.4'/%3E%3C/svg%3E")`}}></div>
-                     {/* Shine */}
                      <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/40 to-transparent rotate-45 animate-shine"></div>
                 </div>
             )}
             
-            {theme === 'SNOW' && (
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a] via-[#1e3a8a] to-[#172554]">
-                    {/* Snow Particles (CSS Animation) */}
-                    {[...Array(20)].map((_, i) => (
-                        <div key={i} className="absolute bg-white rounded-full opacity-80 animate-snow" style={{
-                            width: Math.random() * 4 + 2 + 'px',
-                            height: Math.random() * 4 + 2 + 'px',
+            {theme === 'CHRISTMAS' && (
+                <div className="absolute inset-0 bg-[#0f172a]">
+                    {/* Gradient Sky */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900"></div>
+                    
+                    {/* Snow Particles */}
+                    {[...Array(40)].map((_, i) => (
+                         <div key={i} className="absolute bg-white rounded-full opacity-80 animate-snow" style={{
+                            width: Math.random() * 3 + 1 + 'px',
+                            height: Math.random() * 3 + 1 + 'px',
                             left: Math.random() * 100 + '%',
-                            animationDuration: Math.random() * 3 + 2 + 's',
+                            animationDuration: Math.random() * 5 + 3 + 's',
                             animationDelay: Math.random() * 5 + 's'
                         }}></div>
                     ))}
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    
+                    {/* Bottom Snow Accumulation */}
+                     <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/20 to-transparent"></div>
                 </div>
             )}
 
-            {theme === 'NEWS' && (
-                <div className="absolute inset-0 bg-black">
-                     <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#222_10px,#222_20px)] opacity-30"></div>
-                     {/* Flash Effect */}
+            {theme === 'TABLOID' && (
+                <div className="absolute inset-0 bg-[#0a0a0a]">
+                     <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,#222_2px,#222_4px)] opacity-50"></div>
                      <div className="absolute inset-0 bg-white opacity-0 animate-flash"></div>
                 </div>
             )}
@@ -145,8 +147,17 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex flex-col">
                          {theme === 'GOLD' && <span className="text-[10px] font-black text-[#451a03] tracking-[0.3em]">GOLD STANDARD</span>}
-                         {theme === 'SNOW' && <span className="text-[10px] font-black text-cyan-200 tracking-[0.3em] flex items-center gap-1"><Snowflake size={10}/> WINTER SPECIAL</span>}
-                         {theme === 'NEWS' && <span className="text-[10px] font-black text-red-500 tracking-[0.3em] bg-white px-1">BREAKING NEWS</span>}
+                         {theme === 'CHRISTMAS' && (
+                             <div className="flex items-center gap-1 mb-1">
+                                 <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm">EVENT</span>
+                                 <span className="text-[10px] font-black text-green-400 tracking-[0.2em]">SEASON 2025</span>
+                             </div>
+                         )}
+                         {theme === 'TABLOID' && (
+                             <div className="bg-[#D20000] text-white px-2 py-0.5 font-black tracking-tighter text-xs transform -skew-x-12 inline-block border border-white/20 shadow-lg">
+                                 DISPATCH
+                             </div>
+                         )}
                          
                          <h1 className={`text-3xl font-black italic tracking-tighter mt-1 ${
                              theme === 'GOLD' ? 'text-[#451a03]' : 'text-white'
@@ -154,8 +165,13 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
                     </div>
                     <div>
                         {theme === 'GOLD' && <Coins size={32} className="text-[#451a03] opacity-80" />}
-                        {theme === 'SNOW' && <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm"><Snowflake size={24} className="text-white animate-spin-slow" /></div>}
-                        {theme === 'NEWS' && <Camera size={32} className="text-white animate-pulse" />}
+                        {theme === 'CHRISTMAS' && (
+                            <div className="relative">
+                                <Trees size={32} className="text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                                <Star size={12} className="absolute -top-1 left-1/2 -translate-x-1/2 text-yellow-300 fill-yellow-300 animate-pulse" />
+                            </div>
+                        )}
+                        {theme === 'TABLOID' && <Camera size={32} className="text-white animate-pulse" />}
                     </div>
                 </div>
 
@@ -172,13 +188,14 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
                     {/* Stamp / Icon */}
                     <div className="relative">
                         {isPredictionShare && item ? (
-                             <div className={`border-4 rounded-xl p-4 transform -rotate-6 shadow-2xl ${
+                             <div className={`border-4 rounded-xl p-4 transform -rotate-6 shadow-2xl relative overflow-hidden ${
                                  theme === 'GOLD' ? 'border-[#713f12] bg-[#fef08a]/30 text-[#451a03]' :
-                                 theme === 'SNOW' ? 'border-white bg-white/20 text-white backdrop-blur-md' :
-                                 'border-red-600 bg-red-600 text-white'
+                                 theme === 'CHRISTMAS' ? 'border-green-400/30 bg-black/40 text-white backdrop-blur-sm shadow-[0_0_20px_rgba(34,197,94,0.2)]' :
+                                 'border-white bg-[#D20000] text-white'
                              }`}>
+                                {theme === 'CHRISTMAS' && <div className="absolute -top-2 -left-2 text-white/20"><Snowflake size={24}/></div>}
                                 <div className="text-[10px] font-black opacity-80 mb-1 uppercase">MY PREDICTION</div>
-                                <div className="text-5xl font-black">{item.prediction}</div>
+                                <div className={`text-5xl font-black ${theme === 'CHRISTMAS' && item.prediction === 'YES' ? 'text-green-400' : ''}`}>{item.prediction}</div>
                             </div>
                         ) : (
                             // Generic Share Visuals
@@ -187,24 +204,26 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
                                      <Scale size={64} className="text-[#451a03] drop-shadow-md" />
                                      <div className="bg-[#451a03] text-[#facc15] px-4 py-1 font-black text-xl rounded">VOTE NOW</div>
                                 </div>
-                            ) : theme === 'SNOW' ? (
-                                <div className="flex items-center gap-6">
-                                     <div className="text-center"><div className="text-4xl font-black text-white">YES</div><div className="text-[10px] text-cyan-200 mt-1">SNOW</div></div>
-                                     <div className="h-16 w-0.5 bg-white/30"></div>
-                                     <div className="text-center"><div className="text-4xl font-black text-white/50">NO</div><div className="text-[10px] text-white/50 mt-1">SUNNY</div></div>
+                            ) : theme === 'CHRISTMAS' ? (
+                                <div className="flex flex-col items-center">
+                                     <div className="relative mb-2">
+                                         <Gift size={64} className="text-red-500 fill-red-500 stroke-white stroke-2 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)] animate-bounce" />
+                                         <Snowflake size={24} className="text-white absolute -top-2 -right-2 animate-spin-slow" />
+                                     </div>
+                                     <div className="text-white/80 font-mono text-xs mt-2 border border-white/30 px-3 py-1 rounded-full bg-white/10">White Christmas?</div>
                                 </div>
                             ) : (
                                 <div className="relative">
-                                     <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-t from-zinc-500 to-white italic">VS</div>
-                                     <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 -rotate-3">HOT TOPIC</div>
+                                     <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-t from-zinc-500 to-white italic transform -rotate-6">VS</div>
+                                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#D20000] text-white text-[12px] font-black px-2 py-0.5">EXCLUSIVE</div>
                                 </div>
                             )
                         )}
                     </div>
                     
-                    {theme === 'NEWS' && !isPredictionShare && (
-                        <div className="text-red-500 font-black text-lg tracking-widest border-y-2 border-red-500 w-full py-1 bg-black">
-                            EXCLUSIVE
+                    {theme === 'TABLOID' && !isPredictionShare && (
+                        <div className="text-[#D20000] font-black text-2xl tracking-widest border-y-4 border-[#D20000] w-full py-2 bg-black transform rotate-1">
+                            BREAKING NEWS
                         </div>
                     )}
                 </div>
