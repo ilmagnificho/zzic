@@ -13,6 +13,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   const [isCopied, setIsCopied] = useState(false);
 
+  // [Fix 2] Remove category tags like [날씨], [코인] using Regex
+  const displayTitle = item.marketTitle.replace(/^\[.*?\]\s*/, '');
+
   const handleShare = async () => {
     const shareUrl = `https://zzic.vercel.app/?marketId=${item.marketId}`;
     
@@ -21,7 +24,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
     
     const shareData = {
         title: 'ZZIC - 너의 촉을 믿어봐',
-        text: `[ZZIC 예언 적중 기원]\n\n🏆 주제: ${item.marketTitle}\n\n${emoji} 나의 예측: [ ${item.prediction} ]\n\n이 골드바의 기운을 받아가세요! 👇`,
+        text: `[ZZIC 예언 적중 기원]\n\n🏆 주제: ${displayTitle}\n\n${emoji} 나의 예측: [ ${item.prediction} ]\n\n이 골드바의 기운을 받아가세요! 👇`,
         url: shareUrl,
     };
 
@@ -42,10 +45,11 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-6">
       <div className="relative w-full max-w-[340px] flex flex-col gap-6">
         
-        {/* Close Button */}
+        {/* [Fix 1] Close Button: Better visibility and positioning */}
         <button 
           onClick={onClose}
-          className="absolute -top-12 right-0 text-white/50 hover:text-white p-2 transition-all active:scale-95"
+          className="absolute -top-14 right-0 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-all active:scale-95 backdrop-blur-sm border border-white/10"
+          aria-label="Close"
         >
           <X size={24} />
         </button>
@@ -100,16 +104,16 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
                 </div>
 
                 {/* 2. Main Content: The Topic & Prediction */}
-                <div className="flex-1 w-full flex flex-col items-center justify-center gap-6">
+                <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
                     
-                    {/* Topic Title (Engraved) */}
-                    <div className="w-full relative">
-                        <p className="text-sm font-black text-[#5B3A29] leading-relaxed break-keep line-clamp-3 font-serif"
+                    {/* [Fix 3] Topic Title: Increased Font Size */}
+                    <div className="w-full relative px-2">
+                        <p className="text-xl font-black text-[#5B3A29] leading-tight break-keep line-clamp-4 font-serif"
                            style={{ 
                                textShadow: '1px 1px 0 rgba(255,255,255,0.5)' 
                            }}
                         >
-                           "{item.marketTitle}"
+                           "{displayTitle}"
                         </p>
                     </div>
 
