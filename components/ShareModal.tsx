@@ -76,7 +76,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
             </div>
 
             {/* Content Container (Recessed look) */}
-            <div className="absolute inset-3 rounded-[1rem] border-2 border-[#92400e]/20 flex flex-col items-center justify-between py-6 px-5 text-center z-10"
+            <div className="absolute inset-3 rounded-[1rem] border-2 border-[#92400e]/20 flex flex-col items-center justify-between py-6 px-4 text-center z-10"
                  style={{
                     background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
                     boxShadow: 'inset 4px 4px 10px rgba(146, 64, 14, 0.2), inset -2px -2px 5px rgba(255,255,255,0.3)'
@@ -104,13 +104,14 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
                 </div>
 
                 {/* 2. Main Content: The Topic & Prediction */}
-                <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
+                <div className="flex-1 w-full flex flex-col items-center justify-center gap-6">
                     
-                    {/* [Fix 3] Topic Title: Increased Font Size */}
-                    <div className="w-full relative px-2">
-                        <p className="text-xl font-black text-[#5B3A29] leading-tight break-keep line-clamp-4 font-serif"
+                    {/* [Fix 3] Topic Title: Increased Font Size & Max Contrast */}
+                    <div className="w-full relative px-1">
+                        <p className="text-2xl font-black text-[#1a0f00] leading-snug break-keep text-center font-serif tracking-tight"
                            style={{ 
-                               textShadow: '1px 1px 0 rgba(255,255,255,0.5)' 
+                               // Sharp white shadow for engraving effect
+                               textShadow: '0 1px 0 rgba(255,255,255,0.6)' 
                            }}
                         >
                            "{displayTitle}"
