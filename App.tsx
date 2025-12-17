@@ -68,8 +68,8 @@ const getTier = (balance: number) => {
 // --- SVG Line Chart ---
 const MiniChart: React.FC<{ history: number[], color: string }> = ({ history, color }) => {
     if (!history || history.length < 2) return null;
-    const min = Math.min(...history) * 0.9;
-    const max = Math.max(...history) * 1.1;
+    const min = 0; // Fixed scale 0-100 for better context
+    const max = 100;
     const height = 40;
     const width = 100;
     const points = history.map((price, i) => {
@@ -79,6 +79,8 @@ const MiniChart: React.FC<{ history: number[], color: string }> = ({ history, co
     }).join(' ');
     return (
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+            {/* Guide line at 50% */}
+            <line x1="0" y1={height/2} x2={width} y2={height/2} stroke="#333" strokeDasharray="2" strokeWidth="1" />
             <polyline fill="none" stroke="currentColor" strokeWidth="2" points={points} className={color} strokeLinecap="round" strokeLinejoin="round"/>
             <circle cx={width} cy={height - ((history[history.length-1] - min) / (max - min)) * height} r="3" className={`${color} fill-current`} />
         </svg>
@@ -660,7 +662,7 @@ const RankingView: React.FC<any> = ({ setView, t, user }) => (
                     <div className="absolute -top-[60px] animate-bounce"><Crown size={40} className="text-zzic fill-zzic drop-shadow-[0_0_15px_rgba(204,255,0,0.6)]" /></div>
                     <div className="relative"><div className="w-24 h-24 rounded-full bg-zinc-900 border-4 border-zzic flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(204,255,0,0.2)]"><User size={40} className="text-zzic"/></div></div>
                     <div className="text-xs font-black text-zzic mb-2 max-w-[100px] truncate text-center uppercase tracking-widest">Gold</div>
-                    <div className="w-28 h-40 bg-gradient-to-b from-zzic to-black rounded-t-xl flex flex-col items-center pt-4 border-t border-zinc-700"><span className="text-5xl font-black text-black italic">1</span></div>
+                    <div className="w-28 h-40 bg-gradient-to-b from-zzic to-black rounded-t-xl flex flex-col items-center pt-4 border-t border-zzic relative overflow-hidden"><div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div><span className="text-5xl font-black text-black italic">1</span></div>
                 </div>
                 <div className="flex flex-col items-center z-10">
                     <div className="relative"><div className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center mb-3 shadow-lg"><User size={28} className="text-zinc-500"/></div></div>
@@ -1086,6 +1088,31 @@ const App: React.FC = () => {
     const multiplier = 100 / price;
     const now = Date.now();
 
+    // --- Dynamic Pricing Logic ---
+    // Simulate price movement based on bet. 
+    // Small impact per bet to prevent instant skewing, but visible enough.
+    // In a real app, this would be calculated on server based on pool ratio.
+    const IMPACT_FACTOR = 0.5; // 0.5% shift per vote
+    const direction = selectedPrediction === 'YES' ? 1 : -1;
+    let newYesPrice = activeMarket.yesPrice + (direction * IMPACT_FACTOR);
+    
+    // Clamp between 1 and 99
+    newYesPrice = Math.min(99, Math.max(1, newYesPrice));
+    
+    // Update Local Market State
+    setMarkets(prev => prev.map(m => {
+        if (m.id === activeMarket.id) {
+            return {
+                ...m,
+                yesPrice: parseFloat(newYesPrice.toFixed(1)),
+                // Append new price to history, keep last 7
+                priceHistory: [...m.priceHistory.slice(1), newYesPrice]
+            };
+        }
+        return m;
+    }));
+    // -----------------------------
+
     const newItem: PortfolioItem = {
         id: 'pending-' + now, // Temporary ID
         marketId: activeMarket.id,
@@ -1148,8 +1175,6 @@ const App: React.FC = () => {
     } catch (e) {
         console.error("Betting failed:", e);
         alert(t('alert_save_fail'));
-        // Rollback (simplified)
-        // window.location.reload(); 
     }
   };
 

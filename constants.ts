@@ -20,8 +20,8 @@ export const INITIAL_MARKETS: Market[] = [
     title: '[날씨] 2025년 크리스마스, 서울에 눈이 내린다?',
     titleEn: '[Weather] Will it snow in Seoul on Christmas 2025?',
     category: 'WEATHER',
-    yesPrice: 30, // Low probability -> High payout potential
-    priceHistory: [25, 28, 26, 30, 29, 31, 30],
+    yesPrice: 50, // Started at 50:50
+    priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 1250000,
     endDate: '2025-12-25T00:00:00',
     imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop'
@@ -32,8 +32,8 @@ export const INITIAL_MARKETS: Market[] = [
     title: '[코인] 2026년 1월 1일 전, 비트코인 2억 돌파?',
     titleEn: '[Crypto] Bitcoin hits 200M KRW before Jan 1, 2026?',
     category: 'COIN',
-    yesPrice: 82, // Bullish sentiment
-    priceHistory: [60, 65, 75, 80, 78, 81, 82], 
+    yesPrice: 50, // Started at 50:50
+    priceHistory: [50, 50, 50, 50, 50, 50, 50], 
     volume: 8240000, // Highest volume market
     endDate: '2026-01-01T00:00:00',
     imageUrl: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop'
@@ -44,8 +44,8 @@ export const INITIAL_MARKETS: Market[] = [
     title: '[이슈] 2026년 1월 1일, 디스패치 열애설 터진다?',
     titleEn: '[Issue] Will Dispatch release a scandal on Jan 1st 2026?',
     category: 'ENTER',
-    yesPrice: 95, // Almost certain
-    priceHistory: [80, 85, 90, 92, 94, 95, 95],
+    yesPrice: 50, // Started at 50:50
+    priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 4100000,
     endDate: '2025-12-31T23:59:59',
     imageUrl: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=800&auto=format&fit=crop'
@@ -89,10 +89,11 @@ export const MOCK_COMMENTS: Comment[] = [
   { id: 'c5', marketId: 'm_xmas_2025', userName: '엘사', text: '낭만 뒤졌냐? 화이트 크리스마스 가즈아 ❄️', timestamp: Date.now() - 5000, prediction: 'YES', likeCount: 56, isLiked: false },
 ];
 
+// Realistic Early Stage Ranking
 export const MOCK_RANKING: RankedUser[] = [
-  { rank: 1, name: '워렌버핏', balance: 5240000, winRate: 95 },
-  { rank: 2, name: '일론머스크', balance: 3812000, winRate: 88 },
-  { rank: 3, name: '한강뷰가자', balance: 1540000, winRate: 62 }, 
-  { rank: 4, name: '인간지표', balance: 92000, winRate: 40 },
-  { rank: 5, name: '뉴비', balance: 3000, winRate: 0 },
+  { rank: 1, name: '촉이좋아', balance: 48500, winRate: 100 },
+  { rank: 2, name: '비트2억감', balance: 29200, winRate: 80 },
+  { rank: 3, name: '무한도전', balance: 12400, winRate: 66 }, 
+  { rank: 4, name: '찍기장인', balance: 8900, winRate: 50 },
+  { rank: 5, name: '뉴비123', balance: 3500, winRate: 100 },
 ];
