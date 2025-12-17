@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, LogIn, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS } from './constants';
 import BottomNav from './components/BottomNav';
@@ -8,8 +8,6 @@ import { supabase } from './lib/supabase';
 import { TRANSLATIONS, Language } from './translations';
 
 // --- Helper Components & Functions ---
-
-const isSupabaseConnected = !supabase['supabaseUrl']?.includes('placeholder');
 
 // Robust Logo Component
 const LogoImage: React.FC<{ className?: string }> = ({ className }) => {
@@ -88,10 +86,10 @@ const MiniChart: React.FC<{ history: number[], color: string }> = ({ history, co
 // Billboard
 const Billboard: React.FC<{ messages: BillboardMessage[] }> = ({ messages }) => (
     <div className="bg-black border-b border-zinc-900 overflow-hidden py-2 relative flex items-center h-10 shrink-0">
-        <div className="absolute left-0 z-10 bg-gradient-to-r from-black to-transparent w-8 h-full"></div>
-        <div className="absolute right-0 z-10 bg-gradient-to-l from-black to-transparent w-8 h-full"></div>
-        <Megaphone size={14} className="text-zzic absolute left-3 z-20 animate-pulse" />
-        <div className="whitespace-nowrap flex gap-8 animate-marquee pl-10">
+        <div className="absolute left-0 z-10 bg-gradient-to-r from-black to-transparent w-4 h-full"></div>
+        <div className="absolute right-0 z-10 bg-gradient-to-l from-black to-transparent w-4 h-full"></div>
+        {/* Megaphone icon removed for clearer view */}
+        <div className="whitespace-nowrap flex gap-8 animate-marquee pl-4">
             {[...messages, ...messages].map((msg, i) => (
                 <span key={`${msg.id}-${i}`} className={`text-xs font-bold ${msg.color} flex items-center gap-2`}>
                     <span className="opacity-70 text-[10px] border border-zinc-800 px-1 rounded uppercase">{msg.sender}</span>
@@ -375,14 +373,13 @@ const App: React.FC = () => {
       }));
   };
 
-  // --- Component Renders ---
+  // --- Render Helpers (Defined as functions to avoid React Anti-pattern) ---
 
-  // ... (SidebarLeft, SidebarRight, CommentItem omitted for brevity but presumed unchanged unless needed) ...
-  const SidebarLeft = () => (
+  const renderSidebarLeft = () => (
       <div className="hidden lg:flex flex-col h-[calc(100vh-2rem)] sticky top-4 gap-6 p-4 w-[280px]">
           <div onClick={() => setView('HOME')} className="cursor-pointer group">
               <div className="flex items-center gap-3">
-                  <LogoImage className="w-10 h-10 rounded-xl group-hover:scale-105 transition-transform" />
+                  {/* LogoImage removed for clean PC look */}
                   <div>
                     <h1 className="text-3xl font-black italic tracking-tighter text-white group-hover:text-zzic transition-colors leading-none">ZZIC</h1>
                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Trust Your Instinct</p>
@@ -422,8 +419,14 @@ const App: React.FC = () => {
                             <div className="text-xs text-zzic font-mono">{formatNumber(user.balance)} VP</div>
                         </div>
                     </div>
-                    <button onClick={() => setShowBillboardModal(true)} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <Megaphone size={12} /> {t('sidebar_billboard_btn')}
+                    {/* PC SIDEBAR BILLBOARD BUTTON: Make it stand out */}
+                    <button 
+                        onClick={() => setShowBillboardModal(true)} 
+                        className="w-full bg-gradient-to-r from-zzic to-lime-400 text-black font-black py-3 rounded-xl transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(204,255,0,0.3)] flex items-center justify-center gap-2 group relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                        <Megaphone size={16} className="fill-black" /> 
+                        <span className="relative z-10">{t('sidebar_billboard_btn')}</span>
                     </button>
                     <button onClick={handleLogout} className="w-full mt-2 text-zinc-500 hover:text-white text-xs font-bold py-2 flex items-center justify-center gap-2 transition-colors">
                         <LogOut size={12} /> {t('profile_logout')}
@@ -438,7 +441,7 @@ const App: React.FC = () => {
       </div>
   );
 
-  const SidebarRight = () => (
+  const renderSidebarRight = () => (
     <div className="hidden lg:flex flex-col h-[calc(100vh-2rem)] sticky top-4 gap-6 p-4 w-[320px]">
         <div className="relative group">
             <Search size={18} className="absolute left-4 top-3.5 text-zinc-500 group-focus-within:text-zzic transition-colors" />
@@ -530,10 +533,11 @@ const App: React.FC = () => {
                         e.stopPropagation();
                         setShowBillboardModal(true);
                     }} 
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zzic transition-colors active:scale-95 touch-manipulation"
+                    className="flex items-center gap-1 bg-zinc-900 border border-zinc-700 hover:border-zzic text-zinc-300 pl-2 pr-3 py-1.5 rounded-full transition-all active:scale-95 group"
                     aria-label="Billboard"
                 >
-                    <Megaphone size={18} />
+                    <Megaphone size={14} className="group-hover:text-zzic group-hover:animate-pulse transition-colors" />
+                    <span className="text-[10px] font-bold group-hover:text-white">전광판</span>
                 </button>
 
                 {user.balance < 1000 && <button onClick={handleRefill} className="animate-bounce bg-red-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.5)]"><BatteryCharging size={12} /></button>}
@@ -663,13 +667,6 @@ const App: React.FC = () => {
     </div>
   );
 
-  // ... (renderDetail, renderRanking, renderProfile, renderAbout omitted for brevity but assumed unchanged unless specifically targeted)
-  // I will just return the full component since previous renders are needed for context.
-  // Actually, to be safe and ensure the file is complete, I will output the whole file content.
-  // The user prompt implies updating existing files.
-  // However, I must include `renderDetail`, `renderRanking`, `renderProfile`, `renderAbout` as well.
-  // Since I cannot "import" them from previous blocks in this XML response, I will include the full file.
-  
   const renderDetail = () => {
     if (!activeMarket) return null;
     const tier = user ? getTier(user.balance) : null;
@@ -870,7 +867,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-zzic selection:text-black flex justify-center">
       <div className="w-full max-w-[1200px] flex items-start gap-0 lg:gap-8 justify-center min-h-screen relative shadow-2xl">
-        <SidebarLeft />
+        {renderSidebarLeft()}
         <main className="flex-1 w-full max-w-[600px] border-x border-zinc-900 min-h-screen bg-black relative pb-20 lg:pb-0">
             {view === 'HOME' && renderHome()}
             {view === 'DETAIL' && renderDetail()}
@@ -878,7 +875,7 @@ const App: React.FC = () => {
             {view === 'RANKING' && renderRanking()}
             {view === 'ABOUT' && renderAbout()}
         </main>
-        <SidebarRight />
+        {renderSidebarRight()}
         <BottomNav currentView={view} onChangeView={setView} />
         {showBillboardModal && (
             <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
