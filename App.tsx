@@ -117,8 +117,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
     const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   
     const handleSubmit = () => {
-      // ADMIN CHECK: If email contains 'admin', grant admin rights
-      const isAdmin = email.toLowerCase().includes('admin');
+      // ADMIN CHECK: If email contains 'admin' OR matches specific email, grant admin rights
+      const lowerEmail = email.toLowerCase();
+      const isAdmin = lowerEmail.includes('admin') || lowerEmail === 'yjcho@tetracorp.co.kr';
 
       const mockUser: UserState = {
         id: isLogin ? 'u_demo' : Date.now().toString(),
@@ -172,7 +173,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-white focus:border-zzic outline-none transition-colors"
-                      placeholder="user@example.com (Tip: 'admin' for Manager)"
+                      placeholder="user@example.com"
                   />
               </div>
                <div>
