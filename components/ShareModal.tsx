@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Share2, Check, Sparkles } from 'lucide-react';
+import { X, Share2, Check, Sparkles, Copy } from 'lucide-react';
 import { PortfolioItem } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
@@ -39,8 +39,8 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-300 p-6">
-      <div className="relative w-full max-w-[320px] flex flex-col gap-6">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-6">
+      <div className="relative w-full max-w-[340px] flex flex-col gap-6">
         
         {/* Close Button */}
         <button 
@@ -50,75 +50,80 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
           <X size={24} />
         </button>
 
-        {/* REALISTIC GOLD BAR (Bullion Style) */}
+        {/* --- REALISTIC GOLD BAR (Bullion Style v2) --- */}
         <div 
-            className="w-full aspect-[9/15] relative rounded-[2rem] shadow-[0_20px_60px_-10px_rgba(234,179,8,0.5)] select-none group transform transition-transform hover:scale-[1.02]"
+            className="w-full aspect-[9/15] relative rounded-[1.5rem] select-none group transform transition-transform duration-500 hover:scale-[1.01]"
             style={{
-                // Base Gold Gradient
-                background: 'linear-gradient(135deg, #FBF5C7 0%, #FFD700 25%, #F59E0B 50%, #B45309 80%, #713F12 100%)',
-                // Heavy Bevel Effect via Box Shadow
+                // Complex Metallic Gradient for Shine
+                background: 'linear-gradient(110deg, #b46b00 0%, #fde047 15%, #fcd34d 25%, #d97706 45%, #b45309 50%, #d97706 55%, #fcd34d 75%, #fde047 85%, #b46b00 100%)',
+                // Heavy 3D Bevel Effect
                 boxShadow: `
-                    inset 2px 2px 4px rgba(255, 255, 255, 0.7),
-                    inset -2px -2px 4px rgba(0, 0, 0, 0.4),
-                    inset 8px 8px 16px rgba(255, 215, 0, 0.2),
-                    inset -8px -8px 16px rgba(180, 83, 9, 0.4),
-                    0 25px 50px -12px rgba(0, 0, 0, 0.5)
+                    0 20px 50px -10px rgba(0, 0, 0, 0.7),
+                    inset 2px 2px 5px rgba(255, 255, 255, 0.9),
+                    inset -4px -4px 10px rgba(120, 53, 15, 0.5)
                 `
             }}
         >
-            {/* Brushed Metal Texture Overlay */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay rounded-[2rem]" 
+            {/* Texture: Brushed Metal (Noise) */}
+            <div className="absolute inset-2 rounded-[1.2rem] opacity-30 pointer-events-none mix-blend-overlay border border-yellow-900/10" 
                  style={{ 
-                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                     backgroundSize: '100px 100px'
+                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                  }}>
             </div>
 
-            {/* Shine / Glare Reflection */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-40 rounded-[2rem] pointer-events-none"></div>
-
-            {/* Engraved Content Container */}
-            <div className="absolute inset-4 rounded-[1.5rem] border border-[#B45309]/20 flex flex-col items-center justify-between py-6 px-4 text-center z-10"
+            {/* Content Container (Recessed look) */}
+            <div className="absolute inset-3 rounded-[1rem] border-2 border-[#92400e]/20 flex flex-col items-center justify-between py-6 px-5 text-center z-10"
                  style={{
-                     boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.1), inset -1px -1px 2px rgba(255,255,255,0.3)'
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+                    boxShadow: 'inset 4px 4px 10px rgba(146, 64, 14, 0.2), inset -2px -2px 5px rgba(255,255,255,0.3)'
                  }}
             >
-                {/* Top Stamp: Brand & Purity */}
-                <div className="space-y-2 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full border-2 border-[#854d0e] flex items-center justify-center mb-1 opacity-70" style={{ boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.3), 1px 1px 0 rgba(255,255,255,0.2)' }}>
-                        <span className="text-xl font-black italic text-[#854d0e]">Z</span>
+                {/* 1. Header: Brand */}
+                <div className="w-full flex flex-col items-center gap-1 pt-2">
+                    <div className="flex items-center gap-2 mb-1">
+                        <div className="h-[1px] w-8 bg-[#78350f]/40"></div>
+                        <div className="text-[10px] font-black text-[#78350f] tracking-[0.3em] uppercase scale-x-90 drop-shadow-sm">
+                            Pure Gold
+                        </div>
+                        <div className="h-[1px] w-8 bg-[#78350f]/40"></div>
                     </div>
-                    <h2 className="text-xl font-black tracking-widest text-[#713F12]" 
-                        style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.4), -1px -1px 0 rgba(0,0,0,0.2)' }}>
+                    <h1 className="text-4xl font-black tracking-tighter text-[#451a03]" 
+                        style={{ 
+                            fontFamily: 'serif',
+                            textShadow: '1px 1px 0px rgba(255,255,255,0.4), -1px -1px 0px rgba(180,83,9,0.1)' 
+                        }}>
                         ZZIC
-                    </h2>
-                    <div className="text-[10px] font-bold tracking-[0.3em] text-[#92400e] uppercase scale-x-90">
-                        Fine Gold 999.9
+                    </h1>
+                    <div className="text-[8px] font-bold text-[#92400e] uppercase tracking-widest border border-[#92400e] px-2 py-0.5 rounded-sm">
+                        999.9 FINE
                     </div>
                 </div>
 
-                {/* Middle: The Proposition (Engraved Text) */}
-                <div className="flex-1 flex flex-col items-center justify-center w-full space-y-6">
-                    <div className="w-full px-2">
-                         <p className="text-xs font-serif font-bold text-[#78350f] leading-relaxed break-keep line-clamp-3 opacity-90"
-                            style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.3), -0.5px -0.5px 0 rgba(0,0,0,0.2)' }}
-                         >
-                            "{item.marketTitle}"
+                {/* 2. Main Content: The Topic & Prediction */}
+                <div className="flex-1 w-full flex flex-col items-center justify-center gap-6">
+                    
+                    {/* Topic Title (Engraved) */}
+                    <div className="w-full relative">
+                        <p className="text-sm font-black text-[#5B3A29] leading-relaxed break-keep line-clamp-3 font-serif"
+                           style={{ 
+                               textShadow: '1px 1px 0 rgba(255,255,255,0.5)' 
+                           }}
+                        >
+                           "{item.marketTitle}"
                         </p>
                     </div>
 
-                    {/* The Prediction Stamp (Deep Press Effect) */}
-                    <div className="relative group-hover:scale-105 transition-transform duration-500">
-                        <div className="absolute inset-0 bg-black/10 blur-md rounded-lg transform translate-y-1"></div>
-                        <div className="relative px-8 py-3 bg-gradient-to-br from-[#F59E0B] to-[#D97706] rounded-lg border-2 border-[#92400e]/30 flex items-center justify-center"
-                             style={{
-                                 boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.2)'
-                             }}
-                        >
-                            <span className={`text-4xl font-black italic tracking-tighter drop-shadow-sm 
+                    {/* The Prediction Stamp (Embossed Box) */}
+                    <div className="relative w-full max-w-[200px] group-hover:scale-105 transition-transform duration-500 ease-out">
+                         {/* Shine effect across the stamp */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent translate-x-[-100%] animate-[shimmer_3s_infinite]"></div>
+                        
+                        <div className="relative bg-gradient-to-b from-[#f59e0b] to-[#d97706] rounded-xl border border-[#b45309]/50 p-4 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4),0_4px_8px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center gap-1">
+                            <span className="text-[9px] font-bold text-[#78350f] uppercase tracking-widest opacity-80">Prediction</span>
+                            <span className={`text-5xl font-black italic tracking-tighter drop-shadow-sm 
                                 ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}
                                 style={{ 
-                                    textShadow: '0 1px 1px rgba(255,255,255,0.3)'
+                                    textShadow: '1px 1px 0 rgba(255,255,255,0.3)'
                                 }}
                             >
                                 {item.prediction}
@@ -127,41 +132,58 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
                     </div>
                 </div>
 
-                {/* Bottom: Weight & Serial */}
-                <div className="w-full space-y-2 pb-2">
-                    <div className="flex items-center justify-center gap-2 opacity-80">
-                        <div className="h-[1px] w-8 bg-[#92400e]"></div>
-                        <span className="text-[9px] font-black text-[#713F12]">NET WT 1000g</span>
-                        <div className="h-[1px] w-8 bg-[#92400e]"></div>
-                    </div>
-                    <div className="pt-2 border-t border-[#92400e]/20 w-3/4 mx-auto">
-                        <div className="text-[8px] font-mono text-[#78350f] tracking-widest font-bold">
-                            NO. {item.id.slice(-8).toUpperCase()}
+                {/* 3. Footer: Details */}
+                <div className="w-full space-y-3 pb-2">
+                     <p className="text-[10px] font-bold text-[#78350f] opacity-90 break-keep leading-tight">
+                        위 예측이 적중할 시<br/>이 부적을 소유한 자에게 행운이 깃듭니다.
+                    </p>
+                    
+                    {/* Serial Number Plate */}
+                    <div className="w-full border-t border-[#78350f]/20 pt-2 flex justify-between items-end px-2">
+                        <div className="flex flex-col items-start">
+                             <span className="text-[8px] font-bold text-[#92400e]">WEIGHT</span>
+                             <span className="text-[10px] font-black text-[#451a03]">1000g</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[8px] font-bold text-[#92400e]">SERIAL NO.</span>
+                            <span className="text-[10px] font-mono font-bold text-[#451a03] tracking-wider">{item.id.slice(-8).toUpperCase()}</span>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            {/* Reflection Glare (Overall) */}
+            <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-white/20 to-transparent skew-x-[-20deg] pointer-events-none rounded-[1.5rem]"></div>
         </div>
         
         {/* Action Buttons */}
-        <div className="w-full flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-3">
             <button 
                 onClick={handleShare}
-                className={`w-full py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95
-                ${isCopied ? 'bg-white text-black' : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'}`}
+                className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 border
+                ${isCopied 
+                    ? 'bg-white text-black border-white' 
+                    : 'bg-[#FFE135] text-black border-[#FCD34D] hover:bg-[#FFD700]'}`}
             >
                 {isCopied ? <Check size={18} /> : <Share2 size={18} />}
                 {isCopied ? t('share_copied') : t('share_btn')}
             </button>
-            <div className="text-center mt-1">
-                <p className="text-[10px] text-zinc-500 flex items-center justify-center gap-1.5 opacity-80">
-                    <Sparkles size={10} className="text-yellow-500" />
+            <div className="text-center">
+                <p className="text-[11px] text-zinc-500 flex items-center justify-center gap-1.5 font-bold">
+                    <Sparkles size={12} className="text-yellow-500 fill-yellow-500" />
                     부자되세요! 인스타 스토리에 공유해보세요
                 </p>
             </div>
         </div>
 
       </div>
+      <style>{`
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            50% { transform: translateX(150%) skewX(-20deg); }
+            100% { transform: translateX(150%) skewX(-20deg); }
+        }
+      `}</style>
     </div>
   );
 };
