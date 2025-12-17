@@ -17,6 +17,7 @@ export const TRANSLATIONS = {
     auth_signup_btn: '회원가입 완료',
     auth_social: '소셜 계정으로 계속하기',
     auth_guest: '게스트 모드 (체험하기)',
+    auth_guest_btn: '3초만에 게스트로 시작',
     auth_google_alert: 'MVP 버전에서는 이메일 로그인을 이용해주세요.',
     auth_login_required: '로그인이 필요합니다',
     auth_login_desc: '투표를 하려면 로그인이 필요합니다',
@@ -86,7 +87,7 @@ export const TRANSLATIONS = {
     profile_assets: '총 보유 자산',
     profile_hit_rate: '적중률',
     profile_history_count: '참여 기록',
-    profile_cache_warn: '브라우저 캐시 삭제 시 게스트 데이터가 초기화될 수 있습니다.',
+    profile_cache_warn: '게스트 데이터는 브라우저 종료 시 사라질 수 있습니다.',
     profile_recent: '최근 활동',
     profile_no_history: '아직 참여 내역이 없습니다.',
     profile_explore: '시장 둘러보기',
@@ -135,8 +136,9 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: '베팅 금액',
     share_return: '예상 수익',
-    share_btn: '황금 부적 공유하기',
+    share_btn: '카드 공유하기',
     share_copied: '링크 복사 완료!',
+    share_vote_now: '투표 참여하기',
 
     // Alerts
     msg_signup_success: '회원가입 성공! 자동 로그인됩니다.',
@@ -172,6 +174,7 @@ export const TRANSLATIONS = {
     auth_signup_btn: 'Sign Up',
     auth_social: 'Continue with Social',
     auth_guest: 'Guest Mode (Try)',
+    auth_guest_btn: 'Start as Guest in 3s',
     auth_google_alert: 'Please use email login for MVP.',
     auth_login_required: 'Login Required',
     auth_login_desc: 'You need to login to vote.',
@@ -290,8 +293,9 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: 'Bet Amount',
     share_return: 'Exp. Return',
-    share_btn: 'Share Golden Talisman',
+    share_btn: 'Share Card',
     share_copied: 'Link Copied!',
+    share_vote_now: 'VOTE NOW',
 
     // Alerts
     msg_signup_success: 'Sign up successful! Logging in.',

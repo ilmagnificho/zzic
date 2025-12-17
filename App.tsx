@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2, BookOpen } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2, BookOpen, Share2 } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS, BANNED_NICKNAMES } from './constants';
 import BottomNav from './components/BottomNav';
@@ -108,9 +108,10 @@ const Billboard: React.FC<{ messages: BillboardMessage[] }> = ({ messages }) => 
 interface AuthScreenProps {
   onClose: () => void;
   language: Language;
+  onGuestLogin: () => void;
 }
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
+const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language, onGuestLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -211,6 +212,20 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
               >
                   {loading && <Loader2 size={16} className="animate-spin" />}
                   {isLogin ? t('auth_login_btn') : t('auth_signup_btn')}
+              </button>
+              
+              <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-800"></div></div>
+                  <div className="relative flex justify-center"><span className="bg-zinc-900 px-2 text-[10px] text-zinc-600 uppercase font-bold">OR</span></div>
+              </div>
+              
+              {/* Guest Button */}
+              <button 
+                  onClick={onGuestLogin}
+                  className="w-full bg-white text-black font-black py-3 rounded-xl hover:bg-zzic transition-colors uppercase flex justify-center items-center gap-2 shadow-lg"
+              >
+                  <Rocket size={16} />
+                  {t('auth_guest_btn')}
               </button>
           </div>
           <div className="mt-6 text-center">
@@ -539,7 +554,7 @@ const HomeView: React.FC<any> = ({ billboardMsgs, toggleLanguage, user, setShowB
     </div>
 );
 
-const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, selectedPrediction, setSelectedPrediction, betAmount, setBetAmount, handlePredict, comments, activeMarketId, replyToId, setReplyToId, newCommentText, setNewCommentText, handleAddComment, handleLikeComment, language, handleSettleMarket }) => {
+const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, selectedPrediction, setSelectedPrediction, betAmount, setBetAmount, handlePredict, comments, activeMarketId, replyToId, setReplyToId, newCommentText, setNewCommentText, handleAddComment, handleLikeComment, language, handleSettleMarket, onShareMarket }) => {
     if (!activeMarket) return null;
     const tier = user ? getTier(user.balance) : null;
     const isClosed = activeMarket.result || (timeLeft.expired);
@@ -551,7 +566,13 @@ const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, s
                     <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors"><ArrowLeft size={24} /></button>
                     <span className="ml-2 font-black text-lg tracking-wide uppercase italic">{t('detail_nav')}</span>
                 </div>
-                {tier && <div className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-black ${tier.color} ${tier.bg}`}><tier.icon size={10} /> {tier.name}</div>}
+                <div className="flex items-center gap-2">
+                    {/* Share Button (Generic) */}
+                    <button onClick={() => onShareMarket(activeMarket)} className="p-2 rounded-full bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 transition-colors">
+                        <Share2 size={16} />
+                    </button>
+                    {tier && <div className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-black ${tier.color} ${tier.bg}`}><tier.icon size={10} /> {tier.name}</div>}
+                </div>
             </div>
             <div className="px-5 pt-6">
                 <div className="text-center mb-6">
@@ -881,6 +902,9 @@ const App: React.FC = () => {
   // Modals
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [showBillboardModal, setShowBillboardModal] = useState(false);
+  
+  // New Share Modal State (Generic Market Share)
+  const [marketToShare, setMarketToShare] = useState<Market | null>(null);
 
   // Comments State
   const [comments, setComments] = useState<Comment[]>(MOCK_COMMENTS);
@@ -1038,11 +1062,13 @@ const App: React.FC = () => {
             setUser({ ...user, balance: newBalance });
             alert(t('alert_refill_success'));
 
-            // DB Update
-            await supabase
-                .from('profiles')
-                .update({ balance: newBalance })
-                .eq('id', user.id);
+            if (!user.isGuest) {
+                // DB Update
+                await supabase
+                    .from('profiles')
+                    .update({ balance: newBalance })
+                    .eq('id', user.id);
+            }
         }
     }
   };
@@ -1055,24 +1081,41 @@ const App: React.FC = () => {
       }
   };
 
+  // [Added] Guest Login Function
+  const handleGuestLogin = () => {
+      const guestUser: UserState = {
+          id: `guest_${Date.now()}`,
+          name: `Guest_${Math.floor(Math.random() * 1000)}`,
+          balance: INITIAL_BALANCE,
+          portfolio: [],
+          isGuest: true,
+          isAdmin: false,
+          email: ''
+      };
+      setUser(guestUser);
+      setView('HOME'); // Close modal and go home
+  };
+
   const handleUpdateNickname = async (newName: string) => {
     if (user) {
         // Optimistic update
         setUser({ ...user, name: newName });
         
-        try {
-            // Update Auth Metadata (optional but good for consistency)
-            await supabase.auth.updateUser({
-                data: { display_name: newName }
-            });
-            // Update Public Profile Table (Critical)
-            await supabase
-                .from('profiles')
-                .update({ display_name: newName })
-                .eq('id', user.id);
-        } catch (e) {
-            console.error("Nickname update failed", e);
-            alert("Failed to save nickname on server.");
+        if (!user.isGuest) {
+            try {
+                // Update Auth Metadata (optional but good for consistency)
+                await supabase.auth.updateUser({
+                    data: { display_name: newName }
+                });
+                // Update Public Profile Table (Critical)
+                await supabase
+                    .from('profiles')
+                    .update({ display_name: newName })
+                    .eq('id', user.id);
+            } catch (e) {
+                console.error("Nickname update failed", e);
+                alert("Failed to save nickname on server.");
+            }
         }
     }
   };
@@ -1082,8 +1125,6 @@ const App: React.FC = () => {
       if (user.balance < 1000) return alert(t('alert_vp_insufficient'));
       if (!billboardText.trim()) return;
 
-      // In a real app, this would also be a DB insert into a 'billboards' table.
-      // For MVP, we just decrement balance in DB and update local state.
       const newBalance = user.balance - 1000;
       setUser({ ...user, balance: newBalance });
       
@@ -1098,8 +1139,10 @@ const App: React.FC = () => {
       setShowBillboardModal(false);
       alert(t('alert_billboard_success'));
 
-      // Sync Balance
-      supabase.from('profiles').update({ balance: newBalance }).eq('id', user.id);
+      if (!user.isGuest) {
+          // Sync Balance
+          supabase.from('profiles').update({ balance: newBalance }).eq('id', user.id);
+      }
   };
 
   const handleSuggest = () => {
@@ -1165,45 +1208,47 @@ const App: React.FC = () => {
     setLastPurchasedItem(newItem);
     setBetAmount(0);
 
-    // DB Update
-    try {
-        // 1. Insert Portfolio
-        const { data, error } = await supabase
-            .from('portfolios')
-            .insert({
-                user_id: user.id,
-                market_id: activeMarket.id,
-                market_title: newItem.marketTitle,
-                prediction: selectedPrediction,
-                amount: betAmount,
-                entry_price: price,
-                payout_multiple: multiplier,
-                timestamp: now,
-                is_claimed: false
-            })
-            .select()
-            .single();
-        
-        if (error) throw error;
+    // DB Update (Only if not Guest)
+    if (!user.isGuest) {
+        try {
+            // 1. Insert Portfolio
+            const { data, error } = await supabase
+                .from('portfolios')
+                .insert({
+                    user_id: user.id,
+                    market_id: activeMarket.id,
+                    market_title: newItem.marketTitle,
+                    prediction: selectedPrediction,
+                    amount: betAmount,
+                    entry_price: price,
+                    payout_multiple: multiplier,
+                    timestamp: now,
+                    is_claimed: false
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
 
-        // Update local state with real ID
-        if (data) {
-            setUser(prev => prev ? ({
-                ...prev,
-                portfolio: prev.portfolio.map(p => p.id === newItem.id ? { ...p, id: data.id } : p)
-            }) : null);
-            setLastPurchasedItem(prev => prev ? { ...prev, id: data.id } : null);
+            // Update local state with real ID
+            if (data) {
+                setUser(prev => prev ? ({
+                    ...prev,
+                    portfolio: prev.portfolio.map(p => p.id === newItem.id ? { ...p, id: data.id } : p)
+                }) : null);
+                setLastPurchasedItem(prev => prev ? { ...prev, id: data.id } : null);
+            }
+
+            // 2. Update Balance
+            await supabase
+                .from('profiles')
+                .update({ balance: newBalance })
+                .eq('id', user.id);
+
+        } catch (e) {
+            console.error("Betting failed:", e);
+            alert(t('alert_save_fail'));
         }
-
-        // 2. Update Balance
-        await supabase
-            .from('profiles')
-            .update({ balance: newBalance })
-            .eq('id', user.id);
-
-    } catch (e) {
-        console.error("Betting failed:", e);
-        alert(t('alert_save_fail'));
     }
   };
 
@@ -1255,15 +1300,11 @@ const App: React.FC = () => {
   const handleSettleMarket = async (result: 'YES' | 'NO') => {
       if (!user || !user.isAdmin || !activeMarketId) return;
       
-      // 1. Update Market Result (Local State)
       const updatedMarkets = markets.map(m => 
           m.id === activeMarketId ? { ...m, result: result } : m
       );
       setMarkets(updatedMarkets);
 
-      // 2. Calculate Payout for Current User (Client-side Simulation for Admin)
-      // In a real app, this should be a backend job or Edge Function iterating all users.
-      // Here we only settle for the logged-in admin for demonstration.
       let totalPayout = 0;
       let wonCount = 0;
       const winningIds: string[] = [];
@@ -1279,42 +1320,38 @@ const App: React.FC = () => {
                   return { ...item, isClaimed: true };
               } else {
                   // LOSER
-                  // We mark as claimed to ignore future processing, effectively 0 payout
-                  winningIds.push(item.id); // Mark these as processed in DB too
+                  winningIds.push(item.id); 
                   return { ...item, isClaimed: true };
               }
           }
           return item;
       });
 
-      // 3. Update User Balance & Portfolio (Local & DB)
       if (winningIds.length > 0) {
           const newBalance = user.balance + totalPayout;
-          
           setUser({
               ...user,
               balance: newBalance,
               portfolio: updatedPortfolio
           });
 
-          // DB Updates
-          try {
-              // Mark portfolios as claimed
-              await supabase
-                  .from('portfolios')
-                  .update({ is_claimed: true })
-                  .in('id', winningIds);
-              
-              // Update balance
-              await supabase
-                  .from('profiles')
-                  .update({ balance: newBalance })
-                  .eq('id', user.id);
-
-              alert(`MARKET CLOSED! Result: ${result}\n(Admin Mode) Settle complete for your account.\nWon: ${formatNumber(totalPayout)} VP.`);
-          } catch (e) {
-              console.error("Settlement sync failed", e);
+          // DB Updates (Skip for Guest)
+          if(!user.isGuest) {
+            try {
+                await supabase
+                    .from('portfolios')
+                    .update({ is_claimed: true })
+                    .in('id', winningIds);
+                
+                await supabase
+                    .from('profiles')
+                    .update({ balance: newBalance })
+                    .eq('id', user.id);
+            } catch (e) {
+                console.error("Settlement sync failed", e);
+            }
           }
+          alert(`MARKET CLOSED! Result: ${result}\n(Admin Mode) Settle complete for your account.\nWon: ${formatNumber(totalPayout)} VP.`);
       } else {
            alert(`MARKET CLOSED! Result: ${result}\nNo active bets to settle for you.`);
       }
@@ -1373,6 +1410,7 @@ const App: React.FC = () => {
                     handleLikeComment={handleLikeComment}
                     language={language}
                     handleSettleMarket={handleSettleMarket}
+                    onShareMarket={setMarketToShare}
                 />
             )}
             {view === 'RANKING' && <RankingView setView={setView} t={t} user={user} />}
@@ -1387,7 +1425,13 @@ const App: React.FC = () => {
                 />
             )}
             {view === 'ABOUT' && <AboutView setView={setView} t={t} />}
-            {view === 'AUTH' && <AuthScreen onClose={() => setView('HOME')} language={language} />}
+            {view === 'AUTH' && (
+                <AuthScreen 
+                    onClose={() => setView('HOME')} 
+                    language={language} 
+                    onGuestLogin={handleGuestLogin}
+                />
+            )}
         </main>
 
         <SidebarRight 
@@ -1400,13 +1444,22 @@ const App: React.FC = () => {
 
       <BottomNav currentView={view} onChangeView={setView} />
       
-      {/* Share Modal */}
+      {/* Share Modal (Prediction Share) */}
       {lastPurchasedItem && (
           <ShareModal 
             item={lastPurchasedItem} 
-            // [Added] Pass the corresponding Market object to get Category/Description
             market={markets.find(m => m.id === lastPurchasedItem.marketId)}
             onClose={() => setLastPurchasedItem(null)} 
+            language={language}
+          />
+      )}
+
+      {/* Share Modal (Generic Market Share) */}
+      {marketToShare && (
+          <ShareModal 
+            item={null}
+            market={marketToShare}
+            onClose={() => setMarketToShare(null)} 
             language={language}
           />
       )}

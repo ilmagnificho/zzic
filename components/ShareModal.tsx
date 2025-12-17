@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket } from 'lucide-react';
+import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket, Scale } from 'lucide-react';
 import { PortfolioItem, Market } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
 interface ShareModalProps {
-  item: PortfolioItem;
+  item?: PortfolioItem | null; // Made optional for generic market share
   market?: Market;
   onClose: () => void;
   language: Language;
@@ -15,9 +15,10 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   const [isCopied, setIsCopied] = useState(false);
 
-  const displayTitle = item.marketTitle;
+  // Fallback if sharing from Home without item
+  const displayTitle = item?.marketTitle || market?.title || 'ZZIC';
   const category = market?.category || 'STOCK';
-  const predictionEmoji = item.prediction === 'YES' ? '📈' : '📉';
+  const isPredictionShare = !!item;
 
   // --- STYLING LOGIC ---
   const getCardStyle = () => {
@@ -64,18 +65,23 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   const style = getCardStyle();
 
   const handleShare = async () => {
-    // 1. Dynamic Text Construction based on Market Type
     let shareText = '';
-    
-    if (category === 'WEATHER') {
-        shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${item.prediction === 'YES' ? '눈 온다 ❄️' : '안 온다 ☀️'} ] 입니다.\n함께 결과를 지켜보시죠!`;
-    } else if (category === 'COIN' || category === 'STOCK') {
-        shareText = `[ZZIC 투자 주의보] 💎\n\n"${displayTitle}"\n\n저는 [ ${item.prediction === 'YES' ? '간다! 🚀' : '안 간다! 📉'} ] 에 걸었습니다.\n이 황금 부적의 기운을 받으세요!`;
+    const predictionEmoji = item?.prediction === 'YES' ? '📈' : '📉';
+
+    if (isPredictionShare && item) {
+         if (category === 'WEATHER') {
+            shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${item.prediction === 'YES' ? '눈 온다 ❄️' : '안 온다 ☀️'} ] 입니다.\n함께 결과를 지켜보시죠!`;
+        } else if (category === 'COIN' || category === 'STOCK') {
+            shareText = `[ZZIC 투자 주의보] 💎\n\n"${displayTitle}"\n\n저는 [ ${item.prediction === 'YES' ? '간다! 🚀' : '안 간다! 📉'} ] 에 걸었습니다.\n이 황금 부적의 기운을 받으세요!`;
+        } else {
+            shareText = `[ZZIC 찌라시] ⚡️\n\n"${displayTitle}"\n\n${predictionEmoji} 저의 촉은 [ ${item.prediction} ] 입니다.\n성지순례 미리 오세요!`;
+        }
     } else {
-        shareText = `[ZZIC 찌라시] ⚡️\n\n"${displayTitle}"\n\n${predictionEmoji} 저의 촉은 [ ${item.prediction} ] 입니다.\n성지순례 미리 오세요!`;
+        // Generic Market Share
+        shareText = `[ZZIC 투표] 🗳️\n\n"${displayTitle}"\n\n당신의 촉을 믿으십니까?\n지금 바로 참여해서 결과를 확인하세요!`;
     }
 
-    const shareUrl = `https://zzic.vercel.app/?marketId=${item.marketId}`;
+    const shareUrl = `https://zzic.vercel.app/?marketId=${item?.marketId || market?.id}`;
     
     const shareData = {
         title: 'ZZIC - 너의 촉을 믿어봐',
@@ -144,33 +150,63 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
                         {displayTitle}
                     </h2>
 
-                    {/* Prediction Stamp */}
+                    {/* Stamp Logic */}
                     <div className="relative">
-                        {style.type === 'GOLD' ? (
-                            <div className="border-4 border-[#78350f] rounded-lg p-4 bg-[#b45309]/10 shadow-inner transform -rotate-6">
-                                <div className="text-[10px] font-black text-[#78350f] uppercase mb-1">PREDICTION</div>
-                                <div className={`text-5xl font-black ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}>{item.prediction}</div>
-                            </div>
-                        ) : style.type === 'FROST' ? (
-                             <div className="rounded-full w-32 h-32 border-4 border-white/50 flex flex-col items-center justify-center bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.5)]">
-                                <div className="text-[10px] font-bold text-white mb-1">MY CHOICE</div>
-                                <div className={`text-4xl font-black ${item.prediction === 'YES' ? 'text-blue-100' : 'text-pink-100'}`}>{item.prediction}</div>
-                            </div>
-                        ) : (
-                            <div className="border-2 border-dashed border-pink-500/50 p-2 rounded bg-black/50">
-                                <div className="border border-pink-500 px-6 py-3 rounded bg-pink-500/10">
-                                    <div className="text-4xl font-black text-white drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">{item.prediction}</div>
+                        {isPredictionShare && item ? (
+                             // --- PREDICTION STAMP (User Voted) ---
+                            style.type === 'GOLD' ? (
+                                <div className="border-4 border-[#78350f] rounded-lg p-4 bg-[#b45309]/10 shadow-inner transform -rotate-6">
+                                    <div className="text-[10px] font-black text-[#78350f] uppercase mb-1">PREDICTION</div>
+                                    <div className={`text-5xl font-black ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}>{item.prediction}</div>
                                 </div>
-                            </div>
+                            ) : style.type === 'FROST' ? (
+                                 <div className="rounded-full w-32 h-32 border-4 border-white/50 flex flex-col items-center justify-center bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                                    <div className="text-[10px] font-bold text-white mb-1">MY CHOICE</div>
+                                    <div className={`text-4xl font-black ${item.prediction === 'YES' ? 'text-blue-100' : 'text-pink-100'}`}>{item.prediction}</div>
+                                </div>
+                            ) : (
+                                <div className="border-2 border-dashed border-pink-500/50 p-2 rounded bg-black/50">
+                                    <div className="border border-pink-500 px-6 py-3 rounded bg-pink-500/10">
+                                        <div className="text-4xl font-black text-white drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">{item.prediction}</div>
+                                    </div>
+                                </div>
+                            )
+                        ) : (
+                            // --- GENERIC STAMP (VS / VOTE) ---
+                             style.type === 'GOLD' ? (
+                                <div className="flex flex-col items-center gap-2">
+                                     <Scale size={48} className="text-[#78350f] drop-shadow-sm" />
+                                     <div className="border-y-2 border-[#78350f] py-1 px-4 mt-2">
+                                         <span className="text-xl font-black text-[#78350f] tracking-widest">VOTE NOW</span>
+                                     </div>
+                                </div>
+                            ) : style.type === 'FROST' ? (
+                                <div className="flex items-center gap-4 text-white/90">
+                                    <div className="text-4xl font-black italic">YES</div>
+                                    <div className="h-12 w-0.5 bg-white/50"></div>
+                                    <div className="text-4xl font-black italic">NO</div>
+                                </div>
+                            ) : (
+                                <div className="animate-pulse">
+                                     <div className="bg-white text-black font-black text-4xl px-4 py-2 rotate-2 shadow-[5px_5px_0px_rgba(236,72,153,1)]">
+                                         VS
+                                     </div>
+                                </div>
+                            )
                         )}
                     </div>
+                    {!isPredictionShare && (
+                        <div className={`text-[10px] font-bold tracking-widest uppercase ${style.accentColor}`}>
+                            What is your choice?
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
                 <div className="mt-auto pt-4 border-t flex justify-between items-end" style={{ borderColor: style.type === 'GOLD' ? '#78350f' : 'rgba(255,255,255,0.3)' }}>
                     <div className="flex flex-col">
                         <span className={`text-[8px] font-bold ${style.accentColor}`}>DATE</span>
-                        <span className={`text-[10px] font-mono font-bold ${style.textColor}`}>{new Date(item.timestamp).toLocaleDateString()}</span>
+                        <span className={`text-[10px] font-mono font-bold ${style.textColor}`}>{new Date().toLocaleDateString()}</span>
                     </div>
                     {style.type === 'TICKET' ? <QrCode className="text-white opacity-80" size={32}/> : <Fingerprint className={style.type === 'GOLD' ? 'text-[#78350f]' : 'text-white'} opacity={0.5} size={32}/>}
                 </div>
