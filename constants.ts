@@ -1,7 +1,15 @@
+
 import { Market, Comment, RankedUser, BillboardMessage } from './types';
 
 // [ECONOMY] Start with 3,000 VP
 export const INITIAL_BALANCE = 3000;
+
+// [SECURITY] Banned Nicknames (Case insensitive check will be applied)
+export const BANNED_NICKNAMES = [
+    'admin', 'administrator', 'manager', 'operator', 'master', 'system', 'root',
+    'zzic', '찍', '운영자', '관리자', '주인장', '대표', 'ceo', 'official',
+    '테트라', 'tetra', 'tetracorp'
+];
 
 // [STRATEGY] MVP Launch Content - Seeded with "Hot" Topics
 // Volume is pre-filled to show activity (Social Proof)
