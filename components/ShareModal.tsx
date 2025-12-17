@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket, Scale } from 'lucide-react';
+import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket, Scale, Siren, Camera, TrendingUp } from 'lucide-react';
 import { PortfolioItem, Market } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
 interface ShareModalProps {
-  item?: PortfolioItem | null; // Made optional for generic market share
+  item?: PortfolioItem | null;
   market?: Market;
   onClose: () => void;
   language: Language;
@@ -15,77 +15,60 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   const [isCopied, setIsCopied] = useState(false);
 
-  // Fallback if sharing from Home without item
   const displayTitle = item?.marketTitle || market?.title || 'ZZIC';
   const category = market?.category || 'STOCK';
   const isPredictionShare = !!item;
 
-  // --- STYLING LOGIC ---
-  const getCardStyle = () => {
+  // --- THEME LOGIC ---
+  const getTheme = () => {
     switch (category) {
-      case 'WEATHER': // Style: Frost Glass / Ice Amulet
-        return {
-          type: 'FROST',
-          containerClass: 'rounded-[2rem] border-2 border-white/40 shadow-[0_20px_50px_-10px_rgba(14,165,233,0.5)]',
-          bg: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(224,242,254,0.2) 50%, rgba(14,165,233,0.1) 100%)',
-          textColor: 'text-white',
-          accentColor: 'text-cyan-200',
-          label: 'WEATHER FORECAST',
-          icon: <Snowflake size={24} className="text-cyan-200 animate-pulse" />,
-          textureOpacity: 0.6
-        };
-      case 'ENTER': // Style: Holographic Ticket
+      case 'WEATHER':
+        return 'SNOW';
+      case 'ENTER':
       case 'SPORTS':
-        return {
-          type: 'TICKET',
-          containerClass: 'rounded-xl border-x-2 border-y-0 border-pink-500/50 shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] clip-path-ticket',
-          bg: 'repeating-linear-gradient(45deg, #18181b, #18181b 10px, #27272a 10px, #27272a 20px)',
-          textColor: 'text-white',
-          accentColor: 'text-pink-400',
-          label: 'OFFICIAL TICKET',
-          icon: <Ticket size={24} className="text-pink-500" />,
-          textureOpacity: 0.1
-        };
-      case 'COIN': // Style: Gold Bar
+        return 'NEWS';
+      case 'COIN':
       case 'STOCK':
       default:
-        return {
-          type: 'GOLD',
-          containerClass: 'rounded-[4px] rounded-tr-[2rem] rounded-bl-[2rem] border-4 border-[#b45309] shadow-[0_20px_40px_-5px_rgba(0,0,0,0.8)]',
-          bg: 'linear-gradient(110deg, #854d0e 0%, #facc15 15%, #fef08a 25%, #ca8a04 45%, #a16207 50%, #ca8a04 55%, #fef08a 75%, #facc15 85%, #854d0e 100%)',
-          textColor: 'text-[#451a03]',
-          accentColor: 'text-[#78350f]',
-          label: '999.9 PURE LUCK',
-          icon: <Coins size={24} className="text-[#78350f]" />,
-          textureOpacity: 0.3
-        };
+        return 'GOLD';
     }
   };
 
-  const style = getCardStyle();
+  const theme = getTheme();
 
   const handleShare = async () => {
     let shareText = '';
-    const predictionEmoji = item?.prediction === 'YES' ? '📈' : '📉';
-
-    if (isPredictionShare && item) {
-         if (category === 'WEATHER') {
-            shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${item.prediction === 'YES' ? '눈 온다 ❄️' : '안 온다 ☀️'} ] 입니다.\n함께 결과를 지켜보시죠!`;
-        } else if (category === 'COIN' || category === 'STOCK') {
-            shareText = `[ZZIC 투자 주의보] 💎\n\n"${displayTitle}"\n\n저는 [ ${item.prediction === 'YES' ? '간다! 🚀' : '안 간다! 📉'} ] 에 걸었습니다.\n이 황금 부적의 기운을 받으세요!`;
+    
+    // 1. Text Generation based on Category
+    if (category === 'WEATHER') {
+        if (isPredictionShare) {
+            const pred = item?.prediction === 'YES' ? '눈이 온다! ❄️' : '눈 안 온다 ☀️';
+            shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${pred} ] 입니다.\n크리스마스의 기적, 함께 지켜보시죠!`;
         } else {
-            shareText = `[ZZIC 찌라시] ⚡️\n\n"${displayTitle}"\n\n${predictionEmoji} 저의 촉은 [ ${item.prediction} ] 입니다.\n성지순례 미리 오세요!`;
+            shareText = `[ZZIC 기상청 투표] ☃️\n\n"${displayTitle}"\n\n이번 크리스마스, 과연 화이트 크리스마스일까요?\n당신의 촉을 보여주세요!`;
         }
-    } else {
-        // Generic Market Share
-        shareText = `[ZZIC 투표] 🗳️\n\n"${displayTitle}"\n\n당신의 촉을 믿으십니까?\n지금 바로 참여해서 결과를 확인하세요!`;
+    } 
+    else if (category === 'ENTER' || category === 'SPORTS') {
+        if (isPredictionShare) {
+            shareText = `[ZZIC 단독 입수] 📸\n\n"${displayTitle}"\n\n저는 [ ${item?.prediction} ] 쪽에 걸었습니다.\n이게 터지면 성지순례 오세요!`;
+        } else {
+            shareText = `[ZZIC 핫이슈] 🔥\n\n"${displayTitle}"\n\n대한민국을 뒤흔들 떡밥!\n지금 바로 투표하고 결과를 확인하세요.`;
+        }
+    } 
+    else { // COIN, STOCK
+        if (isPredictionShare) {
+             const pred = item?.prediction === 'YES' ? '떡상 간다 🚀' : '돔황챠! 📉';
+             shareText = `[ZZIC 투자 인증] 💎\n\n"${displayTitle}"\n\n저는 [ ${pred} ] 에 전재산(?) 걸었습니다.\n이 황금 부적의 기운을 받으세요!`;
+        } else {
+             shareText = `[ZZIC 투자 주의보] 💎\n\n"${displayTitle}"\n\n비트코인 10만불, 과연 가능할까요?\n당신의 예측력을 증명해보세요!`;
+        }
     }
 
     const shareUrl = `https://zzic.vercel.app/?marketId=${item?.marketId || market?.id}`;
     
     const shareData = {
-        title: 'ZZIC - 너의 촉을 믿어봐',
-        text: `${shareText}\n👇 투표 하러가기`,
+        title: 'ZZIC - Trust Your Instinct',
+        text: `${shareText}\n👇 결과 확인하기`,
         url: shareUrl,
     };
 
@@ -114,106 +97,133 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
           <X size={24} />
         </button>
 
-        {/* --- DYNAMIC CARD RENDERER --- */}
-        <div 
-            className={`w-full aspect-[3/4.5] relative select-none group transform transition-transform duration-500 hover:scale-[1.01] overflow-hidden flex flex-col ${style.containerClass}`}
-            style={{ background: style.bg }}
-        >
-            {/* Texture Layer */}
-            <div className="absolute inset-0 pointer-events-none mix-blend-overlay" 
-                 style={{ 
-                     opacity: style.textureOpacity,
-                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
-                 }}>
-            </div>
-
-            {/* Frost/Glass Effect Layer (Weather Only) */}
-            {style.type === 'FROST' && (
-                <div className="absolute inset-0 backdrop-blur-sm bg-white/10"></div>
+        {/* --- CARD VISUALS --- */}
+        <div className={`w-full aspect-[3/4.5] relative select-none overflow-hidden flex flex-col shadow-2xl transition-transform duration-500 hover:scale-[1.01] ${
+            theme === 'GOLD' ? 'rounded-[4px] rounded-tr-[30px] rounded-bl-[30px] border-4 border-[#b45309]' : 
+            theme === 'SNOW' ? 'rounded-[32px] border border-white/30' : 
+            'rounded-none border-y-8 border-red-600' // NEWS theme
+        }`}>
+            
+            {/* 1. BACKGROUNDS */}
+            {theme === 'GOLD' && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#854d0e] via-[#facc15] to-[#713f12]">
+                     {/* Gold Texture */}
+                     <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1h2v2H1V1zm4 4h2v2H5V5zm4 4h2v2H9V9z' fill='%23000000' fill-opacity='0.4'/%3E%3C/svg%3E")`}}></div>
+                     {/* Shine */}
+                     <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/40 to-transparent rotate-45 animate-shine"></div>
+                </div>
+            )}
+            
+            {theme === 'SNOW' && (
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a] via-[#1e3a8a] to-[#172554]">
+                    {/* Snow Particles (CSS Animation) */}
+                    {[...Array(20)].map((_, i) => (
+                        <div key={i} className="absolute bg-white rounded-full opacity-80 animate-snow" style={{
+                            width: Math.random() * 4 + 2 + 'px',
+                            height: Math.random() * 4 + 2 + 'px',
+                            left: Math.random() * 100 + '%',
+                            animationDuration: Math.random() * 3 + 2 + 's',
+                            animationDelay: Math.random() * 5 + 's'
+                        }}></div>
+                    ))}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                </div>
             )}
 
-            {/* Content Container */}
-            <div className="relative z-10 flex-1 flex flex-col p-6 h-full">
+            {theme === 'NEWS' && (
+                <div className="absolute inset-0 bg-black">
+                     <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#222_10px,#222_20px)] opacity-30"></div>
+                     {/* Flash Effect */}
+                     <div className="absolute inset-0 bg-white opacity-0 animate-flash"></div>
+                </div>
+            )}
+
+            {/* 2. CONTENT */}
+            <div className="relative z-10 flex flex-col h-full p-6">
                 
                 {/* Header */}
-                <div className="flex justify-between items-start border-b pb-4 mb-4" style={{ borderColor: style.type === 'GOLD' ? '#78350f' : 'rgba(255,255,255,0.3)' }}>
+                <div className="flex justify-between items-start mb-6">
                     <div className="flex flex-col">
-                        <span className={`text-[10px] font-black tracking-[0.2em] ${style.accentColor}`}>{style.label}</span>
-                        <span className={`text-2xl font-black italic tracking-tighter ${style.textColor}`}>ZZIC</span>
+                         {theme === 'GOLD' && <span className="text-[10px] font-black text-[#451a03] tracking-[0.3em]">GOLD STANDARD</span>}
+                         {theme === 'SNOW' && <span className="text-[10px] font-black text-cyan-200 tracking-[0.3em] flex items-center gap-1"><Snowflake size={10}/> WINTER SPECIAL</span>}
+                         {theme === 'NEWS' && <span className="text-[10px] font-black text-red-500 tracking-[0.3em] bg-white px-1">BREAKING NEWS</span>}
+                         
+                         <h1 className={`text-3xl font-black italic tracking-tighter mt-1 ${
+                             theme === 'GOLD' ? 'text-[#451a03]' : 'text-white'
+                         }`}>ZZIC</h1>
                     </div>
-                    <div>{style.icon}</div>
+                    <div>
+                        {theme === 'GOLD' && <Coins size={32} className="text-[#451a03] opacity-80" />}
+                        {theme === 'SNOW' && <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm"><Snowflake size={24} className="text-white animate-spin-slow" /></div>}
+                        {theme === 'NEWS' && <Camera size={32} className="text-white animate-pulse" />}
+                    </div>
                 </div>
 
-                {/* Body */}
-                <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
-                    <h2 className={`text-xl font-bold leading-tight break-keep ${style.textColor}`} style={{ textShadow: style.type === 'GOLD' ? '0 1px 0 rgba(255,255,255,0.4)' : '0 2px 4px rgba(0,0,0,0.5)' }}>
+                {/* Main Body */}
+                <div className="flex-1 flex flex-col items-center justify-center text-center gap-8">
+                    
+                    {/* Title */}
+                    <h2 className={`text-2xl font-bold leading-tight break-keep drop-shadow-lg ${
+                        theme === 'GOLD' ? 'text-[#451a03]' : 'text-white'
+                    }`}>
                         {displayTitle}
                     </h2>
 
-                    {/* Stamp Logic */}
+                    {/* Stamp / Icon */}
                     <div className="relative">
                         {isPredictionShare && item ? (
-                             // --- PREDICTION STAMP (User Voted) ---
-                            style.type === 'GOLD' ? (
-                                <div className="border-4 border-[#78350f] rounded-lg p-4 bg-[#b45309]/10 shadow-inner transform -rotate-6">
-                                    <div className="text-[10px] font-black text-[#78350f] uppercase mb-1">PREDICTION</div>
-                                    <div className={`text-5xl font-black ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}>{item.prediction}</div>
-                                </div>
-                            ) : style.type === 'FROST' ? (
-                                 <div className="rounded-full w-32 h-32 border-4 border-white/50 flex flex-col items-center justify-center bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.5)]">
-                                    <div className="text-[10px] font-bold text-white mb-1">MY CHOICE</div>
-                                    <div className={`text-4xl font-black ${item.prediction === 'YES' ? 'text-blue-100' : 'text-pink-100'}`}>{item.prediction}</div>
-                                </div>
-                            ) : (
-                                <div className="border-2 border-dashed border-pink-500/50 p-2 rounded bg-black/50">
-                                    <div className="border border-pink-500 px-6 py-3 rounded bg-pink-500/10">
-                                        <div className="text-4xl font-black text-white drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">{item.prediction}</div>
-                                    </div>
-                                </div>
-                            )
+                             <div className={`border-4 rounded-xl p-4 transform -rotate-6 shadow-2xl ${
+                                 theme === 'GOLD' ? 'border-[#713f12] bg-[#fef08a]/30 text-[#451a03]' :
+                                 theme === 'SNOW' ? 'border-white bg-white/20 text-white backdrop-blur-md' :
+                                 'border-red-600 bg-red-600 text-white'
+                             }`}>
+                                <div className="text-[10px] font-black opacity-80 mb-1 uppercase">MY PREDICTION</div>
+                                <div className="text-5xl font-black">{item.prediction}</div>
+                            </div>
                         ) : (
-                            // --- GENERIC STAMP (VS / VOTE) ---
-                             style.type === 'GOLD' ? (
+                            // Generic Share Visuals
+                            theme === 'GOLD' ? (
                                 <div className="flex flex-col items-center gap-2">
-                                     <Scale size={48} className="text-[#78350f] drop-shadow-sm" />
-                                     <div className="border-y-2 border-[#78350f] py-1 px-4 mt-2">
-                                         <span className="text-xl font-black text-[#78350f] tracking-widest">VOTE NOW</span>
-                                     </div>
+                                     <Scale size={64} className="text-[#451a03] drop-shadow-md" />
+                                     <div className="bg-[#451a03] text-[#facc15] px-4 py-1 font-black text-xl rounded">VOTE NOW</div>
                                 </div>
-                            ) : style.type === 'FROST' ? (
-                                <div className="flex items-center gap-4 text-white/90">
-                                    <div className="text-4xl font-black italic">YES</div>
-                                    <div className="h-12 w-0.5 bg-white/50"></div>
-                                    <div className="text-4xl font-black italic">NO</div>
+                            ) : theme === 'SNOW' ? (
+                                <div className="flex items-center gap-6">
+                                     <div className="text-center"><div className="text-4xl font-black text-white">YES</div><div className="text-[10px] text-cyan-200 mt-1">SNOW</div></div>
+                                     <div className="h-16 w-0.5 bg-white/30"></div>
+                                     <div className="text-center"><div className="text-4xl font-black text-white/50">NO</div><div className="text-[10px] text-white/50 mt-1">SUNNY</div></div>
                                 </div>
                             ) : (
-                                <div className="animate-pulse">
-                                     <div className="bg-white text-black font-black text-4xl px-4 py-2 rotate-2 shadow-[5px_5px_0px_rgba(236,72,153,1)]">
-                                         VS
-                                     </div>
+                                <div className="relative">
+                                     <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-t from-zinc-500 to-white italic">VS</div>
+                                     <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 -rotate-3">HOT TOPIC</div>
                                 </div>
                             )
                         )}
                     </div>
-                    {!isPredictionShare && (
-                        <div className={`text-[10px] font-bold tracking-widest uppercase ${style.accentColor}`}>
-                            What is your choice?
+                    
+                    {theme === 'NEWS' && !isPredictionShare && (
+                        <div className="text-red-500 font-black text-lg tracking-widest border-y-2 border-red-500 w-full py-1 bg-black">
+                            EXCLUSIVE
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="mt-auto pt-4 border-t flex justify-between items-end" style={{ borderColor: style.type === 'GOLD' ? '#78350f' : 'rgba(255,255,255,0.3)' }}>
+                <div className={`mt-auto pt-4 border-t flex justify-between items-end ${
+                    theme === 'GOLD' ? 'border-[#451a03]/30' : 'border-white/30'
+                }`}>
                     <div className="flex flex-col">
-                        <span className={`text-[8px] font-bold ${style.accentColor}`}>DATE</span>
-                        <span className={`text-[10px] font-mono font-bold ${style.textColor}`}>{new Date().toLocaleDateString()}</span>
+                        <span className={`text-[8px] font-bold ${theme === 'GOLD' ? 'text-[#713f12]' : 'text-zinc-400'}`}>DATE</span>
+                        <span className={`text-[12px] font-mono font-bold ${theme === 'GOLD' ? 'text-[#451a03]' : 'text-white'}`}>{new Date().toLocaleDateString()}</span>
                     </div>
-                    {style.type === 'TICKET' ? <QrCode className="text-white opacity-80" size={32}/> : <Fingerprint className={style.type === 'GOLD' ? 'text-[#78350f]' : 'text-white'} opacity={0.5} size={32}/>}
+                    <div className="flex items-center gap-2">
+                         <span className={`text-[10px] font-bold tracking-widest ${theme === 'GOLD' ? 'text-[#713f12]' : 'text-zinc-400'}`}>ZZIC.APP</span>
+                         <Fingerprint className={theme === 'GOLD' ? 'text-[#451a03]' : 'text-white'} opacity={0.7} size={28}/>
+                    </div>
                 </div>
-            </div>
 
-            {/* Shine Effect */}
-            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 animate-shine" />
+            </div>
         </div>
         
         {/* Share Button */}
@@ -226,22 +236,28 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
             {isCopied ? t('share_copied') : t('share_btn')}
         </button>
       </div>
+
       <style>{`
+        @keyframes snow {
+            0% { transform: translateY(-10px); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(340px); opacity: 0.5; }
+        }
+        .animate-snow { animation: snow linear infinite; }
+        
         @keyframes shine {
-            100% {
-                left: 125%;
-            }
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
-        .animate-shine {
-            animation: shine 3s infinite;
+        .animate-shine { animation: shine 3s infinite; }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            5%, 10% { opacity: 0.3; }
         }
-        .clip-path-ticket {
-            clip-path: polygon(
-                0% 0%, 100% 0%, 100% 100%, 0% 100%,
-                0% 70%, 5% 65%, 0% 60%,
-                100% 60%, 95% 65%, 100% 70%
-            );
-        }
+        .animate-flash { animation: flash 4s infinite; }
+        
+        .animate-spin-slow { animation: spin 4s linear infinite; }
       `}</style>
     </div>
   );
