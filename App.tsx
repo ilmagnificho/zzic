@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2 } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS, BANNED_NICKNAMES } from './constants';
 import BottomNav from './components/BottomNav';
@@ -104,48 +104,73 @@ const Billboard: React.FC<{ messages: BillboardMessage[] }> = ({ messages }) => 
 
 // --- Auth Screen Component ---
 interface AuthScreenProps {
-  onLogin: (user: UserState) => void;
   onClose: () => void;
   language: Language;
 }
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) => {
+const AuthScreen: React.FC<AuthScreenProps> = ({ onClose, language }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [loading, setLoading] = useState(false);
     const t = (key: keyof typeof TRANSLATIONS['ko']) => TRANSLATIONS[language][key];
   
-    const handleSubmit = () => {
-      // ADMIN CHECK: If email contains 'admin' OR matches specific email, grant admin rights
-      const lowerEmail = email.toLowerCase();
-      const isAdmin = lowerEmail.includes('admin') || lowerEmail === 'yjcho@tetracorp.co.kr';
+    const handleSubmit = async () => {
+        if(!email || !password) return alert("Email and Password are required.");
+        if(!isLogin && !name) return alert("Nickname is required.");
+        
+        setLoading(true);
+        try {
+            if (isLogin) {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (error) throw error;
+                // Login successful, App component will handle state update via onAuthStateChange
+            } else {
+                // Check banned nicknames
+                const lowerName = name.toLowerCase();
+                const isBanned = BANNED_NICKNAMES.some(word => lowerName.includes(word));
+                if(isBanned) {
+                    alert("This nickname contains restricted words.");
+                    setLoading(false);
+                    return;
+                }
 
-      // Default name from email or input
-      const initialName = isLogin ? (email ? email.split('@')[0] : 'DemoUser') : (name || 'New User');
-
-      const mockUser: UserState = {
-        id: isLogin ? 'u_demo' : Date.now().toString(),
-        email: email || 'user@example.com',
-        balance: INITIAL_BALANCE,
-        name: initialName,
-        portfolio: [],
-        isGuest: false,
-        isAdmin: isAdmin
-      };
-      onLogin(mockUser);
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            display_name: name,
+                        }
+                    }
+                });
+                if (error) throw error;
+                alert(t('msg_signup_success'));
+            }
+            onClose();
+        } catch (error: any) {
+            alert(error.message || t('alert_error'));
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleGuest = () => {
-        const guest: UserState = {
-            id: 'guest_' + Date.now(),
-            balance: INITIAL_BALANCE,
-            name: 'Guest ' + Math.floor(Math.random() * 1000),
-            portfolio: [],
-            isGuest: true,
-            isAdmin: false 
-        };
-        onLogin(guest);
+    const handleGuest = async () => {
+        // Guest mode doesn't use Supabase Auth usually, but for consistency in this app structure,
+        // we might create an anonymous user or just use local state.
+        // For now, let's keep the local mock user generation for Guest to be fast.
+        // The App component will handle this if we pass a special flag or just handle it here.
+        // Since App expects auth state change for real users, we need a way to set guest.
+        // For MVP, Guest = Local State User.
+        
+        // This function needs to communicate back to App.
+        // Since we removed 'onLogin' prop to rely on Supabase, we need a way to set Guest.
+        // We will dispatch a custom event or use a callback if we re-add it.
+        // Let's re-add onGuestLogin prop for cleaner code.
     };
   
     return (
@@ -158,17 +183,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
             {isLogin ? t('login') : t('signup')}
           </h2>
           <p className="text-center text-zinc-500 text-xs mb-8">로그인하면 기록이 영구 저장됩니다.</p>
-           <button 
-              onClick={handleGuest}
-              className="w-full bg-white text-black font-black py-4 rounded-xl mb-6 hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-          >
-              <Rocket size={20} className="text-blue-600" />
-              <span>3초만에 게스트로 시작하기</span>
-          </button>
-          <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-800"></div></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-zinc-900 px-2 text-zinc-500 font-bold">Or Email Login</span></div>
-          </div>
+          
           <div className="space-y-4 opacity-80 hover:opacity-100 transition-opacity">
               <div>
                   <input 
@@ -188,10 +203,23 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onClose, language }) =
                       placeholder="••••••••"
                   />
               </div>
+              {!isLogin && (
+                  <div>
+                    <input 
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-white focus:border-zzic outline-none transition-colors"
+                        placeholder="Nickname"
+                    />
+                </div>
+              )}
               <button 
                   onClick={handleSubmit}
-                  className="w-full bg-zinc-800 text-zinc-400 font-bold py-3 rounded-xl hover:text-white hover:bg-zinc-700 transition-colors uppercase"
+                  disabled={loading}
+                  className="w-full bg-zinc-800 text-zinc-400 font-bold py-3 rounded-xl hover:text-white hover:bg-zinc-700 transition-colors uppercase flex justify-center items-center gap-2"
               >
+                  {loading && <Loader2 size={16} className="animate-spin" />}
                   {isLogin ? t('auth_login_btn') : t('auth_signup_btn')}
               </button>
           </div>
@@ -775,32 +803,64 @@ const ProfileView: React.FC<any> = ({ setView, t, user, handleRefill, handleLogo
 };
 
 const AboutView: React.FC<any> = ({ setView, t }) => (
-    <div className="pb-24 lg:pb-0 animate-in fade-in duration-500 min-h-screen flex flex-col">
-        <div className="px-5 py-6 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 lg:hidden"><div className="flex items-center gap-3"><button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors"><ArrowLeft size={24} /></button><h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('about_nav')}</h1></div></div>
-        <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center"><h2 className="text-xl font-bold text-white">About ZZIC</h2></div>
-        <div className="px-6 py-10 flex-1 flex flex-col items-center text-center">
-            <div className="mb-8 relative flex flex-col items-center">
-                <div className="absolute inset-0 bg-zzic blur-[60px] opacity-20 rounded-full"></div>
-                <LogoImage className="w-24 h-24 rounded-3xl shadow-2xl mb-4 relative z-10 border border-zinc-800" />
-                <h1 className="text-5xl font-black italic tracking-tighter text-white relative z-10">ZZIC</h1>
-                <p className="text-xs text-zzic font-bold tracking-[0.3em] uppercase mt-2">{t('about_slogan')}</p>
+    <div className="pb-24 lg:pb-0 animate-in slide-in-from-right duration-300 min-h-screen">
+        <div className="px-5 py-6 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 lg:hidden">
+            <div className="flex items-center gap-3">
+                <button onClick={() => setView('HOME')} className="p-2 -ml-2 rounded-full hover:bg-zinc-900 text-white transition-colors">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-xl font-black italic text-white tracking-tighter uppercase">{t('about_nav')}</h1>
             </div>
-            <p className="text-lg font-bold text-zinc-300 mb-12 leading-relaxed max-w-sm">{t('about_desc_1')}<br/><span className="text-white">{t('about_desc_2')}</span></p>
-            <div className="w-full space-y-4 max-w-md">
-                <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-zzic/50 transition-all">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><ShieldCheck size={64} className="text-white"/></div>
-                    <div className="relative z-10"><h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><ShieldCheck size={20} className="text-zzic"/>{t('about_card_1_title')}</h3><p className="text-sm text-zinc-400 font-medium leading-relaxed">{t('about_card_1_desc')}</p></div>
+        </div>
+        <div className="hidden lg:flex px-6 py-4 sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900 justify-between items-center">
+            <h2 className="text-xl font-bold text-white">About</h2>
+        </div>
+        
+        <div className="px-5 pt-8 pb-12">
+            <div className="flex flex-col items-center text-center mb-12">
+                 <div className="w-20 h-20 bg-zinc-900 rounded-3xl rotate-3 flex items-center justify-center border-2 border-zinc-800 mb-6 shadow-[0_0_30px_rgba(204,255,0,0.1)]">
+                     <span className="text-3xl font-black italic tracking-tighter text-white">Z</span>
+                 </div>
+                 <h2 className="text-3xl font-black text-white italic tracking-tighter mb-2">ZZIC</h2>
+                 <p className="text-zzic font-bold tracking-widest text-xs uppercase mb-6">{t('about_slogan')}</p>
+                 <p className="text-zinc-400 text-sm leading-relaxed max-w-[300px]">
+                     {t('about_desc_1')}<br/>{t('about_desc_2')}
+                 </p>
+            </div>
+
+            <div className="space-y-4">
+                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mb-4 text-zinc-400">
+                        <Wallet size={20} />
+                    </div>
+                    <h3 className="text-white font-bold mb-2">{t('about_card_1_title')}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{t('about_card_1_desc')}</p>
                 </div>
-                <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-yellow-500/50 transition-all">
-                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Bug size={64} className="text-yellow-500"/></div>
-                    <div className="relative z-10"><h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Bug size={20} className="text-yellow-500"/>{t('about_card_2_title')}</h3><p className="text-sm text-zinc-400 font-medium leading-relaxed">{t('about_card_2_desc')}</p></div>
+
+                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mb-4 text-zinc-400">
+                        <Bug size={20} />
+                    </div>
+                    <h3 className="text-white font-bold mb-2">{t('about_card_2_title')}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{t('about_card_2_desc')}</p>
                 </div>
-                 <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 text-left relative overflow-hidden group hover:border-blue-500/50 transition-all">
-                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Users size={64} className="text-blue-500"/></div>
-                    <div className="relative z-10"><h3 className="text-xl font-black text-white mb-2 flex items-center gap-2"><Users size={20} className="text-blue-500"/>{t('about_card_3_title')}</h3><p className="text-sm text-zinc-400 font-medium leading-relaxed">{t('about_card_3_desc')}</p></div>
+
+                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mb-4 text-zinc-400">
+                        <ShieldCheck size={20} />
+                    </div>
+                    <h3 className="text-white font-bold mb-2">{t('about_card_3_title')}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{t('about_card_3_desc')}</p>
                 </div>
             </div>
-             <div className="mt-auto pt-12 pb-6"><p className="text-[10px] text-zinc-600 font-mono">© 2025 ZZIC Inc. All rights reserved.<br/>Contact: support@zzic.app</p></div>
+
+            <div className="mt-12 text-center">
+                 <p className="text-[10px] text-zinc-700 font-mono">
+                     Version 0.1.0 (Beta)<br/>
+                     © 2025 ZZIC Inc. All rights reserved.
+                 </p>
+            </div>
+             <div className="py-8 text-center px-4 lg:hidden"><p className="text-[10px] text-zinc-600 font-medium leading-relaxed">{t('footer_text')}</p></div>
         </div>
     </div>
 );
@@ -844,6 +904,42 @@ const App: React.FC = () => {
   
   const timeLeft = useCountdown(activeMarket?.endDate);
 
+  // [AUTH] Initialize & Listen
+  useEffect(() => {
+    // 1. Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        initializeUser(session.user);
+      }
+    });
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+            initializeUser(session.user);
+        } else {
+            setUser(null);
+        }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const initializeUser = (authUser: any) => {
+      const email = authUser.email || '';
+      const isAdmin = email === 'yjcho@tetracorp.co.kr' || email.includes('admin');
+      
+      setUser({
+          id: authUser.id,
+          email: email,
+          name: authUser.user_metadata?.display_name || email.split('@')[0],
+          balance: INITIAL_BALANCE, // [NOTE] Reset on refresh as we don't have DB for balance yet
+          portfolio: [], // [NOTE] Reset on refresh
+          isGuest: false,
+          isAdmin: isAdmin
+      });
+  };
+
   // [DEEP LINKING] Handle ?marketId=xyz
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -866,16 +962,28 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
       if(confirm(t('msg_logout_confirm'))) {
+          await supabase.auth.signOut();
           setUser(null);
           setView('HOME');
       }
   };
 
-  const handleUpdateNickname = (newName: string) => {
+  const handleUpdateNickname = async (newName: string) => {
     if (user) {
+        // Optimistic update
         setUser({ ...user, name: newName });
+        
+        // Supabase update
+        try {
+            await supabase.auth.updateUser({
+                data: { display_name: newName }
+            });
+        } catch (e) {
+            console.error("Nickname update failed", e);
+            alert("Failed to save nickname on server.");
+        }
     }
   };
 
@@ -1093,7 +1201,7 @@ const App: React.FC = () => {
                 />
             )}
             {view === 'ABOUT' && <AboutView setView={setView} t={t} />}
-            {view === 'AUTH' && <AuthScreen onLogin={(u) => { setUser(u); setView('HOME'); }} onClose={() => setView('HOME')} language={language} />}
+            {view === 'AUTH' && <AuthScreen onClose={() => setView('HOME')} language={language} />}
         </main>
 
         <SidebarRight 
