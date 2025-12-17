@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2, BookOpen, Share2 } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
@@ -950,12 +951,121 @@ const App: React.FC = () => {
     }
   }, [activeMarket]);
 
+  // [FETCH] Load Markets from Supabase OR Local Storage
+  useEffect(() => {
+    const fetchMarkets = async () => {
+        // 1. Optimistic Load from Local Storage first
+        // This ensures that even if DB fetch fails, we retain previous session's predictions
+        let mergedMarkets = [...INITIAL_MARKETS];
+        try {
+            const localData = localStorage.getItem('zzic_markets');
+            if (localData) {
+                const parsed = JSON.parse(localData);
+                mergedMarkets = mergedMarkets.map(m => {
+                    const saved = parsed.find((p: Market) => p.id === m.id);
+                    // Only merge dynamic fields, keep code-defined static fields (like updated images)
+                    if (saved) {
+                        return {
+                            ...m,
+                            yesPrice: saved.yesPrice,
+                            priceHistory: saved.priceHistory || m.priceHistory,
+                            volume: saved.volume || m.volume,
+                            result: saved.result
+                        };
+                    }
+                    return m;
+                });
+                setMarkets(mergedMarkets); // Set immediately
+            }
+        } catch (e) {
+            console.error("Local storage load failed", e);
+        }
+
+        // 2. Fetch from DB
+        const { data, error } = await supabase.from('markets').select('*');
+        
+        if (error || !data) {
+            // If fetch fails (e.g. no connection), we silently continue using local/initial data
+            // console.warn("Using local data due to fetch error:", error?.message);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            // Merge DB data
+            const dbMarkets = mergedMarkets.map(m => {
+                const dbMarket = data.find((d: any) => d.id === m.id);
+                if (dbMarket) {
+                    return {
+                        ...m,
+                        yesPrice: dbMarket.yes_price,
+                        priceHistory: dbMarket.price_history || m.priceHistory,
+                        volume: dbMarket.volume,
+                        result: dbMarket.result
+                    };
+                }
+                return m;
+            });
+            setMarkets(dbMarkets);
+            // Update local storage to match DB
+            localStorage.setItem('zzic_markets', JSON.stringify(dbMarkets));
+        }
+    };
+    
+    fetchMarkets();
+
+    // [REALTIME] Subscribe to Market changes
+    const subscription = supabase
+        .channel('public:markets')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'markets' }, (payload) => {
+            const updated = payload.new;
+            setMarkets(prev => {
+                const newMarkets = prev.map(m => {
+                    if (m.id === updated.id) {
+                        return {
+                            ...m,
+                            yesPrice: updated.yes_price,
+                            priceHistory: updated.price_history,
+                            volume: updated.volume,
+                            result: updated.result
+                        };
+                    }
+                    return m;
+                });
+                // Sync realtime updates to local storage
+                localStorage.setItem('zzic_markets', JSON.stringify(newMarkets));
+                return newMarkets;
+            });
+        })
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(subscription);
+    };
+  }, []);
+
   // [AUTH] Initialize & Listen
   useEffect(() => {
+    // Check Guest
+    const checkGuest = () => {
+        const localGuest = localStorage.getItem('zzic_guest_user');
+        if (localGuest) {
+            try {
+                const guest = JSON.parse(localGuest);
+                // Optionally verify structure
+                if (guest && guest.isGuest) return guest;
+            } catch(e) {}
+        }
+        return null;
+    };
+
     // 1. Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         initializeUser(session.user);
+      } else {
+        // Fallback to Guest
+        const guest = checkGuest();
+        if (guest) setUser(guest);
       }
     });
 
@@ -964,12 +1074,20 @@ const App: React.FC = () => {
         if (session?.user) {
             initializeUser(session.user);
         } else {
-            setUser(null);
+             // Fallback to Guest on logout is handled in handleLogout or manually
+             // setUser(null); 
         }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // [PERSISTENCE] Save Guest User to LocalStorage
+  useEffect(() => {
+      if (user && user.isGuest) {
+          localStorage.setItem('zzic_guest_user', JSON.stringify(user));
+      }
+  }, [user]);
 
   // Fetch full profile from Supabase DB with retry logic
   const initializeUser = async (authUser: any, retries = 3) => {
@@ -1076,6 +1194,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
       if(confirm(t('msg_logout_confirm'))) {
           await supabase.auth.signOut();
+          localStorage.removeItem('zzic_guest_user'); // Clear guest data on logout
           setUser(null);
           setView('HOME');
       }
@@ -1093,6 +1212,7 @@ const App: React.FC = () => {
           email: ''
       };
       setUser(guestUser);
+      localStorage.setItem('zzic_guest_user', JSON.stringify(guestUser));
       setView('HOME'); // Close modal and go home
   };
 
@@ -1170,19 +1290,29 @@ const App: React.FC = () => {
     
     // Clamp between 1 and 99
     newYesPrice = Math.min(99, Math.max(1, newYesPrice));
+    newYesPrice = parseFloat(newYesPrice.toFixed(1)); // Fix floating point precision
     
-    // Update Local Market State
-    setMarkets(prev => prev.map(m => {
+    // Update Local Market State immediately (Optimistic)
+    const newHistory = [...activeMarket.priceHistory.slice(1), newYesPrice];
+    const newVolume = activeMarket.volume + betAmount;
+    
+    // Create new markets array for both State and LocalStorage
+    const updatedMarketsList = markets.map(m => {
         if (m.id === activeMarket.id) {
             return {
                 ...m,
-                yesPrice: parseFloat(newYesPrice.toFixed(1)),
-                // Append new price to history, keep last 7
-                priceHistory: [...m.priceHistory.slice(1), newYesPrice]
+                yesPrice: newYesPrice,
+                priceHistory: newHistory,
+                volume: newVolume
             };
         }
         return m;
-    }));
+    });
+
+    setMarkets(updatedMarketsList);
+    // PERSISTENCE: Save to local storage
+    localStorage.setItem('zzic_markets', JSON.stringify(updatedMarketsList));
+
     // -----------------------------
 
     const newItem: PortfolioItem = {
@@ -1199,7 +1329,7 @@ const App: React.FC = () => {
 
     const newBalance = user.balance - betAmount;
 
-    // Optimistic Update
+    // Optimistic Update User State
     setUser({
         ...user,
         balance: newBalance,
@@ -1230,7 +1360,18 @@ const App: React.FC = () => {
             
             if (error) throw error;
 
-            // Update local state with real ID
+            // 2. Update Market Price in DB (This triggers Realtime for everyone else)
+            // Note: We use volume as a simple counter here
+            await supabase
+                .from('markets')
+                .update({ 
+                    yes_price: newYesPrice,
+                    price_history: newHistory,
+                    volume: activeMarket.volume + betAmount
+                })
+                .eq('id', activeMarket.id);
+
+            // Update local state ID with real ID
             if (data) {
                 setUser(prev => prev ? ({
                     ...prev,
@@ -1239,7 +1380,7 @@ const App: React.FC = () => {
                 setLastPurchasedItem(prev => prev ? { ...prev, id: data.id } : null);
             }
 
-            // 2. Update Balance
+            // 3. Update Balance
             await supabase
                 .from('profiles')
                 .update({ balance: newBalance })
@@ -1304,6 +1445,7 @@ const App: React.FC = () => {
           m.id === activeMarketId ? { ...m, result: result } : m
       );
       setMarkets(updatedMarkets);
+      localStorage.setItem('zzic_markets', JSON.stringify(updatedMarkets));
 
       let totalPayout = 0;
       let wonCount = 0;
@@ -1338,6 +1480,12 @@ const App: React.FC = () => {
           // DB Updates (Skip for Guest)
           if(!user.isGuest) {
             try {
+                // Update Market Result
+                await supabase
+                    .from('markets')
+                    .update({ result: result })
+                    .eq('id', activeMarketId);
+
                 await supabase
                     .from('portfolios')
                     .update({ is_claimed: true })

@@ -24,7 +24,8 @@ export const INITIAL_MARKETS: Market[] = [
     priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 1250000,
     endDate: '2025-12-25T00:00:00',
-    imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop'
+    // Updated: Snowy winter vibes
+    imageUrl: 'https://images.unsplash.com/photo-1543258103-a62bdc069871?q=80&w=800&auto=format&fit=crop'
   },
   // 2. Bitcoin $100k (Global Standard)
   {
@@ -37,7 +38,8 @@ export const INITIAL_MARKETS: Market[] = [
     priceHistory: [50, 50, 50, 50, 50, 50, 50], 
     volume: 8240000,
     endDate: '2026-01-01T00:00:00',
-    imageUrl: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop'
+    // Updated: High quality 3D Bitcoin render
+    imageUrl: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800&auto=format&fit=crop'
   },
   // 3. Dispatch Jan 1st (Gossip)
   {
@@ -50,7 +52,8 @@ export const INITIAL_MARKETS: Market[] = [
     priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 4100000,
     endDate: '2025-12-31T23:59:59',
-    imageUrl: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=800&auto=format&fit=crop'
+    // Updated: Dispatch Logo Style (Text-based image)
+    imageUrl: 'https://placehold.co/800x800/000000/D20000.png?text=DISPATCH&font=oswald'
   }
 ];
 
