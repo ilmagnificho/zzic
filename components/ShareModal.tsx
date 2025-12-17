@@ -14,7 +14,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleShare = async () => {
-    const shareUrl = `https://zzic.app/?marketId=${item.marketId}`;
+    const shareUrl = `https://zzic.vercel.app/?marketId=${item.marketId}`;
     
     const shareData = {
         title: 'ZZIC - 너의 촉을 믿어봐',
