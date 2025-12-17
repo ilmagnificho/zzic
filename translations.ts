@@ -61,13 +61,13 @@ export const TRANSLATIONS = {
     detail_return: '예상 수익',
     detail_confirm: '구매 확정',
     detail_login_btn: '로그인 필요',
-    detail_discussion: '실시간 진영 토론',
-    detail_discussion_count: '총 {0}개 의견',
+    detail_discussion: '🔥 실시간 입털기',
+    detail_discussion_count: '총 {0}개',
     detail_comment_placeholder: '의견을 남겨주세요...',
     detail_comment_login_placeholder: '로그인이 필요합니다.',
-    detail_input_placeholder_participant: '참여자만 댓글을 남길 수 있습니다 (Clean Bot 작동중)',
+    detail_input_placeholder_participant: '참여자만 입털기 가능 (Clean Bot 작동중)',
     detail_input_placeholder_login: '로그인이 필요합니다.',
-    detail_no_comments: '아직 작성된 의견이 없습니다. 첫 번째로 작성해보세요!',
+    detail_no_comments: '아직 작성된 내용이 없습니다. 첫 빠따를 날려보세요!',
     detail_reply: '답글',
     detail_reply_to: '님에게 답글 작성 중',
     detail_reply_placeholder: '답글을 입력하세요...',
@@ -135,7 +135,7 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: '베팅 금액',
     share_return: '예상 수익',
-    share_btn: '친구에게 링크 공유하기',
+    share_btn: '황금 부적 공유하기',
     share_copied: '링크 복사 완료!',
 
     // Alerts
@@ -216,11 +216,11 @@ export const TRANSLATIONS = {
     detail_return: 'Exp. Return',
     detail_confirm: 'Confirm Order',
     detail_login_btn: 'Login Needed',
-    detail_discussion: 'Live Discussion',
-    detail_discussion_count: '{0} Comments',
+    detail_discussion: '🔥 Live Trash Talk',
+    detail_discussion_count: '{0} Chats',
     detail_comment_placeholder: 'Leave a comment...',
     detail_comment_login_placeholder: 'Login required.',
-    detail_input_placeholder_participant: 'Only participants can comment (Clean Bot Active)',
+    detail_input_placeholder_participant: 'Only participants can trash talk (Clean Bot Active)',
     detail_input_placeholder_login: 'Login required.',
     detail_no_comments: 'No comments yet. Be the first!',
     detail_reply: 'Reply',
@@ -290,7 +290,7 @@ export const TRANSLATIONS = {
     // Modal - Share
     share_bet_amount: 'Bet Amount',
     share_return: 'Exp. Return',
-    share_btn: 'Share Link',
+    share_btn: 'Share Golden Talisman',
     share_copied: 'Link Copied!',
 
     // Alerts

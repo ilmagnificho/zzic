@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { X, Share2, Check, Download, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Share2, Check, Sparkles } from 'lucide-react';
 import { PortfolioItem } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
@@ -16,9 +16,12 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   const handleShare = async () => {
     const shareUrl = `https://zzic.vercel.app/?marketId=${item.marketId}`;
     
+    // 이모지 선택: YES(상승/긍정) vs NO(하락/부정)
+    const emoji = item.prediction === 'YES' ? '📈' : '📉';
+    
     const shareData = {
         title: 'ZZIC - 너의 촉을 믿어봐',
-        text: `[ZZIC 성지순례] "${item.marketTitle}"\n\n🧧 저의 예측은 [${item.prediction}]입니다.\n이 부적의 기운을 받아가세요! 👇`,
+        text: `[ZZIC 예언 적중 기원]\n\n🏆 주제: ${item.marketTitle}\n\n${emoji} 나의 예측: [ ${item.prediction} ]\n\n이 골드바의 기운을 받아가세요! 👇`,
         url: shareUrl,
     };
 
@@ -36,95 +39,104 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-300 p-4">
-      <div className="relative w-full max-w-[340px] flex flex-col gap-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-300 p-6">
+      <div className="relative w-full max-w-[320px] flex flex-col gap-6">
         
-        {/* Close Button (Floating outside) */}
+        {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute -top-12 right-0 text-white/70 hover:text-white p-2 transition-all active:scale-95"
+          className="absolute -top-12 right-0 text-white/50 hover:text-white p-2 transition-all active:scale-95"
         >
           <X size={24} />
         </button>
 
-        {/* TALISMAN CARD (Fit within view, Trendy Design) */}
+        {/* REALISTIC GOLD BAR (Bullion Style) */}
         <div 
-            className="w-full aspect-[9/14] max-h-[70vh] relative overflow-hidden shadow-[0_0_50px_rgba(255,200,0,0.3)] select-none group"
+            className="w-full aspect-[9/15] relative rounded-[2rem] shadow-[0_20px_60px_-10px_rgba(234,179,8,0.5)] select-none group transform transition-transform hover:scale-[1.02]"
             style={{
-                background: 'linear-gradient(135deg, #ffc107 0%, #ffb300 100%)', // Vivid Amber
-                boxShadow: 'inset 0 0 40px rgba(180, 83, 9, 0.4)'
+                // Base Gold Gradient
+                background: 'linear-gradient(135deg, #FBF5C7 0%, #FFD700 25%, #F59E0B 50%, #B45309 80%, #713F12 100%)',
+                // Heavy Bevel Effect via Box Shadow
+                boxShadow: `
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.7),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.4),
+                    inset 8px 8px 16px rgba(255, 215, 0, 0.2),
+                    inset -8px -8px 16px rgba(180, 83, 9, 0.4),
+                    0 25px 50px -12px rgba(0, 0, 0, 0.5)
+                `
             }}
         >
-            {/* Background Texture & Pattern */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay" 
-                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}>
+            {/* Brushed Metal Texture Overlay */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay rounded-[2rem]" 
+                 style={{ 
+                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                     backgroundSize: '100px 100px'
+                 }}>
             </div>
-            
-            {/* Decorative Borders (Traditional but Graphic) */}
-            <div className="absolute top-3 left-3 w-16 h-16 border-t-4 border-l-4 border-red-700/80 rounded-tl-sm"></div>
-            <div className="absolute top-3 right-3 w-16 h-16 border-t-4 border-r-4 border-red-700/80 rounded-tr-sm"></div>
-            <div className="absolute bottom-3 left-3 w-16 h-16 border-b-4 border-l-4 border-red-700/80 rounded-bl-sm"></div>
-            <div className="absolute bottom-3 right-3 w-16 h-16 border-b-4 border-r-4 border-red-700/80 rounded-br-sm"></div>
 
-            {/* Content Container */}
-            <div className="absolute inset-0 flex flex-col items-center justify-between py-10 px-6 text-center">
-                
-                {/* Header */}
-                <div className="space-y-1">
-                    <div className="text-[10px] font-black text-red-800 tracking-[0.5em] opacity-70">OFFICIAL TALISMAN</div>
-                    <h2 className="text-3xl font-black text-red-900 tracking-tight font-serif drop-shadow-sm mix-blend-color-burn">
-                        적 중 기 원
+            {/* Shine / Glare Reflection */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-40 rounded-[2rem] pointer-events-none"></div>
+
+            {/* Engraved Content Container */}
+            <div className="absolute inset-4 rounded-[1.5rem] border border-[#B45309]/20 flex flex-col items-center justify-between py-6 px-4 text-center z-10"
+                 style={{
+                     boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.1), inset -1px -1px 2px rgba(255,255,255,0.3)'
+                 }}
+            >
+                {/* Top Stamp: Brand & Purity */}
+                <div className="space-y-2 flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full border-2 border-[#854d0e] flex items-center justify-center mb-1 opacity-70" style={{ boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.3), 1px 1px 0 rgba(255,255,255,0.2)' }}>
+                        <span className="text-xl font-black italic text-[#854d0e]">Z</span>
+                    </div>
+                    <h2 className="text-xl font-black tracking-widest text-[#713F12]" 
+                        style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.4), -1px -1px 0 rgba(0,0,0,0.2)' }}>
+                        ZZIC
                     </h2>
+                    <div className="text-[10px] font-bold tracking-[0.3em] text-[#92400e] uppercase scale-x-90">
+                        Fine Gold 999.9
+                    </div>
                 </div>
 
-                {/* Main Prediction */}
-                <div className="flex-1 flex flex-col items-center justify-center w-full space-y-4">
-                    
-                    {/* Market Title */}
-                    <div className="w-full bg-red-900/10 border-y-2 border-red-900/20 py-3 px-2 backdrop-blur-sm">
-                        <p className="text-sm font-bold text-red-950 font-serif leading-relaxed break-keep line-clamp-3">
+                {/* Middle: The Proposition (Engraved Text) */}
+                <div className="flex-1 flex flex-col items-center justify-center w-full space-y-6">
+                    <div className="w-full px-2">
+                         <p className="text-xs font-serif font-bold text-[#78350f] leading-relaxed break-keep line-clamp-3 opacity-90"
+                            style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.3), -0.5px -0.5px 0 rgba(0,0,0,0.2)' }}
+                         >
                             "{item.marketTitle}"
                         </p>
                     </div>
 
-                    {/* The Giant Stamp (User Choice) */}
-                    <div className="relative mt-4 transform group-hover:scale-105 transition-transform duration-500">
-                        {/* Stamp Ink Splatter Effect */}
-                        <div className="absolute inset-0 bg-red-600 blur-xl opacity-20 rounded-full animate-pulse"></div>
-                        
-                        <div className={`w-32 h-32 rounded-full border-[6px] flex items-center justify-center transform -rotate-12 bg-red-100/10 backdrop-blur-sm
-                            ${item.prediction === 'YES' ? 'border-blue-700 text-blue-700' : 'border-red-700 text-red-700'}
-                            shadow-lg`}
-                             style={{ borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%' }} // Organic shape
+                    {/* The Prediction Stamp (Deep Press Effect) */}
+                    <div className="relative group-hover:scale-105 transition-transform duration-500">
+                        <div className="absolute inset-0 bg-black/10 blur-md rounded-lg transform translate-y-1"></div>
+                        <div className="relative px-8 py-3 bg-gradient-to-br from-[#F59E0B] to-[#D97706] rounded-lg border-2 border-[#92400e]/30 flex items-center justify-center"
+                             style={{
+                                 boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.2)'
+                             }}
                         >
-                            <div className="text-center">
-                                <span className="block text-xs font-black uppercase tracking-widest opacity-80 mb-1">Prediction</span>
-                                <span className="text-5xl font-black italic tracking-tighter" style={{ fontFamily: 'serif' }}>
-                                    {item.prediction}
-                                </span>
-                            </div>
+                            <span className={`text-4xl font-black italic tracking-tighter drop-shadow-sm 
+                                ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}
+                                style={{ 
+                                    textShadow: '0 1px 1px rgba(255,255,255,0.3)'
+                                }}
+                            >
+                                {item.prediction}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Footer / Info */}
-                <div className="w-full space-y-3">
-                    <p className="text-[11px] font-bold text-red-800/80 font-serif break-keep">
-                        이 부적은 {item.prediction === 'YES' ? '긍정' : '부정'}의 기운을 담고 있습니다.<br/>
-                        지니고 있으면 직감이 현실이 됩니다.
-                    </p>
-                    
-                    {/* Serial & Brand */}
-                    <div className="flex justify-between items-end border-t border-red-900/30 pt-3 opacity-70">
-                        <div className="text-left">
-                            <div className="text-[9px] font-mono text-red-900 font-bold">SERIAL NO.</div>
-                            <div className="text-[10px] font-mono text-red-950">{item.id.slice(-8).toUpperCase()}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="flex items-center gap-1">
-                                <span className="text-lg font-black italic text-red-900">ZZIC</span>
-                                <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
-                            </div>
+                {/* Bottom: Weight & Serial */}
+                <div className="w-full space-y-2 pb-2">
+                    <div className="flex items-center justify-center gap-2 opacity-80">
+                        <div className="h-[1px] w-8 bg-[#92400e]"></div>
+                        <span className="text-[9px] font-black text-[#713F12]">NET WT 1000g</span>
+                        <div className="h-[1px] w-8 bg-[#92400e]"></div>
+                    </div>
+                    <div className="pt-2 border-t border-[#92400e]/20 w-3/4 mx-auto">
+                        <div className="text-[8px] font-mono text-[#78350f] tracking-widest font-bold">
+                            NO. {item.id.slice(-8).toUpperCase()}
                         </div>
                     </div>
                 </div>
@@ -135,16 +147,16 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, onClose, language }) => {
         <div className="w-full flex flex-col gap-2">
             <button 
                 onClick={handleShare}
-                className={`w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 border-2
-                ${isCopied ? 'bg-white text-black border-white' : 'bg-[#ccff00] text-black border-[#ccff00] hover:bg-[#b3e600]'}`}
+                className={`w-full py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95
+                ${isCopied ? 'bg-white text-black' : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'}`}
             >
                 {isCopied ? <Check size={18} /> : <Share2 size={18} />}
                 {isCopied ? t('share_copied') : t('share_btn')}
             </button>
-            <div className="text-center">
-                <p className="text-[10px] text-zinc-500 flex items-center justify-center gap-1.5">
+            <div className="text-center mt-1">
+                <p className="text-[10px] text-zinc-500 flex items-center justify-center gap-1.5 opacity-80">
                     <Sparkles size={10} className="text-yellow-500" />
-                    캡처해서 인스타 스토리에 올려보세요!
+                    부자되세요! 인스타 스토리에 공유해보세요
                 </p>
             </div>
         </div>

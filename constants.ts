@@ -4,12 +4,13 @@ import { Market, Comment, RankedUser, BillboardMessage } from './types';
 export const INITIAL_BALANCE = 3000;
 
 // [STRATEGY] End of Year Viral Topics (Guerrilla Marketing: Community Focused)
+// Updated Titles: Clear YES/NO Propositions
 export const INITIAL_MARKETS: Market[] = [
-  // 1. White Christmas (Target: Solo vs Couple / Blind, Instiz)
+  // 1. White Christmas
   {
     id: 'm_xmas_2025',
-    title: '[날씨] 크리스마스 눈 올 확률 0%? 솔로부대 vs 커플지옥 승자는?',
-    titleEn: '[Weather] White Christmas in Seoul? Solo vs Couple',
+    title: '[날씨] 2025년 크리스마스, 서울에 눈이 내린다?',
+    titleEn: '[Weather] Will it snow in Seoul on Christmas 2025?',
     category: 'WEATHER',
     yesPrice: 30, // Low probability provokes couples to bet YES
     priceHistory: [20, 22, 25, 28, 32, 29, 30],
@@ -17,11 +18,11 @@ export const INITIAL_MARKETS: Market[] = [
     endDate: '2025-12-25T00:00:00',
     imageUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=800&auto=format&fit=crop'
   },
-  // 2. Bitcoin 200M (Target: Greed vs Logic / Coinpan, DC Bitgall)
+  // 2. Bitcoin 200M
   {
     id: 'm_btc_2026',
-    title: '[코인] 비트코인, 2026년 1월 1일 전까지 "2억" 찍는다 vs 못 간다',
-    titleEn: '[Crypto] Will Bitcoin hit 200M KRW by Jan 1st 2026?',
+    title: '[코인] 2026년 1월 1일 전, 비트코인 2억 돌파?',
+    titleEn: '[Crypto] Bitcoin hits 200M KRW before Jan 1, 2026?',
     category: 'COIN',
     yesPrice: 75, // FOMO driven high price
     priceHistory: [40, 55, 62, 70, 78, 74, 75], 
@@ -29,10 +30,10 @@ export const INITIAL_MARKETS: Market[] = [
     endDate: '2026-01-01T00:00:00',
     imageUrl: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop'
   },
-  // 3. Dispatch Jan 1st (Target: Gossip / TheQoo, Twitter)
+  // 3. Dispatch Jan 1st
   {
     id: 'm_dispatch_2026',
-    title: '[이슈] 2026년 1월 1일, 디스패치 열애설 "터진다" vs "안 터진다"',
+    title: '[이슈] 2026년 1월 1일, 디스패치 열애설 터진다?',
     titleEn: '[Issue] Will Dispatch release a scandal on Jan 1st 2026?',
     category: 'ENTER',
     yesPrice: 88, // High conviction in community rumors
@@ -44,7 +45,7 @@ export const INITIAL_MARKETS: Market[] = [
 ];
 
 export const COMING_SOON_ITEMS = [
-    { id: 'cs1', title: '2026년 1월, 한은 "금리 인하" 소식 들려올까?', date: 'MONEY / ECONOMY' }
+    { id: 'cs1', title: '2026년 1월, 한은 금리 인하한다?', date: 'MONEY / ECONOMY' }
 ];
 
 // Community Style Billboard (Real vibes)
