@@ -903,6 +903,29 @@ const App: React.FC = () => {
   
   const timeLeft = useCountdown(activeMarket?.endDate);
 
+  // [META] Dynamic Meta Tag Update
+  useEffect(() => {
+    if (activeMarket) {
+        document.title = `${activeMarket.title} | ZZIC`;
+        
+        // Update Meta Description
+        const descMeta = document.querySelector('meta[name="description"]');
+        if (descMeta) descMeta.setAttribute('content', `ZZIC 예측: ${activeMarket.description}`);
+
+        // Update OG Title
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', activeMarket.title);
+
+        // Update OG Description
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.setAttribute('content', activeMarket.description);
+
+    } else {
+        document.title = 'ZZIC - 너의 촉을 믿어봐';
+        // Reset defaults if needed
+    }
+  }, [activeMarket]);
+
   // [AUTH] Initialize & Listen
   useEffect(() => {
     // 1. Check current session

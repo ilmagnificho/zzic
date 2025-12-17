@@ -1,11 +1,12 @@
+
 import React, { useState } from 'react';
-import { X, Share2, Check, Sparkles } from 'lucide-react';
+import { X, Share2, Check, QrCode, Fingerprint, Snowflake, Coins, Ticket } from 'lucide-react';
 import { PortfolioItem, Market } from '../types';
 import { TRANSLATIONS, Language } from '../translations';
 
 interface ShareModalProps {
   item: PortfolioItem;
-  market?: Market; // Added to access category and description
+  market?: Market;
   onClose: () => void;
   language: Language;
 }
@@ -21,39 +22,41 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   // --- STYLING LOGIC ---
   const getCardStyle = () => {
     switch (category) {
-      case 'WEATHER': // Ice Theme
+      case 'WEATHER': // Style: Frost Glass / Ice Amulet
         return {
-          bg: 'linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 50%, #0ea5e9 100%)',
-          border: 'border-cyan-200',
-          shadow: 'shadow-[0_20px_50px_-10px_rgba(14,165,233,0.5)]',
-          textColor: 'text-cyan-950',
-          accentColor: 'text-cyan-700',
-          label: 'FROSTED LUCK',
-          texture: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")`,
-          icon: '❄️'
-        };
-      case 'COIN': // Gold Bar Theme
-      case 'STOCK':
-        return {
-          bg: 'linear-gradient(110deg, #b46b00 0%, #fde047 15%, #fcd34d 25%, #d97706 45%, #b45309 50%, #d97706 55%, #fcd34d 75%, #fde047 85%, #b46b00 100%)',
-          border: 'border-yellow-600/30',
-          shadow: 'shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)]',
-          textColor: 'text-[#451a03]',
-          accentColor: 'text-[#92400e]',
-          label: '999.9 FINE GOLD',
-          texture: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          icon: '💰'
-        };
-      default: // Holographic/Neon Theme (Enter, Sports, Tech)
-        return {
-          bg: 'linear-gradient(135deg, #3b0764 0%, #7e22ce 50%, #ec4899 100%)',
-          border: 'border-purple-500/30',
-          shadow: 'shadow-[0_20px_50px_-10px_rgba(126,34,206,0.6)]',
+          type: 'FROST',
+          containerClass: 'rounded-[2rem] border-2 border-white/40 shadow-[0_20px_50px_-10px_rgba(14,165,233,0.5)]',
+          bg: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(224,242,254,0.2) 50%, rgba(14,165,233,0.1) 100%)',
           textColor: 'text-white',
-          accentColor: 'text-purple-200',
-          label: 'VIP ACCESS',
-          texture: `url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='10' cy='10' r='1' fill='rgba(255,255,255,0.2)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23p)'/%3E%3C/svg%3E")`,
-          icon: '🎟️'
+          accentColor: 'text-cyan-200',
+          label: 'WEATHER FORECAST',
+          icon: <Snowflake size={24} className="text-cyan-200 animate-pulse" />,
+          textureOpacity: 0.6
+        };
+      case 'ENTER': // Style: Holographic Ticket
+      case 'SPORTS':
+        return {
+          type: 'TICKET',
+          containerClass: 'rounded-xl border-x-2 border-y-0 border-pink-500/50 shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] clip-path-ticket',
+          bg: 'repeating-linear-gradient(45deg, #18181b, #18181b 10px, #27272a 10px, #27272a 20px)',
+          textColor: 'text-white',
+          accentColor: 'text-pink-400',
+          label: 'OFFICIAL TICKET',
+          icon: <Ticket size={24} className="text-pink-500" />,
+          textureOpacity: 0.1
+        };
+      case 'COIN': // Style: Gold Bar
+      case 'STOCK':
+      default:
+        return {
+          type: 'GOLD',
+          containerClass: 'rounded-[4px] rounded-tr-[2rem] rounded-bl-[2rem] border-4 border-[#b45309] shadow-[0_20px_40px_-5px_rgba(0,0,0,0.8)]',
+          bg: 'linear-gradient(110deg, #854d0e 0%, #facc15 15%, #fef08a 25%, #ca8a04 45%, #a16207 50%, #ca8a04 55%, #fef08a 75%, #facc15 85%, #854d0e 100%)',
+          textColor: 'text-[#451a03]',
+          accentColor: 'text-[#78350f]',
+          label: '999.9 PURE LUCK',
+          icon: <Coins size={24} className="text-[#78350f]" />,
+          textureOpacity: 0.3
         };
     }
   };
@@ -61,10 +64,22 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   const style = getCardStyle();
 
   const handleShare = async () => {
+    // 1. Dynamic Text Construction based on Market Type
+    let shareText = '';
+    
+    if (category === 'WEATHER') {
+        shareText = `[ZZIC 기상청 속보] ☃️\n\n"${displayTitle}"\n\n제 예측은 [ ${item.prediction === 'YES' ? '눈 온다 ❄️' : '안 온다 ☀️'} ] 입니다.\n함께 결과를 지켜보시죠!`;
+    } else if (category === 'COIN' || category === 'STOCK') {
+        shareText = `[ZZIC 투자 주의보] 💎\n\n"${displayTitle}"\n\n저는 [ ${item.prediction === 'YES' ? '간다! 🚀' : '안 간다! 📉'} ] 에 걸었습니다.\n이 황금 부적의 기운을 받으세요!`;
+    } else {
+        shareText = `[ZZIC 찌라시] ⚡️\n\n"${displayTitle}"\n\n${predictionEmoji} 저의 촉은 [ ${item.prediction} ] 입니다.\n성지순례 미리 오세요!`;
+    }
+
     const shareUrl = `https://zzic.vercel.app/?marketId=${item.marketId}`;
+    
     const shareData = {
         title: 'ZZIC - 너의 촉을 믿어봐',
-        text: `[ZZIC 예언 적중 기원]\n\n🏆 주제: ${displayTitle}\n\n${predictionEmoji} 나의 예측: [ ${item.prediction} ]\n\n이 부적의 기운을 받아가세요! 👇`,
+        text: `${shareText}\n👇 투표 하러가기`,
         url: shareUrl,
     };
 
@@ -82,121 +97,114 @@ const ShareModal: React.FC<ShareModalProps> = ({ item, market, onClose, language
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-6">
-      <div className="relative w-full max-w-[340px] flex flex-col gap-6">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-6 overflow-y-auto">
+      <div className="relative w-full max-w-[340px] flex flex-col gap-6 my-auto">
         
         <button 
           onClick={onClose}
-          className="absolute -top-14 right-0 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-all active:scale-95 backdrop-blur-sm border border-white/10"
+          className="absolute -top-12 right-0 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-all active:scale-95 backdrop-blur-sm border border-white/10"
           aria-label="Close"
         >
           <X size={24} />
         </button>
 
-        {/* --- DYNAMIC CARD DESIGN --- */}
+        {/* --- DYNAMIC CARD RENDERER --- */}
         <div 
-            className={`w-full aspect-[9/14] relative rounded-[1.5rem] select-none group transform transition-transform duration-500 hover:scale-[1.01] ${style.shadow}`}
+            className={`w-full aspect-[3/4.5] relative select-none group transform transition-transform duration-500 hover:scale-[1.01] overflow-hidden flex flex-col ${style.containerClass}`}
             style={{ background: style.bg }}
         >
-            {/* Texture Overlay */}
-            <div className="absolute inset-2 rounded-[1.2rem] opacity-30 pointer-events-none mix-blend-overlay border border-white/20" 
-                 style={{ backgroundImage: style.texture }}>
+            {/* Texture Layer */}
+            <div className="absolute inset-0 pointer-events-none mix-blend-overlay" 
+                 style={{ 
+                     opacity: style.textureOpacity,
+                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
+                 }}>
             </div>
 
-            {/* Inner Content Container */}
-            <div className={`absolute inset-3 rounded-[1rem] border-2 ${style.border} flex flex-col items-center justify-between py-6 px-4 text-center z-10`}
-                 style={{
-                    background: category === 'COIN' ? 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)' : 'rgba(255,255,255,0.1)',
-                    backdropFilter: category !== 'COIN' ? 'blur(4px)' : 'none'
-                 }}
-            >
-                {/* 1. Header */}
-                <div className="w-full flex flex-col items-center gap-1 pt-2">
-                    <div className="flex items-center gap-2 mb-1">
-                        <div className={`h-[1px] w-8 ${category === 'ENTER' ? 'bg-white/40' : 'bg-black/20'}`}></div>
-                        <div className={`text-[10px] font-black tracking-[0.3em] uppercase scale-x-90 ${style.accentColor}`}>
-                            {style.label}
-                        </div>
-                        <div className={`h-[1px] w-8 ${category === 'ENTER' ? 'bg-white/40' : 'bg-black/20'}`}></div>
+            {/* Frost/Glass Effect Layer (Weather Only) */}
+            {style.type === 'FROST' && (
+                <div className="absolute inset-0 backdrop-blur-sm bg-white/10"></div>
+            )}
+
+            {/* Content Container */}
+            <div className="relative z-10 flex-1 flex flex-col p-6 h-full">
+                
+                {/* Header */}
+                <div className="flex justify-between items-start border-b pb-4 mb-4" style={{ borderColor: style.type === 'GOLD' ? '#78350f' : 'rgba(255,255,255,0.3)' }}>
+                    <div className="flex flex-col">
+                        <span className={`text-[10px] font-black tracking-[0.2em] ${style.accentColor}`}>{style.label}</span>
+                        <span className={`text-2xl font-black italic tracking-tighter ${style.textColor}`}>ZZIC</span>
                     </div>
-                    <h1 className={`text-4xl font-black tracking-tighter ${style.textColor}`} 
-                        style={{ fontFamily: 'serif', textShadow: category === 'ENTER' ? '0 2px 10px rgba(0,0,0,0.5)' : 'none' }}>
-                        ZZIC
-                    </h1>
+                    <div>{style.icon}</div>
                 </div>
 
-                {/* 2. Main Content */}
-                <div className="flex-1 w-full flex flex-col items-center justify-center gap-6">
-                    <div className="w-full relative px-1">
-                        <p className={`text-2xl font-black leading-snug break-keep text-center font-serif tracking-tight ${style.textColor}`}
-                           style={{ textShadow: category === 'COIN' ? '0 1px 0 rgba(255,255,255,0.6)' : '0 2px 4px rgba(0,0,0,0.2)' }}
-                        >
-                           "{displayTitle}"
-                        </p>
-                    </div>
+                {/* Body */}
+                <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
+                    <h2 className={`text-xl font-bold leading-tight break-keep ${style.textColor}`} style={{ textShadow: style.type === 'GOLD' ? '0 1px 0 rgba(255,255,255,0.4)' : '0 2px 4px rgba(0,0,0,0.5)' }}>
+                        {displayTitle}
+                    </h2>
 
                     {/* Prediction Stamp */}
-                    <div className="relative w-full max-w-[200px] group-hover:scale-105 transition-transform duration-500 ease-out">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent translate-x-[-100%] animate-[shimmer_3s_infinite]"></div>
-                        
-                        <div className={`relative rounded-xl border p-4 shadow-lg flex flex-col items-center justify-center gap-1
-                            ${category === 'WEATHER' ? 'bg-white/30 border-white/50' : 
-                              category === 'COIN' ? 'bg-gradient-to-b from-[#f59e0b] to-[#d97706] border-[#b45309]/50' : 
-                              'bg-black/40 border-purple-400/50'}`}>
-                            
-                            <span className={`text-[9px] font-bold uppercase tracking-widest opacity-80 ${category === 'COIN' ? 'text-[#78350f]' : 'text-white'}`}>
-                                MY PREDICTION
-                            </span>
-                            <span className={`text-5xl font-black italic tracking-tighter drop-shadow-sm 
-                                ${category === 'COIN' 
-                                    ? (item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900') 
-                                    : (item.prediction === 'YES' ? 'text-blue-200' : 'text-pink-300')}`}
-                            >
-                                {item.prediction}
-                            </span>
-                        </div>
+                    <div className="relative">
+                        {style.type === 'GOLD' ? (
+                            <div className="border-4 border-[#78350f] rounded-lg p-4 bg-[#b45309]/10 shadow-inner transform -rotate-6">
+                                <div className="text-[10px] font-black text-[#78350f] uppercase mb-1">PREDICTION</div>
+                                <div className={`text-5xl font-black ${item.prediction === 'YES' ? 'text-blue-900' : 'text-red-900'}`}>{item.prediction}</div>
+                            </div>
+                        ) : style.type === 'FROST' ? (
+                             <div className="rounded-full w-32 h-32 border-4 border-white/50 flex flex-col items-center justify-center bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                                <div className="text-[10px] font-bold text-white mb-1">MY CHOICE</div>
+                                <div className={`text-4xl font-black ${item.prediction === 'YES' ? 'text-blue-100' : 'text-pink-100'}`}>{item.prediction}</div>
+                            </div>
+                        ) : (
+                            <div className="border-2 border-dashed border-pink-500/50 p-2 rounded bg-black/50">
+                                <div className="border border-pink-500 px-6 py-3 rounded bg-pink-500/10">
+                                    <div className="text-4xl font-black text-white drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">{item.prediction}</div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* 3. Footer */}
-                <div className="w-full space-y-3 pb-2">
-                     <p className={`text-[10px] font-bold opacity-90 break-keep leading-tight ${style.accentColor}`}>
-                        위 예측이 적중할 시<br/>이 부적을 소유한 자에게 {style.icon} 행운이 깃듭니다.
-                    </p>
-                    <div className={`w-full border-t pt-2 flex justify-between items-end px-2 ${category==='ENTER' ? 'border-white/20' : 'border-black/10'}`}>
-                        <div className="flex flex-col items-start">
-                             <span className={`text-[8px] font-bold ${style.accentColor}`}>DATE</span>
-                             <span className={`text-[10px] font-black ${style.textColor}`}>{new Date(item.timestamp).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex flex-col items-end">
-                            <span className={`text-[8px] font-bold ${style.accentColor}`}>SERIAL NO.</span>
-                            <span className={`text-[10px] font-mono font-bold tracking-wider ${style.textColor}`}>{item.id.slice(-8).toUpperCase()}</span>
-                        </div>
+                {/* Footer */}
+                <div className="mt-auto pt-4 border-t flex justify-between items-end" style={{ borderColor: style.type === 'GOLD' ? '#78350f' : 'rgba(255,255,255,0.3)' }}>
+                    <div className="flex flex-col">
+                        <span className={`text-[8px] font-bold ${style.accentColor}`}>DATE</span>
+                        <span className={`text-[10px] font-mono font-bold ${style.textColor}`}>{new Date(item.timestamp).toLocaleDateString()}</span>
                     </div>
+                    {style.type === 'TICKET' ? <QrCode className="text-white opacity-80" size={32}/> : <Fingerprint className={style.type === 'GOLD' ? 'text-[#78350f]' : 'text-white'} opacity={0.5} size={32}/>}
                 </div>
             </div>
-            
-            {/* Glare Effect */}
-            <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-white/20 to-transparent skew-x-[-20deg] pointer-events-none rounded-[1.5rem]"></div>
+
+            {/* Shine Effect */}
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 animate-shine" />
         </div>
         
-        {/* Buttons */}
-        <div className="w-full flex flex-col gap-3">
-            <button 
-                onClick={handleShare}
-                className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 border
-                ${isCopied ? 'bg-white text-black border-white' : 'bg-zzic text-black border-zzic hover:bg-[#b3e600]'}`}
-            >
-                {isCopied ? <Check size={18} /> : <Share2 size={18} />}
-                {isCopied ? t('share_copied') : t('share_btn')}
-            </button>
-        </div>
+        {/* Share Button */}
+        <button 
+            onClick={handleShare}
+            className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 border
+            ${isCopied ? 'bg-white text-black border-white' : 'bg-zzic text-black border-zzic hover:bg-[#b3e600]'}`}
+        >
+            {isCopied ? <Check size={18} /> : <Share2 size={18} />}
+            {isCopied ? t('share_copied') : t('share_btn')}
+        </button>
       </div>
       <style>{`
-        @keyframes shimmer {
-            0% { transform: translateX(-150%) skewX(-20deg); }
-            50% { transform: translateX(150%) skewX(-20deg); }
-            100% { transform: translateX(150%) skewX(-20deg); }
+        @keyframes shine {
+            100% {
+                left: 125%;
+            }
+        }
+        .animate-shine {
+            animation: shine 3s infinite;
+        }
+        .clip-path-ticket {
+            clip-path: polygon(
+                0% 0%, 100% 0%, 100% 100%, 0% 100%,
+                0% 70%, 5% 65%, 0% 60%,
+                100% 60%, 95% 65%, 100% 70%
+            );
         }
       `}</style>
     </div>
