@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Wallet, Clock, Trophy, User, MessageSquare, Send, Crown, Info, ChevronRight, Flame, PlusCircle, LogOut, Mail, Lock, X, Zap, AlertCircle, Globe, LayoutGrid, Search, Home, MessageCircle, CornerDownRight, Sparkles, Timer, Megaphone, BatteryCharging, Gem, Heart, ThumbsUp, MoreHorizontal, LogIn as LogInIcon, Lightbulb, Calendar, ShieldCheck, Bug, Users, Snowflake, Rocket, Gavel, Check, Edit2, Loader2, BookOpen } from 'lucide-react';
 import { Market, UserState, ViewState, PortfolioItem, Comment, Category, BillboardMessage } from './types';
 import { INITIAL_BALANCE, INITIAL_MARKETS, INITIAL_BILLBOARD, CATEGORY_COLORS, MOCK_COMMENTS, MOCK_RANKING, COMING_SOON_ITEMS, BANNED_NICKNAMES } from './constants';
 import BottomNav from './components/BottomNav';
@@ -562,6 +562,15 @@ const DetailView: React.FC<any> = ({ activeMarket, user, setView, t, timeLeft, s
                             {activeMarket.result ? `RESULT: ${activeMarket.result} WIN` : (timeLeft.expired ? "CLOSED" : `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m left`)}
                         </span>
                     </div>
+
+                    {/* [Added] Rule / Description Box */}
+                    {activeMarket.description && (
+                        <div className="bg-zinc-900/80 border border-zinc-700 rounded-xl p-3 text-xs text-zinc-400 font-medium leading-relaxed break-keep mb-4 text-left flex items-start gap-2">
+                             <BookOpen size={14} className="shrink-0 mt-0.5 text-zinc-500" />
+                             <span>{activeMarket.description}</span>
+                        </div>
+                    )}
+
                     <div className="w-full h-32 bg-zinc-900/50 rounded-xl border border-zinc-800 p-4 mb-4 relative overflow-hidden">
                         <div className="absolute top-2 left-4 text-[10px] font-bold text-zinc-500">YES Price Trend</div>
                         <MiniChart history={activeMarket.priceHistory} color="text-zzic" />
@@ -1089,9 +1098,6 @@ const App: React.FC = () => {
     const now = Date.now();
 
     // --- Dynamic Pricing Logic ---
-    // Simulate price movement based on bet. 
-    // Small impact per bet to prevent instant skewing, but visible enough.
-    // In a real app, this would be calculated on server based on pool ratio.
     const IMPACT_FACTOR = 0.5; // 0.5% shift per vote
     const direction = selectedPrediction === 'YES' ? 1 : -1;
     let newYesPrice = activeMarket.yesPrice + (direction * IMPACT_FACTOR);
@@ -1375,6 +1381,8 @@ const App: React.FC = () => {
       {lastPurchasedItem && (
           <ShareModal 
             item={lastPurchasedItem} 
+            // [Added] Pass the corresponding Market object to get Category/Description
+            market={markets.find(m => m.id === lastPurchasedItem.marketId)}
             onClose={() => setLastPurchasedItem(null)} 
             language={language}
           />

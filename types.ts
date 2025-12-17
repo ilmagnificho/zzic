@@ -5,13 +5,14 @@ export interface Market {
   id: string;
   title: string;
   titleEn: string;
+  description: string; // [Added] Detailed rules for settlement
   category: Category;
   yesPrice: number; // Current probability (0-100)
   priceHistory: number[]; // Array of historical prices for the chart
   volume: number;
   endDate: string;
   imageUrl: string;
-  result?: 'YES' | 'NO' | null; // [Added] Result state: null(ongoing), YES, NO
+  result?: 'YES' | 'NO' | null; // Result state: null(ongoing), YES, NO
 }
 
 export interface PortfolioItem {
@@ -23,7 +24,7 @@ export interface PortfolioItem {
   entryPrice: number;
   payoutMultiple: number;
   timestamp: number;
-  isClaimed?: boolean; // [Added] To track if payout has been received
+  isClaimed?: boolean; // To track if payout has been received
 }
 
 export interface UserState {
@@ -33,7 +34,7 @@ export interface UserState {
   name: string;
   portfolio: PortfolioItem[];
   isGuest: boolean;
-  isAdmin?: boolean; // [Added] Simple admin flag
+  isAdmin?: boolean; // Simple admin flag
 }
 
 export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH' | 'ABOUT';
@@ -46,8 +47,8 @@ export interface Comment {
   timestamp: number;
   prediction?: 'YES' | 'NO';
   parentId?: string;
-  likeCount: number; // [Added] For community engagement
-  isLiked?: boolean; // [Added] Local state for user interaction
+  likeCount: number; // For community engagement
+  isLiked?: boolean; // Local state for user interaction
 }
 
 export interface RankedUser {
