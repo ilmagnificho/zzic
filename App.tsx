@@ -515,20 +515,31 @@ const App: React.FC = () => {
     <div className="pb-24 lg:pb-0 animate-in fade-in duration-500">
       <Billboard messages={billboardMsgs} />
 
-      {/* Mobile Header */}
-      <div className="lg:hidden px-5 py-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('HOME')}>
-            <LogoImage className="w-8 h-8 rounded-lg shadow-md" />
+      {/* Mobile Header - Removed LogoImage for cleaner look */}
+      <div className="lg:hidden px-4 py-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-xl z-40 border-b border-zinc-900">
+        <div className="flex items-center cursor-pointer" onClick={() => setView('HOME')}>
             <h1 className="text-2xl font-black italic tracking-tighter text-white">ZZIC</h1>
         </div>
-        <div className="flex gap-3 items-center">
-            <button onClick={toggleLanguage} className="bg-zinc-900 p-1.5 rounded-full border border-zinc-800 text-zinc-400"><Globe size={18} /></button>
+        <div className="flex gap-2 items-center">
+            <button onClick={toggleLanguage} className="bg-zinc-900 p-2 rounded-full border border-zinc-800 text-zinc-400 hover:text-white transition-colors"><Globe size={18} /></button>
             {user ? (
                 <>
-                {user.balance < 1000 && <button onClick={handleRefill} className="animate-bounce bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.5)]"><BatteryCharging size={12} /> {t('home_free_refill')}</button>}
+                {/* Mobile Billboard Button - Enlarged hit area */}
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowBillboardModal(true);
+                    }} 
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zzic transition-colors active:scale-95 touch-manipulation"
+                    aria-label="Billboard"
+                >
+                    <Megaphone size={18} />
+                </button>
+
+                {user.balance < 1000 && <button onClick={handleRefill} className="animate-bounce bg-red-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.5)]"><BatteryCharging size={12} /></button>}
                 <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800" onClick={() => setShowBillboardModal(true)}>
                     <div className="w-2 h-2 rounded-full bg-zzic animate-pulse"></div>
-                    <span className="text-sm font-black text-white font-mono">{formatNumber(user.balance)} VP</span>
+                    <span className="text-sm font-black text-white font-mono">{formatNumber(user.balance)}</span>
                 </div>
                 </>
             ) : (
@@ -553,7 +564,11 @@ const App: React.FC = () => {
         </h3>
         
         <div className="space-y-4">
-            {markets.map((market) => (
+            {markets.map((market) => {
+                const recentComment = comments.find(c => c.marketId === market.id);
+                const commentCount = comments.filter(c => c.marketId === market.id).length;
+                
+                return (
                 <div 
                     key={market.id}
                     onClick={() => { setActiveMarketId(market.id); setView('DETAIL'); setBetAmount(0); }}
@@ -578,7 +593,7 @@ const App: React.FC = () => {
                                         <Clock size={10} />
                                         <span>{new Date(market.endDate).getFullYear() === new Date().getFullYear() ? new Date(market.endDate).toLocaleDateString() + ' ' + t('market_closed') : t('market_long_term')}</span>
                                     </div>
-                                    <div className="w-16 h-6 opacity-50 group-hover:opacity-100 transition-opacity"><MiniChart history={market.priceHistory} color={market.yesPrice > 50 ? 'text-blue-500' : 'text-red-500'} /></div>
+                                    {/* Chart Removed to clean up UI */}
                                 </div>
                                 <h4 className="text-[16px] font-bold text-white leading-snug line-clamp-2 pr-1 group-hover:text-zzic transition-colors">{language === 'en' ? (market.titleEn || market.title) : market.title}</h4>
                             </div>
@@ -594,20 +609,50 @@ const App: React.FC = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* REAL-TIME COMMENT PREVIEW - SPEECH BUBBLE STYLE */}
+                    {recentComment && (
+                        <div className="mt-3 bg-zinc-800/40 rounded-xl p-3 relative">
+                            {/* Speech bubble tail */}
+                            <div className="absolute -top-1 left-6 w-2 h-2 bg-zinc-800/40 rotate-45"></div>
+                            
+                            <div className="flex items-center gap-2 text-xs text-zinc-300">
+                                <MessageCircle size={14} className="shrink-0 text-zinc-500" />
+                                <span className="truncate flex-1">
+                                    <span className={`font-bold mr-2 ${recentComment.prediction === 'YES' ? 'text-blue-400' : 'text-red-400'}`}>{recentComment.userName}</span>
+                                    <span className="text-zinc-400">{recentComment.text}</span>
+                                </span>
+                                {commentCount > 1 && <span className="shrink-0 text-[10px] bg-zinc-900 px-1.5 py-0.5 rounded text-zinc-500 font-bold">+{commentCount-1}</span>}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            ))}
+                );
+            })}
 
             <div className="pt-8 pb-4">
                 <h3 className="text-xs font-black text-zinc-500 mb-4 flex items-center gap-2 uppercase tracking-wide pl-2"><Calendar size={14} /> Coming Soon</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="w-full">
                     {COMING_SOON_ITEMS.map(item => (
-                        <div key={item.id} className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4 flex flex-col justify-between h-24 relative overflow-hidden group">
-                             <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/80"></div>
-                             <div className="relative z-10">
-                                <span className="text-[9px] font-black bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded mb-2 inline-block">NEXT SEASON</span>
-                                <h4 className="text-sm font-bold text-zinc-400 leading-tight group-hover:text-white transition-colors">{item.title}</h4>
+                        <div key={item.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 flex items-center justify-between relative overflow-hidden group cursor-not-allowed">
+                             {/* Background blur/gradient */}
+                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-800/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                             
+                             <div className="flex items-center gap-4 relative z-10">
+                                <div className="w-10 h-10 rounded-full bg-black border border-zinc-700 flex items-center justify-center">
+                                    <TrendingUp size={18} className="text-red-500 rotate-180" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-zinc-400 leading-tight group-hover:text-white transition-colors">{item.title}</h4>
+                                    <div className="text-[10px] text-zinc-600 font-mono mt-1 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-zzic animate-pulse"></span>
+                                        {item.date}
+                                    </div>
+                                </div>
                              </div>
-                             <div className="relative z-10 text-[10px] text-zinc-600 font-mono mt-auto">{item.date}</div>
+                             <button className="text-[10px] font-black border border-zinc-700 text-zinc-500 px-3 py-1.5 rounded-full uppercase tracking-wider group-hover:border-zzic group-hover:text-zzic transition-colors">
+                                 Notify Me
+                             </button>
                         </div>
                     ))}
                 </div>

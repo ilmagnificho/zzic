@@ -32,8 +32,8 @@ export const INITIAL_MARKETS: Market[] = [
   // 3. Dispatch Jan 1st (Target: Gossip / TheQoo, Twitter)
   {
     id: 'm_dispatch_2026',
-    title: '[이슈] 1월 1일 디스패치 주인공, "3세대 아이돌"이다?',
-    titleEn: '[Issue] Dispatch Jan 1st Couple: 3rd Gen Idol?',
+    title: '[이슈] 2026년 1월 1일, 디스패치 열애설 "터진다" vs "안 터진다"',
+    titleEn: '[Issue] Will Dispatch release a scandal on Jan 1st 2026?',
     category: 'ENTER',
     yesPrice: 88, // High conviction in community rumors
     priceHistory: [60, 75, 80, 82, 85, 87, 88],
@@ -44,8 +44,7 @@ export const INITIAL_MARKETS: Market[] = [
 ];
 
 export const COMING_SOON_ITEMS = [
-    { id: 'cs1', title: '제62회 백상예술대상 대상 예측', date: '2026.04 Open' },
-    { id: 'cs2', title: '2026 북중미 월드컵 우승국', date: '2026.05 Open' }
+    { id: 'cs1', title: '2026년 1월, 한은 "금리 인하" 소식 들려올까?', date: 'MONEY / ECONOMY' }
 ];
 
 // Community Style Billboard (Real vibes)
