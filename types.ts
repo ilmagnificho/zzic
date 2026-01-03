@@ -35,6 +35,12 @@ export interface UserState {
   portfolio: PortfolioItem[];
   isGuest: boolean;
   isAdmin?: boolean; // Simple admin flag
+  age?: number; // User's age for restrictions
+  birthYear?: number; // For age verification
+  parentalConsent?: boolean; // For users under 18
+  isTeenager?: boolean; // 13-17 year old users
+  dailyBetAmount?: number; // Daily betting limit tracking
+  lastBetReset?: number; // Last time daily limit was reset
 }
 
 export type ViewState = 'HOME' | 'DETAIL' | 'PROFILE' | 'RANKING' | 'AUTH' | 'ABOUT';

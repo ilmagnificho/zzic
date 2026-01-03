@@ -4,6 +4,34 @@ import { Market, Comment, RankedUser, BillboardMessage } from './types';
 // [ECONOMY] Start with 3,000 VP
 export const INITIAL_BALANCE = 3000;
 
+// [AGE RESTRICTIONS] Age-based betting limits and features
+export const AGE_RESTRICTIONS = {
+  // 13-17 years old (GenZ Teens)
+  teenager: {
+    minAge: 13,
+    maxAge: 17,
+    maxDailyBet: 3000, // 30% of adult limit
+    requireParentalConsent: true,
+    timeLimitMinutes: 60, // 1 hour daily limit
+    welcomeBonus: 1500, // Half of adult bonus
+    allowedMarkets: ['WEATHER', 'TECH', 'ENTER'], // Safe categories only
+    features: ['BETTING', 'SOCIAL'], // Limited features
+    uiTheme: 'teen_friendly'
+  },
+  
+  // 18+ years old (Adults)
+  adult: {
+    minAge: 18,
+    maxDailyBet: 10000,
+    requireParentalConsent: false,
+    timeLimitMinutes: null, // No time limit
+    welcomeBonus: 3000, // Full bonus
+    allowedMarkets: ['ENTER', 'SPORTS', 'WEATHER', 'TECH', 'STOCK', 'COIN'],
+    features: ['BETTING', 'SOCIAL', 'ADMIN', 'BILLBOARD'],
+    uiTheme: 'default'
+  }
+};
+
 // [SECURITY] Banned Nicknames (Case insensitive check will be applied)
 export const BANNED_NICKNAMES = [
     'admin', 'administrator', 'manager', 'operator', 'master', 'system', 'root',
@@ -11,49 +39,118 @@ export const BANNED_NICKNAMES = [
     '테트라', 'tetra', 'tetracorp'
 ];
 
-// [STRATEGY] MVP Launch Content
+// [STRATEGY] MVP Launch Content - GenZ Targeted Markets
 export const INITIAL_MARKETS: Market[] = [
-  // 1. White Christmas (Seasonal & Romantic)
+  // 1. White Christmas (Seasonal & Teen Friendly)
   {
     id: 'm_xmas_2025',
-    title: '2025년 크리스마스, 서울에 눈이 내릴까?',
-    titleEn: 'Will it snow in Seoul on Christmas 2025?',
+    title: '2025년 크리스마스, 서울에 눈이 내릴까? ❄️',
+    titleEn: 'Will it snow in Seoul on Christmas 2025? ❄️',
     description: '기상청 서울(송월동) 관측소 기준, 12월 25일 00:00~23:59 사이 최심신적설량(새로 쌓인 눈) 1.0cm 이상 기록 시 YES 승리.',
     category: 'WEATHER',
     yesPrice: 50,
     priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 1250000,
     endDate: '2025-12-25T00:00:00',
-    // Updated: Snowy winter vibes
     imageUrl: 'https://images.unsplash.com/photo-1543258103-a62bdc069871?q=80&w=800&auto=format&fit=crop'
   },
-  // 2. Bitcoin $100k (Global Standard)
+  
+  // 2. K-POP Comeback (GenZ Hot Topic)
+  {
+    id: 'm_bts_2025',
+    title: 'BTS, 2025년 완전체 앨범 발매 할까? 🎤',
+    titleEn: 'Will BTS release a full group album in 2025? 🎤',
+    description: '2025년 12월 31일까지 BTS 멤버 7인 전원이 참여한 완전체 정규 앨범(싱글/미니앨범 제외)이 발매될 경우 YES 승리.',
+    category: 'ENTER',
+    yesPrice: 65,
+    priceHistory: [65, 63, 67, 64, 66, 65, 64],
+    volume: 2500000,
+    endDate: '2025-12-31T23:59:59',
+    imageUrl: 'https://images.unsplash.com/photo-1493225457121-a3a16270a9b6?q=80&w=800&auto=format&fit=crop'
+  },
+  
+  // 3. YouTube Milestone (GenZ Favorite)
+  {
+    id: 'm_pinkfong_2025',
+    title: '핑크퐁 2025년 구독자 2000만 돌파할까? 📺',
+    titleEn: 'Will Pinkfong hit 20M subscribers in 2025? 📺',
+    description: '2025년 12월 31일까지 공식 구독자 수가 20,000,000명을 돌파할 경우 YES 승리.',
+    category: 'TECH',
+    yesPrice: 55,
+    priceHistory: [55, 57, 54, 56, 58, 55, 53],
+    volume: 1800000,
+    endDate: '2025-12-31T23:59:59',
+    imageUrl: 'https://images.unsplash.com/photo-1611225216421-5bc8946d3aa7?q=80&w=800&auto=format&fit=crop'
+  },
+  
+  // 4. Bitcoin $100k (Global Standard)
   {
     id: 'm_btc_2026',
-    title: '비트코인, 2026년 전 $100,000 돌파 가능?',
-    titleEn: 'Can Bitcoin break $100k before 2026?',
+    title: '비트코인, 2026년 전 $100,000 돌파 가능? 🚀',
+    titleEn: 'Can Bitcoin break $100k before 2026? 🚀',
     description: 'Binance USDT 마켓 현물 가격 기준, 한국 시간 2026년 1월 1일 00:00 이전에 단 한 번이라도 $100,000를 터치할 경우 YES 승리.',
     category: 'COIN',
     yesPrice: 50,
     priceHistory: [50, 50, 50, 50, 50, 50, 50], 
     volume: 8240000,
     endDate: '2026-01-01T00:00:00',
-    // Updated: High quality 3D Bitcoin render
     imageUrl: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800&auto=format&fit=crop'
   },
-  // 3. Dispatch Jan 1st (Gossip)
+  
+  // 5. Game Release (GenZ Gaming)
+  {
+    id: 'm_gta6_2025',
+    title: 'GTA 6, 2025년 공식 발표 될까? 🎮',
+    titleEn: 'Will GTA 6 be officially announced in 2025? 🎮',
+    description: '2025년 12월 31일까지 Rockstar Games가 GTA 6의 공식 티저 트레일러가 포함된 발표를 할 경우 YES 승리.',
+    category: 'TECH',
+    yesPrice: 35,
+    priceHistory: [35, 38, 33, 36, 40, 35, 32],
+    volume: 3200000,
+    endDate: '2025-12-31T23:59:59',
+    imageUrl: 'https://images.unsplash.com/photo-1511512433090-18b5ad8ce2f?q=80&w=800&auto=format&fit=crop'
+  },
+  
+  // 6. Korea Entertainment News
   {
     id: 'm_dispatch_2026',
-    title: '2026년 1월 1일, 디스패치 대형 열애설 터질까?',
-    titleEn: 'Will Dispatch release a major scandal on Jan 1, 2026?',
+    title: '2026년 1월 1일, 디스패치 대형 열애설 터질까? 📸',
+    titleEn: 'Will Dispatch release a major scandal on Jan 1, 2026? 📸',
     description: '2026년 1월 1일 당일(00:00~23:59), 디스패치(Dispatch)가 연예인 열애설 특종 기사를 공식 보도할 경우 YES 승리.',
     category: 'ENTER',
     yesPrice: 50, 
     priceHistory: [50, 50, 50, 50, 50, 50, 50],
     volume: 4100000,
     endDate: '2025-12-31T23:59:59',
-    // Updated: Dispatch Logo Style (Text-based image)
     imageUrl: 'https://placehold.co/800x800/000000/D20000.png?text=DISPATCH&font=oswald'
+  },
+  
+  // 7. Sports Achievement (Safe Sports Topic)
+  {
+    id: 'm_son_heungmin_2025',
+    title: '손흥민, 2025-26시즌 프리미어리골 10골 이상? ⚽',
+    titleEn: 'Will Son Heung-min score 10+ goals in 2025-26 PL season? ⚽',
+    description: '2025-26시즌 프리미어리그에서 손흥민이 리그 경기에만 10골 이상 기록할 경우 YES 승리.',
+    category: 'SPORTS',
+    yesPrice: 45,
+    priceHistory: [45, 47, 44, 46, 48, 45, 43],
+    volume: 5600000,
+    endDate: '2025-12-31T23:59:59',
+    imageUrl: 'https://images.unsplash.com/photo-1431328801262-df71ad07dd2e?q=80&w=800&auto=format&fit=crop'
+  },
+  
+  // 8. Tech Company News
+  {
+    id: 'm_naver_stock_2025',
+    title: '네이버, 2025년 주가 10만원 돌파할까? 📈',
+    titleEn: 'Will Naver stock exceed 100,000 KRW in 2025? 📈',
+    description: '2025년 12월 31일 KOSPI 종가 기준, 네이버 주가가 100,000원을 돌파할 경우 YES 승리.',
+    category: 'STOCK',
+    yesPrice: 30,
+    priceHistory: [30, 32, 29, 31, 33, 30, 28],
+    volume: 2100000,
+    endDate: '2025-12-31T23:59:59',
+    imageUrl: 'https://images.unsplash.com/photo-1611974289852-16c9c9b4341?q=80&w=800&auto=format&fit=crop'
   }
 ];
 
